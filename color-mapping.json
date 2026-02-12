@@ -1,0 +1,19 @@
+{
+  "oldColors": {
+    "beige": "#F6F2E8",
+    "brown": "#5f4b3a",
+    "darkBrown": "#1e1914"
+  },
+  "newColors": {
+    "offWhite": "#FAFAF9",
+    "charcoal": "#4A4A4A",
+    "darkCharcoal": "#2A2A2A"
+  },
+  "replacements": [
+    { "from": "#F6F2E8", "to": "#FAFAF9" },
+    { "from": "#5f4b3a", "to": "#4A4A4A" },
+    { "from": "#1e1914", "to": "#2A2A2A" },
+    { "from": "#4a3a2c", "to": "#3A3A3A" },
+    { "from": "#0f0d0a", "to": "#1A1A1A" }
+  ]
+}
