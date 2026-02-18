@@ -1,0 +1,245 @@
+.
+├── Attributions.md
+├── COLOR_UPDATE_COMPLETE.md
+├── backend
+│   ├── README.md
+│   ├── alembic.ini
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── api
+│   │   │   ├── __init__.py
+│   │   │   ├── deps.py
+│   │   │   └── v1
+│   │   │       ├── __init__.py
+│   │   │       ├── auth.py
+│   │   │       ├── blog.py
+│   │   │       ├── contacts.py
+│   │   │       ├── projects.py
+│   │   │       ├── router.py
+│   │   │       ├── services.py
+│   │   │       ├── social_media.py
+│   │   │       ├── testimonials.py
+│   │   │       └── upload.py
+│   │   ├── config.py
+│   │   ├── core
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   └── security.py
+│   │   ├── crud
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── blog.py
+│   │   │   ├── contact.py
+│   │   │   ├── project.py
+│   │   │   ├── service.py
+│   │   │   ├── social_media.py
+│   │   │   └── testimonial.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── blog.py
+│   │   │   ├── contact.py
+│   │   │   ├── project.py
+│   │   │   ├── service.py
+│   │   │   ├── social_media.py
+│   │   │   └── testimonial.py
+│   │   ├── schemas
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py
+│   │   │   ├── blog.py
+│   │   │   ├── contact.py
+│   │   │   ├── project.py
+│   │   │   ├── service.py
+│   │   │   ├── social_media.py
+│   │   │   └── testimonial.py
+│   │   └── utils
+│   │       ├── __init__.py
+│   │       └── files.py
+│   ├── migrations
+│   │   └── versions
+│   ├── requirements.txt
+│   ├── static
+│   │   ├── blog
+│   │   ├── projects
+│   │   │   ├── after
+│   │   │   └── before
+│   │   ├── services
+│   │   └── testimonials
+│   └── tests
+│       ├── __init__.py
+│       ├── conftest.py
+│       ├── test_auth.py
+│       ├── test_blog.py
+│       ├── test_contacts.py
+│       ├── test_projects.py
+│       ├── test_services.py
+│       ├── test_social_media.py
+│       └── test_testimonials.py
+├── batch-color-update.py
+├── color-mapping.json
+├── index.html
+├── node_modules
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── src
+│   ├── App.tsx
+│   ├── app
+│   │   └── router.tsx
+│   ├── assets
+│   │   ├── after.jpg
+│   │   ├── art.jpg
+│   │   ├── before.png
+│   │   ├── bone.jpg
+│   │   ├── drive.jpg
+│   │   ├── evo.jpg
+│   │   ├── fly.jpg
+│   │   ├── foot.png
+│   │   ├── footer.png
+│   │   ├── gline.jpg
+│   │   ├── hero-image.png
+│   │   ├── hero.png
+│   │   ├── hide.jpg
+│   │   ├── home.jpg
+│   │   ├── isy.jpg
+│   │   ├── joy.jpg
+│   │   ├── krio.jpg
+│   │   ├── line.jpg
+│   │   ├── loft.jpg
+│   │   ├── log.png
+│   │   ├── logo.png
+│   │   ├── logo2.png
+│   │   ├── mix.jpg
+│   │   ├── porta.jpg
+│   │   ├── vid.webm
+│   │   ├── video.mp4
+│   │   └── video.webm
+│   ├── features
+│   │   ├── admin
+│   │   │   ├── AdminDashboard.tsx
+│   │   │   └── AdminPanel.tsx
+│   │   ├── contact
+│   │   │   └── Contact.tsx
+│   │   ├── hero
+│   │   │   └── Hero.tsx
+│   │   ├── navigation
+│   │   │   ├── Footer.tsx
+│   │   │   └── Navigation.tsx
+│   │   ├── projects
+│   │   │   ├── BeforeAfterSlider.tsx
+│   │   │   └── RecentProjects.tsx
+│   │   ├── services
+│   │   │   └── StickyServices.tsx
+│   │   └── testimonials
+│   │       └── Testimonials.tsx
+│   ├── layout
+│   │   └── RootLayout.tsx
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── AboutPage.tsx
+│   │   ├── BlogPage.tsx
+│   │   ├── Blogdetailpage.tsx
+│   │   ├── ContactPage.tsx
+│   │   ├── Doorscataloguepage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── InteriorDesignPage.tsx
+│   │   ├── NotFound.tsx
+│   │   ├── ProcessPage.tsx
+│   │   ├── ProjectDetailPage.tsx
+│   │   ├── ProjectsPage.tsx
+│   │   ├── ServicesPage.tsx
+│   │   └── Untitled
+│   ├── shared
+│   │   ├── config
+│   │   ├── contexts
+│   │   │   └── LanguageContext.tsx
+│   │   ├── lib
+│   │   │   ├── EnhancedAnimatedTitle.tsx
+│   │   │   ├── EnhancedParallax.tsx
+│   │   │   ├── gsap-init.ts
+│   │   │   └── useGSAPAnimations.ts
+│   │   ├── styles
+│   │   │   └── globals.css
+│   │   └── ui
+│   │       ├── BlueprintSection.tsx
+│   │       ├── DepthLayers.tsx
+│   │       ├── EditorialSection.tsx
+│   │       ├── EnhancedDentTransition.tsx
+│   │       ├── FilmGrainTexture.tsx
+│   │       ├── FlipCounter.tsx
+│   │       ├── GlassCard.tsx
+│   │       ├── GridAnnotations.tsx
+│   │       ├── LayeredParallax.tsx
+│   │       ├── PageTransition.tsx
+│   │       ├── ParallaxImage.tsx
+│   │       ├── ParallaxSection.tsx
+│   │       ├── PremiumTextReveal.tsx
+│   │       ├── ScrollVideo.tsx
+│   │       ├── Scrollnav.tsx
+│   │       ├── SectionHeader.tsx
+│   │       ├── SlotMachineCounter.tsx
+│   │       ├── StorytellingTransition.tsx
+│   │       ├── SwissGraphicElements.tsx
+│   │       ├── TextReveal.tsx
+│   │       ├── TypewriterText.tsx
+│   │       ├── figma
+│   │       │   └── ImageWithFallback.tsx
+│   │       └── ui
+│   │           ├── accordion.tsx
+│   │           ├── alert-dialog.tsx
+│   │           ├── alert.tsx
+│   │           ├── aspect-ratio.tsx
+│   │           ├── avatar.tsx
+│   │           ├── badge.tsx
+│   │           ├── breadcrumb.tsx
+│   │           ├── button.tsx
+│   │           ├── calendar.tsx
+│   │           ├── card.tsx
+│   │           ├── carousel.tsx
+│   │           ├── chart.tsx
+│   │           ├── checkbox.tsx
+│   │           ├── collapsible.tsx
+│   │           ├── command.tsx
+│   │           ├── context-menu.tsx
+│   │           ├── dialog.tsx
+│   │           ├── drawer.tsx
+│   │           ├── dropdown-menu.tsx
+│   │           ├── form.tsx
+│   │           ├── hover-card.tsx
+│   │           ├── input-otp.tsx
+│   │           ├── input.tsx
+│   │           ├── label.tsx
+│   │           ├── menubar.tsx
+│   │           ├── navigation-menu.tsx
+│   │           ├── pagination.tsx
+│   │           ├── popover.tsx
+│   │           ├── progress.tsx
+│   │           ├── radio-group.tsx
+│   │           ├── resizable.tsx
+│   │           ├── scroll-area.tsx
+│   │           ├── select.tsx
+│   │           ├── separator.tsx
+│   │           ├── sheet.tsx
+│   │           ├── sidebar.tsx
+│   │           ├── skeleton.tsx
+│   │           ├── slider.tsx
+│   │           ├── sonner.tsx
+│   │           ├── switch.tsx
+│   │           ├── table.tsx
+│   │           ├── tabs.tsx
+│   │           ├── textarea.tsx
+│   │           ├── toggle-group.tsx
+│   │           ├── toggle.tsx
+│   │           ├── tooltip.tsx
+│   │           ├── use-mobile.ts
+│   │           └── utils.ts
+│   └── types
+│       └── image-types.d.ts
+├── structure
+├── structure.txt
+├── tailwind.config.js
+├── tsconfig.json
+├── tsconfig.node.json
+├── update-colors.sh
+└── vite.config.ts

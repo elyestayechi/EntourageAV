@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+__pycache__/
+
+# Environment
+.env
+.env.local
+*.pyc
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+EOF
+
+echo "✅ Reorganization complete!"
+echo ""
+echo "Your structure is now:"
+echo "EntourageAV/"
+echo "├── backend/"
+echo "└── frontend/"
