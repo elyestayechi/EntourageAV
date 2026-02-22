@@ -106,7 +106,7 @@ export function HomePage() {
       {/* Transition to Chapter 5 */}
       <StorytellingTransition
         themeColor="premium"
-        chapter={4}
+        chapter={5}
         title="Notre Méthode"
         subtitle="Un processus structuré et transparent, de la consultation à la livraison finale."
        

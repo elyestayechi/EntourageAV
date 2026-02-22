@@ -279,7 +279,7 @@ export function BlogPage() {
                         <img
                           src={getImageUrl(post.image)}
                           alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                         />
                         <div
                           className="absolute top-4 left-4 px-4 py-2"

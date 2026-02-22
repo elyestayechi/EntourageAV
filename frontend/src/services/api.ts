@@ -21,6 +21,7 @@ const NO_SLASH_SUFFIXES = [
   '/toggle',
   '/reorder',
   '/active',
+  '/images',    // ← project image pairs endpoint
 ];
 
 api.interceptors.request.use(

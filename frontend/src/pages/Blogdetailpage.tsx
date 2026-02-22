@@ -204,7 +204,7 @@ export function BlogDetailPage() {
               <img
                 src={getImageUrl(post.image)}
                 alt={post.title}
-                className="w-full h-[400px] sm:h-[500px] object-cover"
+                className="w-full h-[400px] sm:h-[500px] object-contain"
               />
             </div>
           </div>
@@ -283,7 +283,7 @@ export function BlogDetailPage() {
                           <img
                             src={getImageUrl(relatedPost.image)}
                             alt={relatedPost.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                           />
                         </div>
                       )}

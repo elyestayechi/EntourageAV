@@ -35,7 +35,7 @@ export interface ProjectCreate {
   description: string;
   duration?: string;
   surface?: string;
-  image?: string;   // ✅ Added — was missing, causing images to be silently dropped
+  image?: string;
 }
 
 export interface ProjectImageCreate {
@@ -82,8 +82,9 @@ export const deleteProject = async (id: number): Promise<void> => {
 };
 
 // Add image pair to project (admin only)
+// NOTE: no trailing slash — backend has redirect_slashes=False
 export const addProjectImage = async (projectId: number, data: ProjectImageCreate): Promise<ProjectImage> => {
-  const response = await api.post<ProjectImage>(`/projects/${projectId}/images/`, data);
+  const response = await api.post<ProjectImage>(`/projects/${projectId}/images`, data);
   return response.data;
 };
 

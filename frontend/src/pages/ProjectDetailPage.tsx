@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
 import {
   ArrowLeft, Calendar, MapPin, Ruler, Clock,
-  ChevronLeft, ChevronRight, X
+  ChevronLeft, ChevronRight, X,
 } from 'lucide-react';
 import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
 import { getProjectBySlug } from '../services/projectsAPI';
@@ -37,15 +37,24 @@ interface ProjectDetail {
   surface?: string;
 }
 
+// ─── Fullscreen Before/After Lightbox ────────────────────────────────────────
 function ImageLightbox({
-  images, currentIndex, onClose, onNavigate,
+  images,
+  currentIndex,
+  onClose,
+  onNavigate,
 }: {
   images: ProjectImage[];
   currentIndex: number;
   onClose: () => void;
   onNavigate: (direction: 'prev' | 'next') => void;
 }) {
-  const [viewMode, setViewMode] = useState<'before' | 'after'>('before');
+  const [viewMode, setViewMode] = useState<'before' | 'after'>('after');
+
+  // Reset to 'after' when image changes
+  useEffect(() => {
+    setViewMode('after');
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,51 +67,112 @@ function ImageLightbox({
   }, [onClose, onNavigate]);
 
   const currentImage = images[currentIndex];
+  const src = viewMode === 'before' ? currentImage.before : currentImage.after;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(20px)' }}
+      style={{ background: 'rgba(0, 0, 0, 0.96)', backdropFilter: 'blur(20px)' }}
       onClick={onClose}
     >
-      <button onClick={onClose} className="absolute top-6 right-6 p-4 transition-all duration-300 hover:opacity-70 z-50">
-        <X className="w-6 h-6 text-white drop-shadow-lg" />
+      {/* Close */}
+      <button
+        onClick={onClose}
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50"
+      >
+        <X className="w-6 h-6 text-white" />
       </button>
+
+      {/* Prev / Next */}
       {images.length > 1 && (
         <>
-          <button onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-6 p-4 transition-all duration-300 hover:opacity-70 z-50">
-            <ChevronLeft className="w-8 h-8 text-white drop-shadow-lg" />
+          <button
+            onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }}
+            className="absolute left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50"
+          >
+            <ChevronLeft className="w-8 h-8 text-white" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); onNavigate('next'); }} className="absolute right-6 p-4 transition-all duration-300 hover:opacity-70 z-50">
-            <ChevronRight className="w-8 h-8 text-white drop-shadow-lg" />
+          <button
+            onClick={(e) => { e.stopPropagation(); onNavigate('next'); }}
+            className="absolute right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50"
+          >
+            <ChevronRight className="w-8 h-8 text-white" />
           </button>
         </>
       )}
+
       <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
+        {/* Toggle pill */}
+        <div className="flex justify-center mb-4">
+          <div
+            className="inline-flex rounded-full overflow-hidden border border-white/20"
+            style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}
+          >
+            <button
+              onClick={() => setViewMode('before')}
+              className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${
+                viewMode === 'before'
+                  ? 'bg-white text-black'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              Avant
+            </button>
+            <button
+              onClick={() => setViewMode('after')}
+              className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${
+                viewMode === 'after'
+                  ? 'bg-white text-black'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              Après
+            </button>
+          </div>
+        </div>
+
+        {/* Image */}
         <div
           className="relative aspect-video overflow-hidden"
-          style={{ clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}
+          style={{
+            clipPath:
+              'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
+          }}
         >
           <img
-            src={viewMode === 'before' ? currentImage.before : currentImage.after}
+            key={src}
+            src={src}
             alt={viewMode === 'before' ? 'Avant' : 'Après'}
-            className="w-full h-full object-cover transition-opacity duration-500"
+            className="w-full h-full object-contain transition-opacity duration-300"
           />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-6">
-            <button onClick={() => setViewMode('before')} className={`px-2 py-1 text-sm font-bold tracking-wider transition-all duration-300 ${viewMode === 'before' ? 'opacity-100 scale-110' : 'opacity-50 hover:opacity-75'}`}>
-              <span className="text-white drop-shadow-lg">AVANT</span>
-            </button>
-            <span className="text-white/30">|</span>
-            <button onClick={() => setViewMode('after')} className={`px-2 py-1 text-sm font-bold tracking-wider transition-all duration-300 ${viewMode === 'after' ? 'opacity-100 scale-110' : 'opacity-50 hover:opacity-75'}`}>
-              <span className="text-white drop-shadow-lg">APRÈS</span>
-            </button>
+
+          {/* Corner label */}
+          <div
+            className="absolute bottom-5 left-5 px-4 py-2"
+            style={{
+              background: 'rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(10px)',
+              clipPath:
+                'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)',
+            }}
+          >
+            <span className="text-white text-sm font-semibold uppercase tracking-wider">
+              {viewMode === 'before' ? 'Avant Rénovation' : 'Après Rénovation'}
+            </span>
           </div>
-          <div className="absolute bottom-6 left-6">
-            <span className="text-white text-sm font-medium drop-shadow-lg">{viewMode === 'before' ? 'Avant Rénovation' : 'Après Rénovation'}</span>
-          </div>
-          <div className="absolute bottom-6 right-6 text-right">
-            {currentImage.label && <p className="text-white text-sm font-medium drop-shadow-lg mb-1">{currentImage.label}</p>}
-            {images.length > 1 && <p className="text-white/60 text-xs drop-shadow-lg">{currentIndex + 1} / {images.length}</p>}
+
+          {/* Pair label + counter */}
+          <div className="absolute bottom-5 right-5 text-right">
+            {currentImage.label && (
+              <p className="text-white text-sm font-medium drop-shadow-lg mb-1">
+                {currentImage.label}
+              </p>
+            )}
+            {images.length > 1 && (
+              <p className="text-white/50 text-xs">
+                {currentIndex + 1} / {images.length}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -110,6 +180,7 @@ function ImageLightbox({
   );
 }
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export function ProjectDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -130,7 +201,6 @@ export function ProjectDetailPage() {
     try {
       setLoading(true);
       const data = await getProjectBySlug(slug!);
-      // ✅ Map API shape and resolve all URLs here
       const mapped: ProjectDetail = {
         id: data.id,
         slug: data.slug,
@@ -158,9 +228,9 @@ export function ProjectDetailPage() {
 
   const navigateImage = (direction: 'prev' | 'next') => {
     if (!project) return;
-    const maxIndex = project.images.length - 1;
+    const max = project.images.length - 1;
     setSelectedImageIndex((prev) =>
-      direction === 'prev' ? (prev > 0 ? prev - 1 : maxIndex) : (prev < maxIndex ? prev + 1 : 0)
+      direction === 'prev' ? (prev > 0 ? prev - 1 : max) : (prev < max ? prev + 1 : 0)
     );
   };
 
@@ -173,11 +243,17 @@ export function ProjectDetailPage() {
       );
     }
     if (contentRef.current && project) {
-      contentRef.current.querySelectorAll('.fade-in-section').forEach((element) => {
+      contentRef.current.querySelectorAll('.fade-in-section').forEach((el) => {
         gsap.fromTo(
-          element,
+          el,
           { opacity: 0, y: 60 },
-          { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 85%', toggleActions: 'play none none none' } }
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
+          }
         );
       });
     }
@@ -189,11 +265,18 @@ export function ProjectDetailPage() {
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>Projet non trouvé</h1>
+          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>
+            Projet non trouvé
+          </h1>
           <Link
             to="/realisations"
             className="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all duration-300"
-            style={{ background: 'rgba(0, 0, 0, 0.85)', color: 'var(--color-base-cream)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}
+            style={{
+              background: 'rgba(0, 0, 0, 0.85)',
+              color: 'var(--color-base-cream)',
+              clipPath:
+                'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+            }}
           >
             <ArrowLeft className="w-5 h-5" />
             Retour aux projets
@@ -206,23 +289,53 @@ export function ProjectDetailPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Hero */}
-      <section ref={heroRef} className="relative min-h-[60vh] flex items-center justify-center px-4 pt-32 pb-20">
+      <section
+        ref={heroRef}
+        className="relative min-h-[60vh] flex items-center justify-center px-4 pt-32 pb-20"
+      >
         <div className="max-w-5xl mx-auto w-full relative z-10">
           <button
             onClick={() => navigate('/realisations')}
             className="inline-flex items-center gap-2 px-6 py-3 mb-8 font-medium transition-all duration-300 hover:scale-105 animate-in"
-            style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)', color: '#2A2522' }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              clipPath:
+                'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+              color: '#2A2522',
+            }}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Retour aux projets</span>
           </button>
 
-          <div className="inline-flex px-6 py-3 mb-6 animate-in" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}>
-            <span className="text-sm font-medium" style={{ color: '#2A2522' }}>PROJET {project.number}</span>
+          <div
+            className="inline-flex px-6 py-3 mb-6 animate-in"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              clipPath:
+                'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+            }}
+          >
+            <span className="text-sm font-medium" style={{ color: '#2A2522' }}>
+              PROJET {project.number}
+            </span>
           </div>
 
           <PremiumTextReveal>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-[0.95]" style={{ color: '#2A2522' }}>{project.title}</h1>
+            <h1
+              className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-[0.95]"
+              style={{ color: '#2A2522' }}
+            >
+              {project.title}
+            </h1>
           </PremiumTextReveal>
 
           <div className="flex flex-wrap gap-4 mb-6 animate-in">
@@ -244,7 +357,12 @@ export function ProjectDetailPage() {
             )}
           </div>
 
-          <p className="text-lg sm:text-xl max-w-3xl leading-relaxed animate-in" style={{ color: '#5A5A5A' }}>{project.description}</p>
+          <p
+            className="text-lg sm:text-xl max-w-3xl leading-relaxed animate-in"
+            style={{ color: '#5A5A5A' }}
+          >
+            {project.description}
+          </p>
         </div>
       </section>
 
@@ -252,24 +370,41 @@ export function ProjectDetailPage() {
       {(project.surface || project.duration) && (
         <section className="py-12 px-4 bg-[#FAFAF9]">
           <div className="max-w-5xl mx-auto">
-            <div className="flex flex-wrap justify-center gap-12 p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
+            <div
+              className="flex flex-wrap justify-center gap-12 p-8"
+              style={{
+                background: 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                clipPath:
+                  'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+              }}
+            >
               {project.surface && (
                 <div className="text-center">
                   <Ruler className="w-8 h-8 mx-auto mb-3" style={{ color: '#2A2522' }} />
-                  <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>{project.surface}</div>
+                  <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>
+                    {project.surface}
+                  </div>
                   <div className="text-sm" style={{ color: '#5A5A5A' }}>Surface</div>
                 </div>
               )}
               {project.duration && (
                 <div className="text-center">
                   <Clock className="w-8 h-8 mx-auto mb-3" style={{ color: '#2A2522' }} />
-                  <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>{project.duration}</div>
+                  <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>
+                    {project.duration}
+                  </div>
                   <div className="text-sm" style={{ color: '#5A5A5A' }}>Durée</div>
                 </div>
               )}
               <div className="text-center">
                 <Calendar className="w-8 h-8 mx-auto mb-3" style={{ color: '#2A2522' }} />
-                <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>{project.category}</div>
+                <div className="text-2xl font-bold mb-1" style={{ color: '#2A2522' }}>
+                  {project.category}
+                </div>
                 <div className="text-sm" style={{ color: '#5A5A5A' }}>Catégorie</div>
               </div>
             </div>
@@ -277,39 +412,81 @@ export function ProjectDetailPage() {
         </section>
       )}
 
-      {/* Main Content */}
+      {/* Content */}
       <section ref={contentRef} className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-5xl mx-auto space-y-16">
 
-          {/* Cover image (if no pairs) */}
-          {project.image && project.images.length === 0 && (
-            <div className="fade-in-section overflow-hidden" style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', aspectRatio: '16/9' }}>
-              <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          {/* Before/After gallery */}
+          {/* ── AFTER thumbnails grid (click → lightbox) ── */}
           {project.images.length > 0 && (
             <div className="fade-in-section">
-              <h2 className="text-3xl font-bold mb-8" style={{ color: '#2A2522' }}>Transformation Visuelle</h2>
-              <div className={`grid gap-6 ${project.images.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              <h2 className="text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
+                Transformation Visuelle
+              </h2>
+              <p className="text-sm mb-8" style={{ color: '#5A5A5A' }}>
+                Cliquez sur une image pour voir la comparaison Avant / Après
+              </p>
+              <div
+                className={`grid gap-6 ${
+                  project.images.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'
+                }`}
+              >
                 {project.images.map((image, idx) => (
                   <button
                     key={idx}
                     onClick={() => { setSelectedImageIndex(idx); setLightboxOpen(true); }}
-                    className="relative group overflow-hidden transition-all duration-300 hover:scale-[1.02]"
-                    style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', aspectRatio: project.images.length === 1 ? '16/9' : '4/3' }}
+                    className="relative group transition-all duration-300 hover:scale-[1.02]"
+                    style={{
+                      position: 'relative',
+                      display: 'block',
+                      width: '100%',
+                      aspectRatio: project.images.length === 1 ? '16/9' : '4/3',
+                      overflow: 'hidden',
+                      clipPath:
+                        'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+                    }}
                   >
+                    {/* Show AFTER as thumbnail */}
                     <img
-                      src={image.before}
-                      alt={`${project.title} - ${image.label ?? `Image ${idx + 1}`}`}
-                      className="w-full h-full object-cover"
+                      src={image.after || image.before}
+                      alt={`${project.title} — Après ${idx + 1}`}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}>
+
+                    {/* "APRÈS" badge */}
+                    <div
+                      className="absolute top-3 left-3 px-3 py-1"
+                      style={{
+                        background: 'rgba(0,0,0,0.65)',
+                        backdropFilter: 'blur(10px)',
+                        clipPath:
+                          'polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px)',
+                      }}
+                    >
+                      <span className="text-white text-xs font-bold uppercase tracking-widest">
+                        Après
+                      </span>
+                    </div>
+
+                    {/* Hover overlay */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                      style={{ background: 'rgba(0, 0, 0, 0.55)', backdropFilter: 'blur(4px)' }}
+                    >
                       <div className="text-white text-center">
-                        <p className="text-lg font-medium mb-2">Voir Avant / Après</p>
-                        {image.label && <p className="text-sm opacity-75">{image.label}</p>}
+                        <p className="text-lg font-bold uppercase tracking-wider mb-1">
+                          Voir Avant / Après
+                        </p>
+                        {image.label && (
+                          <p className="text-sm opacity-75">{image.label}</p>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -319,9 +496,24 @@ export function ProjectDetailPage() {
           )}
 
           {/* Description */}
-          <div className="fade-in-section p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
-            <h2 className="text-3xl font-bold mb-6" style={{ color: '#2A2522' }}>Description du Projet</h2>
-            <p className="text-lg leading-relaxed" style={{ color: '#5A5A5A' }}>{project.description}</p>
+          <div
+            className="fade-in-section p-8"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              clipPath:
+                'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+            }}
+          >
+            <h2 className="text-3xl font-bold mb-6" style={{ color: '#2A2522' }}>
+              Description du Projet
+            </h2>
+            <p className="text-lg leading-relaxed" style={{ color: '#5A5A5A' }}>
+              {project.description}
+            </p>
             <div className="mt-6 pt-6 border-t border-white/20">
               <p className="text-sm font-medium" style={{ color: '#5A5A5A' }}>
                 <strong style={{ color: '#2A2522' }}>Catégorie:</strong> {project.category}
@@ -333,21 +525,72 @@ export function ProjectDetailPage() {
           </div>
 
           {/* CTA */}
-          <div className="fade-in-section p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>Un Projet Similaire en Tête ?</h2>
-            <p className="text-lg mb-8 leading-relaxed max-w-2xl mx-auto" style={{ color: '#5A5A5A' }}>Contactez-nous pour discuter de votre projet et découvrir comment nous pouvons vous aider à le concrétiser.</p>
+          <div
+            className="fade-in-section p-12 text-center"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              clipPath:
+                'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
+            }}
+          >
+            <h2
+              className="text-3xl sm:text-4xl font-bold mb-6"
+              style={{ color: '#2A2522' }}
+            >
+              Un Projet Similaire en Tête ?
+            </h2>
+            <p
+              className="text-lg mb-8 leading-relaxed max-w-2xl mx-auto"
+              style={{ color: '#5A5A5A' }}
+            >
+              Contactez-nous pour discuter de votre projet et découvrir comment nous pouvons vous
+              aider à le concrétiser.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/contact" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)', border: '1px solid rgba(80, 80, 80, 0.25)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: 'var(--color-base-cream)' }}>
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105"
+                style={{
+                  background: 'rgba(0, 0, 0, 0.85)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                  border: '1px solid rgba(80, 80, 80, 0.25)',
+                  clipPath:
+                    'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+                  color: 'var(--color-base-cream)',
+                }}
+              >
                 <span className="uppercase tracking-wider text-sm font-bold">Contactez-Nous</span>
               </Link>
-              <Link to="/realisations" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: '#2A2522' }}>
-                <span className="uppercase tracking-wider text-sm font-bold">Voir Tous Les Projets</span>
+              <Link
+                to="/realisations"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  clipPath:
+                    'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+                  color: '#2A2522',
+                }}
+              >
+                <span className="uppercase tracking-wider text-sm font-bold">
+                  Voir Tous Les Projets
+                </span>
               </Link>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Lightbox */}
       {lightboxOpen && (
         <ImageLightbox
           images={project.images}
