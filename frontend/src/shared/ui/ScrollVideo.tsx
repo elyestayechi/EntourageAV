@@ -91,14 +91,14 @@ export function ScrollVideo() {
         </div>
 
         {/*
-          Video fills the pinned container exactly.
-          `object-cover` + `w-full h-full` ensures no letterboxing or black bars
-          regardless of the video's native aspect ratio or the device's viewport.
-          `object-position: center` keeps the most important area centred.
+          Video is displayed at its natural horizontal aspect ratio.
+          `w-full` + `object-contain` lets it fit the full width while
+          letterboxing top/bottom — intentional so nothing gets cropped.
         */}
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
+          style={{ aspectRatio: 'auto' }}
           muted
           playsInline
           preload="auto"
