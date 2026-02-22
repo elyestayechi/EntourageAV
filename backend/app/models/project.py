@@ -18,6 +18,7 @@ class Project(Base):
     description = Column(Text, nullable=False)
     duration = Column(String(100), nullable=True)  # "6 semaines"
     surface = Column(String(100), nullable=True)  # "85m²"
+    image = Column(String(500), nullable=True)      # ✅ Cover image URL
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     

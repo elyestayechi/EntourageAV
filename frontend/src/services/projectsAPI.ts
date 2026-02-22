@@ -20,6 +20,7 @@ export interface Project {
   description: string;
   duration?: string;
   surface?: string;
+  image?: string;
   images: ProjectImage[];
   created_at: string;
   updated_at: string;
@@ -34,6 +35,7 @@ export interface ProjectCreate {
   description: string;
   duration?: string;
   surface?: string;
+  image?: string;   // ✅ Added — was missing, causing images to be silently dropped
 }
 
 export interface ProjectImageCreate {

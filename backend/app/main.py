@@ -2,12 +2,32 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy import text, inspect
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.database import engine, Base
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+
+def run_safe_migrations():
+    """
+    Safely add any missing columns to existing tables.
+    Uses inspect() to check before altering — safe to run on every startup.
+    """
+    with engine.connect() as conn:
+        inspector = inspect(engine)
+
+        # ── projects.image ────────────────────────────────────────────────────
+        project_cols = [c["name"] for c in inspector.get_columns("projects")]
+        if "image" not in project_cols:
+            conn.execute(text("ALTER TABLE projects ADD COLUMN image VARCHAR(500)"))
+            conn.commit()
+            print("✅ Migration: added 'image' column to projects table")
+
+run_safe_migrations()
+
 
 # Initialize FastAPI app
 app = FastAPI(
