@@ -75,21 +75,30 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      <div ref={containerRef} className="h-screen w-full overflow-hidden">
-        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center px-4">
-          <div className="text-center w-full max-w-4xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-3 sm:mb-4 md:mb-6 tracking-tight uppercase">
+      {/* GSAP owns the pin */}
+      <div ref={containerRef} className="relative h-screen w-full overflow-hidden">
+
+        {/* Text overlay — centered, fully responsive */}
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+          <div className="text-center px-4 sm:px-6 md:px-8 w-full max-w-5xl mx-auto">
+            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-3 sm:mb-4 md:mb-6 tracking-tight uppercase leading-none">
               Notre Processus
             </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/70 uppercase tracking-widest px-4">
+            <p className="text-xs sm:text-sm md:text-base lg:text-xl text-white/70 uppercase tracking-widest">
               De la vision à la réalité
             </p>
           </div>
         </div>
 
+        {/*
+          Video fills the pinned container exactly.
+          `object-cover` + `w-full h-full` ensures no letterboxing or black bars
+          regardless of the video's native aspect ratio or the device's viewport.
+          `object-position: center` keeps the most important area centred.
+        */}
         <video
           ref={videoRef}
-          className="w-full h-full object-contain md:object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-center"
           muted
           playsInline
           preload="auto"
