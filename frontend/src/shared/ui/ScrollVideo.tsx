@@ -63,7 +63,8 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#2A2A2A] overflow-hidden"
+      /* Mobile: match site light bg. md+: original dark bg */
+      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A] overflow-hidden"
       style={{ height: '400vh' }}
     >
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay z-10">
@@ -78,23 +79,38 @@ export function ScrollVideo() {
       {/* GSAP owns the pin */}
       <div ref={containerRef} className="relative h-screen w-full overflow-hidden">
 
-        {/* Text overlay — centered, fully responsive */}
-        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-          <div className="text-center px-4 sm:px-6 md:px-8 w-full max-w-5xl mx-auto">
-            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-3 sm:mb-4 md:mb-6 tracking-tight uppercase leading-none">
+        {/* ── Mobile only: text sits above the video frame, dark colours ── */}
+        <div
+          className="md:hidden absolute inset-x-0 top-30 z-20 px-4 pt-10 pb-4 text-center"
+          style={{ background: '#FAFAF9' }}
+        >
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight uppercase leading-none"
+            style={{ color: 'var(--color-navy-sky)' }}
+          >
+            Notre Processus
+          </h2>
+          <p
+            className="text-xs sm:text-sm uppercase tracking-widest"
+            style={{ color: 'var(--color-base-slate)' }}
+          >
+            De la vision à la réalité
+          </p>
+        </div>
+
+        {/* ── Desktop only: white text centred over the video (original) ── */}
+        <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
+          <div className="text-center px-6 md:px-8 w-full max-w-5xl mx-auto">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 md:mb-6 tracking-tight uppercase leading-none">
               Notre Processus
             </h2>
-            <p className="text-xs sm:text-sm md:text-base lg:text-xl text-white/70 uppercase tracking-widest">
+            <p className="text-base lg:text-xl text-white/70 uppercase tracking-widest">
               De la vision à la réalité
             </p>
           </div>
         </div>
 
-        {/*
-          Video is displayed at its natural horizontal aspect ratio.
-          `w-full` + `object-contain` lets it fit the full width while
-          letterboxing top/bottom — intentional so nothing gets cropped.
-        */}
+        {/* Video — full width, vertically centred, natural aspect ratio */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
@@ -105,7 +121,8 @@ export function ScrollVideo() {
           src={videoSrc}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none z-10" />
+        {/* Desktop gradient overlay (original) */}
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none z-10" />
       </div>
     </section>
   );
