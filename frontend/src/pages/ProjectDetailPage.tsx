@@ -1,4 +1,4 @@
-import { useLocation, Link, useNavigate } from 'react-router';
+import { useParams, Link, useNavigate } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
 import { 
@@ -17,7 +17,11 @@ import {
   X
 } from 'lucide-react';
 import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
+import { getProjectBySlug } from '../services/projectsAPI';
+import { LoadingSpinner } from '../shared/ui/LoadingSpinner';
+import { getImageUrl } from '../shared/utils/images';
 
+// Types
 interface ProjectImage {
   before: string;
   after: string;
@@ -37,7 +41,8 @@ interface Timeline {
 }
 
 interface ProjectDetail {
-  id: string;
+  id: number;
+  slug: string;
   number: string;
   title: string;
   category: string;
@@ -60,449 +65,6 @@ interface ProjectDetail {
     role: string;
   };
 }
-
-// Detailed project data
-const projectsData: ProjectDetail[] = [
-  {
-    id: 'renovation-appartement-parisien',
-    number: '01',
-    title: 'Rénovation complète d\'un appartement parisien',
-    category: 'Rénovation complète',
-    location: 'Paris 15ème',
-    client: 'Famille Dubois',
-    shortDescription: 'Transformation complète d\'un appartement de 85m² avec redistribution des espaces, cuisine ouverte et salle de bain moderne.',
-    fullDescription: 'Ce projet ambitieux consistait à transformer un appartement parisien des années 70 en un espace de vie moderne et fonctionnel. Le défi principal était de créer une sensation d\'espace ouvert tout en conservant l\'intimité nécessaire pour une famille de quatre personnes. Nous avons repensé entièrement la distribution des pièces, abattu des cloisons non porteuses, et créé une cuisine ouverte sur le salon qui est devenue le cœur de l\'appartement.',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njg5OTk1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1768321903885-d0a6798485d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMHJlbm92YXRpb24lMjBjb25zdHJ1Y3Rpb258ZW58MXx8fHwxNzY4OTk1MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080',
-        label: 'Salon principal'
-      },
-      {
-        before: 'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBraXRjaGVufGVufDF8fHx8MTc2ODk5OTUwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBraXRjaGVufGVufDF8fHx8MTc2ODk5OTUwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-        label: 'Cuisine'
-      }
-    ],
-    duration: '6 semaines',
-    surface: '85m²',
-    budget: '75 000€',
-    teamSize: '5 personnes',
-    completionDate: 'Mars 2024',
-    challenges: [
-      {
-        title: 'Murs porteurs et structure',
-        description: 'L\'appartement comportait plusieurs murs porteurs qui limitaient les possibilités d\'ouverture de l\'espace.',
-        solution: 'Nous avons fait appel à un bureau d\'études structure pour installer des IPN (poutres métalliques) permettant de créer une grande ouverture entre le salon et la cuisine tout en maintenant la solidité structurelle du bâtiment.'
-      },
-      {
-        title: 'Plomberie et électricité vétustes',
-        description: 'Les installations électriques et de plomberie dataient de plus de 40 ans et ne répondaient plus aux normes actuelles.',
-        solution: 'Refonte complète des réseaux avec mise aux normes NF C 15-100 pour l\'électricité et remplacement de toute la plomberie en cuivre et PER. Installation d\'un nouveau tableau électrique avec différentiels et disjoncteurs adaptés.'
-      },
-      {
-        title: 'Isolation phonique et thermique',
-        description: 'L\'isolation était inexistante, causant des problèmes de bruit et des pertes énergétiques importantes.',
-        solution: 'Installation d\'une isolation thermique renforcée (laine de roche) dans toutes les parois donnant sur l\'extérieur et pose d\'une isolation phonique entre les pièces. Remplacement de toutes les fenêtres par du double vitrage haute performance.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Démolition et gros œuvre',
-        duration: '2 semaines',
-        description: 'Démolition des cloisons, évacuation des gravats, installation des IPN, création des nouvelles ouvertures.'
-      },
-      {
-        phase: 'Phase 2 - Électricité et plomberie',
-        duration: '1.5 semaines',
-        description: 'Réfection complète des réseaux électriques et de plomberie, installation du nouveau tableau, pose des gaines et tuyauteries.'
-      },
-      {
-        phase: 'Phase 3 - Isolation et doublage',
-        duration: '1 semaine',
-        description: 'Pose de l\'isolation thermique et phonique, montage des cloisons en placo, création des faux plafonds pour intégrer l\'éclairage.'
-      },
-      {
-        phase: 'Phase 4 - Finitions',
-        duration: '1.5 semaines',
-        description: 'Pose des revêtements de sol (parquet, carrelage), peintures, installation de la cuisine équipée, pose des portes et des sanitaires.'
-      }
-    ],
-    results: [
-      'Gain de 15m² de surface habitable perçue grâce à l\'ouverture des espaces',
-      'Réduction de 40% de la consommation énergétique',
-      'Augmentation de la valeur du bien de 20%',
-      'Amélioration significative du confort acoustique',
-      'Conformité totale aux normes électriques et de plomberie actuelles'
-    ],
-    testimonial: {
-      text: 'Entourage AV a complètement transformé notre appartement. Leur professionnalisme, leur écoute et la qualité de leurs finitions ont dépassé nos attentes. Nous avons maintenant un espace de vie moderne et fonctionnel où il fait bon vivre en famille.',
-      author: 'Sophie Dubois',
-      role: 'Cliente'
-    }
-  },
-  {
-    id: 'salle-de-bain-contemporaine',
-    number: '02',
-    title: 'Création d\'une salle de bain contemporaine',
-    category: 'Salle de bain',
-    location: 'Versailles',
-    client: 'Monsieur et Madame Martin',
-    shortDescription: 'Installation d\'une suite parentale avec douche à l\'italienne, double vasque et carrelage grand format.',
-    fullDescription: 'Ce projet consistait à transformer une ancienne salle de bain des années 80 en un espace contemporain et luxueux. Les clients souhaitaient une salle de bain spacieuse avec une douche à l\'italienne, une double vasque et beaucoup de rangements. Le défi était de maximiser l\'espace disponible tout en créant une atmosphère zen et relaxante.',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBiYXRocm9vbXxlbnwxfHx8fDE3Njg5OTk1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1761353855019-05f2f3ed9c43?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwbHVtYmluZyUyMGJhdGhyb29tJTIwcmVub3ZhdGlvbnxlbnwxfHx8fDE3Njg5OTUyMDl8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      }
-    ],
-    duration: '3 semaines',
-    surface: '12m²',
-    budget: '25 000€',
-    teamSize: '3 personnes',
-    completionDate: 'Janvier 2024',
-    challenges: [
-      {
-        title: 'Évacuation et pente de la douche',
-        description: 'Pour créer une douche à l\'italienne, il fallait assurer une pente suffisante vers l\'évacuation, ce qui était compliqué avec la dalle existante.',
-        solution: 'Nous avons créé une chape légère sur mesure avec une pente parfaite (2%) et installé un système d\'évacuation linéaire extra-plat qui permet un écoulement optimal de l\'eau.'
-      },
-      {
-        title: 'Étanchéité et ventilation',
-        description: 'Une salle de bain sans fenêtre nécessitait une attention particulière pour l\'étanchéité et la ventilation.',
-        solution: 'Installation d\'une membrane d\'étanchéité sous carrelage (système SPEC) et mise en place d\'une VMC hygroréglable pour garantir un renouvellement d\'air optimal et prévenir les problèmes d\'humidité.'
-      },
-      {
-        title: 'Intégration des rangements',
-        description: 'Les clients avaient besoin de beaucoup de rangements sans encombrer visuellement l\'espace.',
-        solution: 'Création de niches encastrées dans les murs de la douche et installation d\'un meuble vasque suspendu avec tiroirs à fermeture douce. Ajout de miroirs avec rangements intégrés.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Démolition',
-        duration: '3 jours',
-        description: 'Dépose complète de l\'ancienne salle de bain, évacuation des gravats, préparation du sol et des murs.'
-      },
-      {
-        phase: 'Phase 2 - Plomberie et électricité',
-        duration: '5 jours',
-        description: 'Déplacement des arrivées d\'eau, installation du système d\'évacuation, mise en place du réseau électrique pour l\'éclairage et la VMC.'
-      },
-      {
-        phase: 'Phase 3 - Étanchéité et carrelage',
-        duration: '1 semaine',
-        description: 'Application de la membrane d\'étanchéité, pose du carrelage au sol et aux murs, réalisation des joints.'
-      },
-      {
-        phase: 'Phase 4 - Installation et finitions',
-        duration: '4 jours',
-        description: 'Installation de la robinetterie, du meuble vasque, des miroirs et de tous les accessoires. Peinture du plafond et installation de l\'éclairage LED.'
-      }
-    ],
-    results: [
-      'Création d\'un espace zen et luxueux répondant parfaitement aux attentes',
-      'Douche à l\'italienne parfaitement étanche sans problème d\'écoulement',
-      'Optimisation maximale de l\'espace de rangement',
-      'Éclairage LED moderne avec variation d\'intensité',
-      'Ventilation efficace garantissant un air sain'
-    ],
-    testimonial: {
-      text: 'Notre nouvelle salle de bain est un véritable havre de paix. L\'équipe d\'Entourage AV a su transformer notre vision en réalité avec une attention remarquable aux détails. La douche à l\'italienne est magnifique et fonctionne parfaitement.',
-      author: 'Claire Martin',
-      role: 'Cliente'
-    }
-  },
-  {
-    id: 'cuisine-moderne',
-    number: '03',
-    title: 'Rénovation de cuisine moderne',
-    category: 'Cuisine',
-    location: 'Saint-Cloud',
-    client: 'Famille Petit',
-    shortDescription: 'Cuisine ouverte avec îlot central, électroménager encastré et finitions haut de gamme.',
-    fullDescription: 'Transformation complète d\'une cuisine fermée et vieillissante en un espace ouvert et convivial. Le projet incluait l\'installation d\'un îlot central, l\'intégration d\'électroménagers haut de gamme et la création d\'un coin repas. L\'objectif était de créer le cœur de la maison, un lieu de vie et de partage pour toute la famille.',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBraXRjaGVufGVufDF8fHx8MTc2ODk5OTUwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBraXRjaGVufGVufDF8fHx8MTc2ODk5OTUwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-      }
-    ],
-    duration: '4 semaines',
-    surface: '18m²',
-    budget: '35 000€',
-    teamSize: '4 personnes',
-    completionDate: 'Février 2024',
-    challenges: [
-      {
-        title: 'Ouverture sur le salon',
-        description: 'La cloison séparant la cuisine du salon était partiellement porteuse.',
-        solution: 'Installation d\'une poutre IPN dissimulée dans le plafond pour supporter la charge, permettant de créer une large ouverture tout en conservant la sécurité structurelle.'
-      },
-      {
-        title: 'Îlot central et plomberie',
-        description: 'L\'ajout d\'un évier et d\'un lave-vaisselle dans l\'îlot central nécessitait de déplacer les arrivées d\'eau et les évacuations.',
-        solution: 'Nous avons créé une rehausse sous l\'îlot pour faire passer les canalisations et assurer une pente d\'évacuation correcte. Le tout est parfaitement dissimulé et respecte les normes.'
-      },
-      {
-        title: 'Ventilation et hotte aspirante',
-        description: 'La hotte devait être installée au-dessus d\'un îlot, sans possibilité d\'évacuation murale directe.',
-        solution: 'Installation d\'une hotte îlot design avec système de recyclage haute performance et filtre à charbon actif. Intégration d\'une VMC supplémentaire pour un renouvellement d\'air optimal.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Démolition et gros œuvre',
-        duration: '1 semaine',
-        description: 'Dépose de l\'ancienne cuisine, démolition partielle de la cloison, installation de l\'IPN, préparation du sol.'
-      },
-      {
-        phase: 'Phase 2 - Plomberie, électricité et ventilation',
-        duration: '1 semaine',
-        description: 'Installation des nouvelles arrivées d\'eau et évacuations, mise en place du réseau électrique (prises, éclairage), installation de la VMC.'
-      },
-      {
-        phase: 'Phase 3 - Pose de la cuisine',
-        duration: '1 semaine',
-        description: 'Installation des meubles, du plan de travail en quartz, de l\'îlot central, pose du carrelage mural et du parquet.'
-      },
-      {
-        phase: 'Phase 4 - Électroménager et finitions',
-        duration: '1 semaine',
-        description: 'Encastrement des électroménagers, installation de la hotte, des luminaires, peinture et finitions décoratives.'
-      }
-    ],
-    results: [
-      'Création d\'un espace de vie convivial et fonctionnel',
-      'Îlot central devenu le point central de la maison',
-      'Intégration parfaite de l\'électroménager haut de gamme',
-      'Luminosité optimisée avec éclairage LED multi-zones',
-      'Augmentation de 30% de l\'espace de rangement'
-    ],
-    testimonial: {
-      text: 'Notre nouvelle cuisine est exactement ce dont nous rêvions. L\'îlot central est devenu le lieu de rassemblement de la famille. L\'équipe d\'Entourage AV a géré le projet de A à Z avec un professionnalisme remarquable.',
-      author: 'Marc Petit',
-      role: 'Client'
-    }
-  },
-  {
-    id: 'electricite-normes',
-    number: '04',
-    title: 'Mise aux normes électriques complète',
-    category: 'Électricité',
-    location: 'Boulogne-Billancourt',
-    client: 'Madame Leroy',
-    shortDescription: 'Remplacement complet du tableau électrique et mise aux normes NF C 15-100 d\'une maison de 120m².',
-    fullDescription: 'Ce projet de mise aux normes électriques concernait une maison dont l\'installation datait de plus de 30 ans. L\'objectif était de garantir la sécurité des occupants tout en modernisant l\'installation pour répondre aux besoins actuels (recharge de véhicule électrique, domotique, etc.).',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBlbGVjdHJpY2FsJTIwcGFuZWx8ZW58MXx8fHwxNzY4OTk5NTAxfDA&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1675622623767-6a47f22a7332?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBlbGVjdHJpY2FsJTIwcGFuZWx8ZW58MXx8fHwxNzY4OTkzOTExfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      }
-    ],
-    duration: '2 semaines',
-    surface: '120m²',
-    budget: '12 000€',
-    teamSize: '2 personnes',
-    completionDate: 'Avril 2024',
-    challenges: [
-      {
-        title: 'Installation vétuste et dangereuse',
-        description: 'L\'ancien tableau ne possédait pas de disjoncteur différentiel et plusieurs circuits n\'étaient pas aux normes, présentant un risque d\'électrocution et d\'incendie.',
-        solution: 'Remplacement complet du tableau électrique avec installation de disjoncteurs différentiels 30mA sur tous les circuits, mise à la terre de toutes les prises et installation de parafoudre pour protéger les équipements sensibles.'
-      },
-      {
-        title: 'Circuits surchargés',
-        description: 'Plusieurs circuits alimentaient trop de prises ou d\'appareils, causant des disjonctions fréquentes.',
-        solution: 'Création de nouveaux circuits dédiés pour la cuisine, la salle de bain et les gros électroménagers. Équilibrage de la charge sur l\'ensemble du tableau.'
-      },
-      {
-        title: 'Préparation pour véhicule électrique',
-        description: 'La cliente souhaitait pouvoir installer une borne de recharge dans le futur.',
-        solution: 'Augmentation de la puissance de l\'abonnement électrique et installation d\'un circuit dédié 32A avec protection adaptée, prêt pour l\'ajout d\'une wallbox.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Diagnostic et préparation',
-        duration: '2 jours',
-        description: 'Diagnostic complet de l\'installation existante, repérage des circuits, préparation de la zone de travail.'
-      },
-      {
-        phase: 'Phase 2 - Installation du nouveau tableau',
-        duration: '3 jours',
-        description: 'Pose du nouveau tableau électrique, installation des disjoncteurs, connexion de tous les circuits existants avec repérage.'
-      },
-      {
-        phase: 'Phase 3 - Mise aux normes des circuits',
-        duration: '5 jours',
-        description: 'Création de nouveaux circuits, remplacement des prises non conformes, installation de la liaison équipotentielle dans la salle de bain, vérification de la mise à la terre.'
-      },
-      {
-        phase: 'Phase 4 - Tests et certification',
-        duration: '2 jours',
-        description: 'Tests de tous les circuits, vérification de la protection différentielle, mesures de terre, délivrance du certificat de conformité Consuel.'
-      }
-    ],
-    results: [
-      'Installation électrique 100% conforme à la norme NF C 15-100',
-      'Sécurité maximale avec protection différentielle sur tous les circuits',
-      'Capacité électrique augmentée de 30%',
-      'Préparation complète pour borne de recharge véhicule électrique',
-      'Certificat de conformité Consuel obtenu'
-    ],
-    testimonial: {
-      text: 'J\'avais des inquiétudes concernant mon installation électrique vieillissante. Entourage AV a réalisé une mise aux normes complète avec professionnalisme. Je me sens maintenant en sécurité et mon installation est prête pour l\'avenir.',
-      author: 'Isabelle Leroy',
-      role: 'Cliente'
-    }
-  },
-  {
-    id: 'terrasse-exterieur',
-    number: '05',
-    title: 'Terrasse et aménagement extérieur',
-    category: 'Extérieur',
-    location: 'Neuilly-sur-Seine',
-    client: 'Famille Rousseau',
-    shortDescription: 'Création d\'une terrasse en bois composite avec éclairage intégré et espace détente.',
-    fullDescription: 'Transformation complète d\'un jardin négligé en un espace extérieur moderne et accueillant. Le projet incluait la création d\'une large terrasse en bois composite, l\'installation d\'un éclairage paysager LED, la plantation de végétaux et l\'aménagement d\'un coin salon extérieur.',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBnYXJkZW58ZW58MXx8fHwxNzY4OTk5NTAyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvdXRkb29yJTIwdGVycmFjZXxlbnwxfHx8fDE3Njg5OTk1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      }
-    ],
-    duration: '3 semaines',
-    surface: '45m²',
-    budget: '28 000€',
-    teamSize: '4 personnes',
-    completionDate: 'Mai 2024',
-    challenges: [
-      {
-        title: 'Terrain en pente',
-        description: 'Le jardin présentait une pente importante nécessitant un terrassement conséquent.',
-        solution: 'Création d\'un système de paliers avec murets en pierre naturelle. La terrasse principale a été nivelée avec une structure porteuse sur plots réglables permettant de compenser la pente.'
-      },
-      {
-        title: 'Drainage et évacuation des eaux',
-        description: 'Le terrain argileux retenait l\'eau, créant des zones boueuses et risquant d\'endommager la terrasse.',
-        solution: 'Installation d\'un système de drainage périphérique avec géotextile et graviers drainants. Création de pentes légères pour diriger l\'eau vers un puisard d\'infiltration.'
-      },
-      {
-        title: 'Éclairage extérieur',
-        description: 'Les clients souhaitaient un éclairage ambiant sans installation électrique apparente.',
-        solution: 'Installation de spots LED encastrés dans la terrasse et dans les murets, alimentés par des câbles enterrés. Ajout d\'un éclairage indirect avec rubans LED et d\'appliques murales design.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Terrassement et drainage',
-        duration: '1 semaine',
-        description: 'Terrassement du terrain, création des niveaux, installation du système de drainage, évacuation des terres.'
-      },
-      {
-        phase: 'Phase 2 - Murets et structure',
-        duration: '5 jours',
-        description: 'Construction des murets en pierre naturelle, création de la structure porteuse de la terrasse sur plots, installation de l\'électricité enterrée.'
-      },
-      {
-        phase: 'Phase 3 - Pose de la terrasse',
-        duration: '4 jours',
-        description: 'Pose des lames de bois composite, création des finitions en bordure, installation des garde-corps si nécessaire.'
-      },
-      {
-        phase: 'Phase 4 - Aménagements et plantations',
-        duration: '4 jours',
-        description: 'Installation de l\'éclairage LED, plantation des végétaux, mise en place du système d\'arrosage automatique, finitions décoratives.'
-      }
-    ],
-    results: [
-      'Création d\'un espace extérieur de 45m² parfaitement utilisable',
-      'Terrasse sans entretien grâce au composite haut de gamme',
-      'Éclairage LED créant une ambiance chaleureuse le soir',
-      'Système de drainage efficace, plus de problème d\'eau stagnante',
-      'Augmentation significative de la valeur de la propriété'
-    ],
-    testimonial: {
-      text: 'Notre jardin était inutilisable et maintenant c\'est notre endroit préféré ! La terrasse est magnifique, l\'éclairage crée une ambiance magique le soir. L\'équipe a su gérer les contraintes du terrain avec brio.',
-      author: 'Éric Rousseau',
-      role: 'Client'
-    }
-  },
-  {
-    id: 'bureaux-professionnels',
-    number: '06',
-    title: 'Rénovation de bureaux professionnels',
-    category: 'Rénovation complète',
-    location: 'La Défense',
-    client: 'Société TechStart',
-    shortDescription: 'Transformation d\'espaces de bureaux avec open space, salles de réunion et zones de détente.',
-    fullDescription: 'Rénovation complète de locaux professionnels de 250m² pour une start-up en pleine croissance. Le projet visait à créer un environnement de travail moderne, collaboratif et inspirant, tout en respectant les normes ERP et d\'accessibilité. Les espaces ont été repensés pour favoriser à la fois le travail en équipe et la concentration individuelle.',
-    images: [
-      {
-        before: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBvZmZpY2V8ZW58MXx8fHwxNzY4OTk5NTAyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-        after: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2V8ZW58MXx8fHwxNzY4OTk5NTAzfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      }
-    ],
-    duration: '8 semaines',
-    surface: '250m²',
-    budget: '120 000€',
-    teamSize: '8 personnes',
-    completionDate: 'Juin 2024',
-    challenges: [
-      {
-        title: 'Normes ERP et accessibilité',
-        description: 'En tant qu\'établissement recevant du public, le projet devait respecter des normes strictes d\'accessibilité et de sécurité.',
-        solution: 'Collaboration avec un bureau de contrôle pour garantir la conformité totale. Création de circulations accessibles aux PMR, installation de portes automatiques, signalétique adaptée et système de sécurité incendie conforme.'
-      },
-      {
-        title: 'Acoustique en open space',
-        description: 'L\'open space devait permettre la collaboration tout en limitant les nuisances sonores.',
-        solution: 'Installation de faux plafonds acoustiques absorbants, pose de panneaux muraux phoniques design, création de bulles acoustiques vitrées pour les appels téléphoniques.'
-      },
-      {
-        title: 'Câblage réseau et éclairage',
-        description: 'Le réseau informatique devait être performant et l\'éclairage adapté au travail sur écran.',
-        solution: 'Installation d\'un réseau structuré Cat 6A avec plusieurs points d\'accès WiFi 6. Éclairage LED avec température de couleur 4000K et contrôle de l\'intensité par zones pour un confort visuel optimal.'
-      }
-    ],
-    timeline: [
-      {
-        phase: 'Phase 1 - Démolition et gros œuvre',
-        duration: '2 semaines',
-        description: 'Dépose des anciennes cloisons, des faux plafonds et des revêtements. Création des nouvelles distributions selon le plan.'
-      },
-      {
-        phase: 'Phase 2 - Électricité, réseau et CVC',
-        duration: '2 semaines',
-        description: 'Installation du réseau électrique, du réseau informatique, du système de climatisation et de ventilation. Mise en place du système de contrôle d\'accès.'
-      },
-      {
-        phase: 'Phase 3 - Cloisons, faux plafonds et isolation',
-        duration: '2 semaines',
-        description: 'Montage des cloisons vitrées et pleines, installation des faux plafonds acoustiques, pose de l\'isolation phonique.'
-      },
-      {
-        phase: 'Phase 4 - Finitions et aménagements',
-        duration: '2 semaines',
-        description: 'Peintures, pose des revêtements de sol, installation du mobilier, de la signalétique et des équipements audiovisuels dans les salles de réunion.'
-      }
-    ],
-    results: [
-      'Espace de travail moderne et fonctionnel pour 45 collaborateurs',
-      'Open space de 150m² avec acoustique optimisée',
-      '4 salles de réunion équipées de la technologie audiovisuelle',
-      'Zone de détente et cuisine partagée de 40m²',
-      'Conformité totale aux normes ERP et accessibilité PMR',
-      'Réduction de 35% de la consommation énergétique grâce à l\'éclairage LED et à la CVC performante'
-    ],
-    testimonial: {
-      text: 'Entourage AV a transformé nos locaux en un espace de travail inspirant qui reflète parfaitement les valeurs de notre entreprise. Le projet a été livré dans les temps et le budget. Nos équipes adorent leur nouvel environnement !',
-      author: 'Thomas Girard',
-      role: 'CEO, TechStart'
-    }
-  }
-];
 
 // Image Lightbox Component
 function ImageLightbox({ 
@@ -579,7 +141,7 @@ function ImageLightbox({
           }}
         >
           <img
-            src={viewMode === 'before' ? currentImage.before : currentImage.after}
+            src={viewMode === 'before' ? getImageUrl(currentImage.before) : getImageUrl(currentImage.after)}
             alt={viewMode === 'before' ? 'Avant' : 'Après'}
             className="w-full h-full object-cover transition-opacity duration-500"
           />
@@ -627,17 +189,34 @@ function ImageLightbox({
 }
 
 export function ProjectDetailPage() {
-  const location = useLocation();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  // Extract ID from pathname: /realisations/renovation-appartement-parisien -> renovation-appartement-parisien
-  const id = location.pathname.split('/').pop() || '';
   
-  const project = projectsData.find(p => p.id === id);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (slug) {
+      loadProject();
+    }
+  }, [slug]);
+
+  const loadProject = async () => {
+    try {
+      setLoading(true);
+      const data = await getProjectBySlug(slug!);
+      setProject(data as ProjectDetail);
+    } catch (err) {
+      setError('Projet non trouvé');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const navigateImage = (direction: 'prev' | 'next') => {
     if (!project) return;
@@ -652,7 +231,7 @@ export function ProjectDetailPage() {
   };
 
   useEffect(() => {
-    if (heroRef.current) {
+    if (heroRef.current && project) {
       gsap.fromTo(
         heroRef.current.querySelectorAll('.animate-in'),
         { opacity: 0, y: 50 },
@@ -666,7 +245,7 @@ export function ProjectDetailPage() {
       );
     }
 
-    if (contentRef.current) {
+    if (contentRef.current && project) {
       const elements = contentRef.current.querySelectorAll('.fade-in-section');
       
       elements.forEach((element) => {
@@ -689,7 +268,11 @@ export function ProjectDetailPage() {
     }
   }, [project]);
 
-  if (!project) {
+  if (loading) {
+    return <LoadingSpinner fullScreen text="Chargement du projet..." />;
+  }
+
+  if (error || !project) {
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
         <div className="text-center">
@@ -702,6 +285,7 @@ export function ProjectDetailPage() {
             style={{
               background: 'rgba(0, 0, 0, 0.85)',
               color: 'var(--color-base-cream)',
+              clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
             }}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -836,7 +420,7 @@ export function ProjectDetailPage() {
                   }}
                 >
                   <img
-                    src={image.before}
+                    src={getImageUrl(image.before)}
                     alt={`${project.title} - ${image.label || `Image ${idx + 1}`}`}
                     className="w-full h-full object-cover"
                   />
@@ -1057,7 +641,7 @@ export function ProjectDetailPage() {
       </section>
 
       {/* Lightbox */}
-      {lightboxOpen && (
+      {lightboxOpen && project && (
         <ImageLightbox
           images={project.images}
           currentIndex={selectedImageIndex}

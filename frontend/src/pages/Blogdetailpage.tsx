@@ -1,82 +1,118 @@
-import { useLocation, Link, useNavigate } from 'react-router';
-import { useEffect, useRef } from 'react';
+import { useParams, Link, useNavigate } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
-import { 
-  ArrowLeft, 
-  Calendar, 
+import {
+  ArrowLeft,
+  Calendar,
   Clock,
   User,
   Tag,
-  Share2
+  Share2,
+  ArrowRight,
 } from 'lucide-react';
 import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
-import { blogPosts } from './BlogPage';
+import { getBlogPostBySlug, getRelatedPosts } from '../services/blogAPI';
+import type { BlogPost } from '../services/blogAPI';
+import { LoadingSpinner } from '../shared/ui/LoadingSpinner';
+import { getImageUrl } from '../shared/utils/images';
 
 export function BlogDetailPage() {
-  const location = useLocation();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Extract slug from pathname: /blog/avenir-renovation-energetique -> avenir-renovation-energetique
-  const slug = location.pathname.split('/').pop() || '';
-  
-  const post = blogPosts.find(p => p.slug === slug);
+  useEffect(() => {
+    if (slug) {
+      loadPost();
+    }
+  }, [slug]);
+
+  const loadPost = async () => {
+    try {
+      setLoading(true);
+      const data = await getBlogPostBySlug(slug!);
+      setPost(data);
+      // Fetch related posts in same category, excluding current
+      if (data.category && data.id) {
+        const related = await getRelatedPosts(data.category, data.id, 2);
+        setRelatedPosts(related);
+      }
+    } catch (err) {
+      setError('Article non trouvé');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Scroll to top when page loads
     window.scrollTo(0, 0);
 
-    if (heroRef.current) {
+    if (heroRef.current && post) {
       gsap.fromTo(
         heroRef.current.querySelectorAll('.animate-in'),
         { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-        }
+        { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' }
       );
     }
 
-    if (contentRef.current) {
-      const elements = contentRef.current.querySelectorAll('.fade-in-section');
-      
-      elements.forEach((element) => {
+    if (contentRef.current && post) {
+      contentRef.current.querySelectorAll('.fade-in-section').forEach((el) => {
         gsap.fromTo(
-          element,
+          el,
           { opacity: 0, y: 60 },
           {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 85%',
-              toggleActions: 'play none none none',
-            },
+            opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
           }
         );
       });
     }
   }, [post]);
 
-  if (!post) {
+  const formatDate = (post: BlogPost) => {
+    if (post.date) return post.date;
+    return new Date(post.created_at).toLocaleDateString('fr-FR', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    });
+  };
+
+  const formatContent = (content: string) => {
+    return content.split('\n\n').map((paragraph, index) => {
+      if (paragraph.startsWith('## ')) {
+        return (
+          <h2 key={index} className="text-2xl sm:text-3xl font-bold mt-12 mb-6" style={{ color: '#2A2522' }}>
+            {paragraph.replace('## ', '')}
+          </h2>
+        );
+      }
+      return (
+        <p key={index} className="text-lg leading-relaxed mb-6" style={{ color: '#5A5A5A' }}>
+          {paragraph}
+        </p>
+      );
+    });
+  };
+
+  if (loading) return <LoadingSpinner fullScreen text="Chargement de l'article..." />;
+
+  if (error || !post) {
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>
-            Article non trouvé
-          </h1>
+          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>Article non trouvé</h1>
           <Link
             to="/blog"
             className="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all duration-300"
             style={{
               background: 'rgba(0, 0, 0, 0.85)',
               color: 'var(--color-base-cream)',
+              clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
             }}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -86,26 +122,6 @@ export function BlogDetailPage() {
       </div>
     );
   }
-
-  // Format content with proper paragraphs
-  const formatContent = (content: string) => {
-    return content.split('\n\n').map((paragraph, index) => {
-      // Check if it's a heading
-      if (paragraph.startsWith('## ')) {
-        return (
-          <h2 key={index} className="text-2xl sm:text-3xl font-bold mt-12 mb-6" style={{ color: '#2A2522' }}>
-            {paragraph.replace('## ', '')}
-          </h2>
-        );
-      }
-      // Regular paragraph
-      return (
-        <p key={index} className="text-lg leading-relaxed mb-6" style={{ color: '#5A5A5A' }}>
-          {paragraph}
-        </p>
-      );
-    });
-  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
@@ -130,7 +146,7 @@ export function BlogDetailPage() {
             <span>Retour au blog</span>
           </button>
 
-          <div 
+          <div
             className="inline-flex px-6 py-3 mb-6 animate-in"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -143,26 +159,30 @@ export function BlogDetailPage() {
           >
             <span className="text-sm font-medium" style={{ color: '#2A2522' }}>{post.category}</span>
           </div>
-          
+
           <PremiumTextReveal>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-[0.95]" style={{ color: '#2A2522' }}>
               {post.title}
             </h1>
           </PremiumTextReveal>
-          
+
           <div className="flex flex-wrap gap-4 mb-6 animate-in">
-            <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
-              <User className="w-5 h-5" />
-              <span className="font-medium">{post.author}</span>
-            </div>
+            {post.author && (
+              <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
+                <User className="w-5 h-5" />
+                <span className="font-medium">{post.author}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
               <Calendar className="w-5 h-5" />
-              <span className="font-medium">{post.date}</span>
+              <span className="font-medium">{formatDate(post)}</span>
             </div>
-            <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
-              <Clock className="w-5 h-5" />
-              <span className="font-medium">{post.readTime} de lecture</span>
-            </div>
+            {post.read_time && (
+              <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
+                <Clock className="w-5 h-5" />
+                <span className="font-medium">{post.read_time} de lecture</span>
+              </div>
+            )}
           </div>
 
           <p className="text-lg sm:text-xl max-w-3xl leading-relaxed animate-in" style={{ color: '#5A5A5A' }}>
@@ -172,29 +192,31 @@ export function BlogDetailPage() {
       </section>
 
       {/* Featured Image */}
-      <section className="py-12 px-4 bg-[#FAFAF9]">
-        <div className="max-w-5xl mx-auto">
-          <div 
-            className="overflow-hidden"
-            style={{
-              clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
-            }}
-          >
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-[400px] sm:h-[500px] object-cover"
-            />
+      {post.image && (
+        <section className="py-12 px-4 bg-[#FAFAF9]">
+          <div className="max-w-5xl mx-auto">
+            <div
+              className="overflow-hidden"
+              style={{
+                clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
+              }}
+            >
+              <img
+                src={getImageUrl(post.image)}
+                alt={post.title}
+                className="w-full h-[400px] sm:h-[500px] object-cover"
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Main Content */}
       <section ref={contentRef} className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-4xl mx-auto space-y-16">
-          
+
           {/* Article Content */}
-          <div 
+          <div
             className="fade-in-section p-8 sm:p-12"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -207,13 +229,11 @@ export function BlogDetailPage() {
           >
             <div className="prose prose-lg max-w-none">
               {post.content ? formatContent(post.content) : (
-                <p className="text-lg leading-relaxed" style={{ color: '#5A5A5A' }}>
-                  {post.excerpt}
-                </p>
+                <p className="text-lg leading-relaxed" style={{ color: '#5A5A5A' }}>{post.excerpt}</p>
               )}
             </div>
 
-            {/* Article Meta Footer */}
+            {/* Footer Meta */}
             <div className="mt-12 pt-8 border-t border-white/20 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2" style={{ color: '#5A5A5A' }}>
                 <Tag className="w-5 h-5" />
@@ -222,11 +242,9 @@ export function BlogDetailPage() {
               <button
                 onClick={() => {
                   if (navigator.share) {
-                    navigator.share({
-                      title: post.title,
-                      text: post.excerpt,
-                      url: window.location.href,
-                    });
+                    navigator.share({ title: post.title, text: post.excerpt, url: window.location.href });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
                   }
                 }}
                 className="flex items-center gap-2 px-4 py-2 font-medium transition-all duration-300 hover:scale-105"
@@ -243,19 +261,13 @@ export function BlogDetailPage() {
           </div>
 
           {/* Related Articles */}
-          <div className="fade-in-section">
-            <h2 className="text-3xl font-bold mb-8" style={{ color: '#2A2522' }}>Articles Similaires</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {blogPosts
-                .filter(p => p.category === post.category && p.slug !== post.slug)
-                .slice(0, 2)
-                .map((relatedPost) => (
-                  <Link
-                    key={relatedPost.slug}
-                    to={`/blog/${relatedPost.slug}`}
-                    className="block group"
-                  >
-                    <div 
+          {relatedPosts.length > 0 && (
+            <div className="fade-in-section">
+              <h2 className="text-3xl font-bold mb-8" style={{ color: '#2A2522' }}>Articles Similaires</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {relatedPosts.map((relatedPost) => (
+                  <Link key={relatedPost.slug} to={`/blog/${relatedPost.slug}`} className="block group">
+                    <div
                       className="overflow-hidden transition-all duration-500 hover:scale-105 flex flex-col h-full"
                       style={{
                         background: 'rgba(255, 255, 255, 0.4)',
@@ -266,33 +278,36 @@ export function BlogDetailPage() {
                         clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
                       }}
                     >
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={relatedPost.image}
-                          alt={relatedPost.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                      </div>
-                      <div className="p-6 flex-1">
+                      {relatedPost.image && (
+                        <div className="relative h-48 overflow-hidden">
+                          <img
+                            src={getImageUrl(relatedPost.image)}
+                            alt={relatedPost.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        </div>
+                      )}
+                      <div className="p-6 flex-1 flex flex-col">
                         <div className="flex items-center gap-2 text-xs mb-3" style={{ color: '#5A5A5A' }}>
                           <Calendar className="w-4 h-4" />
-                          <span>{relatedPost.date}</span>
+                          <span>{formatDate(relatedPost)}</span>
                         </div>
-                        <h3 className="text-xl font-bold mb-2" style={{ color: '#2A2522' }}>
-                          {relatedPost.title}
-                        </h3>
-                        <p className="text-sm leading-relaxed" style={{ color: '#5A5A5A' }}>
-                          {relatedPost.excerpt}
-                        </p>
+                        <h3 className="text-xl font-bold mb-2 flex-1" style={{ color: '#2A2522' }}>{relatedPost.title}</h3>
+                        <p className="text-sm leading-relaxed mb-4" style={{ color: '#5A5A5A' }}>{relatedPost.excerpt}</p>
+                        <div className="flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all" style={{ color: '#2A2522' }}>
+                          <span>Lire la suite</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
                       </div>
                     </div>
                   </Link>
                 ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* CTA */}
-          <div 
+          <div
             className="fade-in-section p-12 text-center"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -303,9 +318,7 @@ export function BlogDetailPage() {
               clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
             }}
           >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>
-              Un Projet en Tête ?
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>Un Projet en Tête ?</h2>
             <p className="text-lg mb-8 leading-relaxed max-w-2xl mx-auto" style={{ color: '#5A5A5A' }}>
               Contactez-nous pour discuter de votre projet et découvrir comment nous pouvons vous aider à le concrétiser.
             </p>

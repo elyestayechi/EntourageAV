@@ -6,11 +6,29 @@
 │   ├── alembic.ini
 │   ├── app
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-310.pyc
+│   │   │   ├── database.cpython-310.pyc
+│   │   │   └── main.cpython-310.pyc
 │   │   ├── api
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   └── deps.cpython-310.pyc
 │   │   │   ├── deps.py
 │   │   │   └── v1
 │   │   │       ├── __init__.py
+│   │   │       ├── __pycache__
+│   │   │       │   ├── __init__.cpython-310.pyc
+│   │   │       │   ├── auth.cpython-310.pyc
+│   │   │       │   ├── blog.cpython-310.pyc
+│   │   │       │   ├── contacts.cpython-310.pyc
+│   │   │       │   ├── projects.cpython-310.pyc
+│   │   │       │   ├── router.cpython-310.pyc
+│   │   │       │   ├── services.cpython-310.pyc
+│   │   │       │   ├── social_media.cpython-310.pyc
+│   │   │       │   ├── testimonials.cpython-310.pyc
+│   │   │       │   └── upload.cpython-310.pyc
 │   │   │       ├── auth.py
 │   │   │       ├── blog.py
 │   │   │       ├── contacts.py
@@ -23,10 +41,23 @@
 │   │   ├── config.py
 │   │   ├── core
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   ├── config.cpython-310.pyc
+│   │   │   │   └── security.cpython-310.pyc
 │   │   │   ├── config.py
 │   │   │   └── security.py
 │   │   ├── crud
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   ├── base.cpython-310.pyc
+│   │   │   │   ├── blog.cpython-310.pyc
+│   │   │   │   ├── contact.cpython-310.pyc
+│   │   │   │   ├── project.cpython-310.pyc
+│   │   │   │   ├── service.cpython-310.pyc
+│   │   │   │   ├── social_media.cpython-310.pyc
+│   │   │   │   └── testimonial.cpython-310.pyc
 │   │   │   ├── base.py
 │   │   │   ├── blog.py
 │   │   │   ├── contact.py
@@ -38,6 +69,14 @@
 │   │   ├── main.py
 │   │   ├── models
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   ├── blog.cpython-310.pyc
+│   │   │   │   ├── contact.cpython-310.pyc
+│   │   │   │   ├── project.cpython-310.pyc
+│   │   │   │   ├── service.cpython-310.pyc
+│   │   │   │   ├── social_media.cpython-310.pyc
+│   │   │   │   └── testimonial.cpython-310.pyc
 │   │   │   ├── blog.py
 │   │   │   ├── contact.py
 │   │   │   ├── project.py
@@ -46,6 +85,15 @@
 │   │   │   └── testimonial.py
 │   │   ├── schemas
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   ├── auth.cpython-310.pyc
+│   │   │   │   ├── blog.cpython-310.pyc
+│   │   │   │   ├── contact.cpython-310.pyc
+│   │   │   │   ├── project.cpython-310.pyc
+│   │   │   │   ├── service.cpython-310.pyc
+│   │   │   │   ├── social_media.cpython-310.pyc
+│   │   │   │   └── testimonial.cpython-310.pyc
 │   │   │   ├── auth.py
 │   │   │   ├── blog.py
 │   │   │   ├── contact.py
@@ -55,9 +103,20 @@
 │   │   │   └── testimonial.py
 │   │   └── utils
 │   │       ├── __init__.py
+│   │       ├── __pycache__
+│   │       │   ├── __init__.cpython-310.pyc
+│   │       │   └── files.cpython-310.pyc
 │   │       └── files.py
 │   ├── migrations
+│   │   ├── __pycache__
+│   │   │   └── env.cpython-310.pyc
+│   │   ├── env.py
+│   │   ├── script.py.mako
 │   │   └── versions
+│   │       ├── __pycache__
+│   │       │   └── b02f146356c4_initial_schema.cpython-310.pyc
+│   │       └── b02f146356c4_initial_schema.py
+│   ├── quick-start.sh
 │   ├── requirements.txt
 │   ├── static
 │   │   ├── blog
@@ -66,180 +125,203 @@
 │   │   │   └── before
 │   │   ├── services
 │   │   └── testimonials
-│   └── tests
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── test_auth.py
-│       ├── test_blog.py
-│       ├── test_contacts.py
-│       ├── test_projects.py
-│       ├── test_services.py
-│       ├── test_social_media.py
-│       └── test_testimonials.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── test_auth.py
+│   │   ├── test_blog.py
+│   │   ├── test_contacts.py
+│   │   ├── test_projects.py
+│   │   ├── test_services.py
+│   │   ├── test_social_media.py
+│   │   └── test_testimonials.py
+│   └── venv
+│       ├── bin
+│       │   ├── Activate.ps1
+│       │   ├── activate
+│       │   ├── activate.csh
+│       │   ├── activate.fish
+│       │   ├── pip
+│       │   ├── pip3
+│       │   ├── pip3.10
+│       │   ├── python -> python3
+│       │   ├── python3 -> /Users/asmatayechi/miniconda3/envs/llama_env/bin/python3
+│       │   └── python3.10 -> python3
+│       ├── include
+│       ├── lib
 ├── batch-color-update.py
 ├── color-mapping.json
-├── index.html
-├── node_modules
-├── package-lock.json
-├── package.json
-├── postcss.config.js
-├── src
-│   ├── App.tsx
-│   ├── app
-│   │   └── router.tsx
-│   ├── assets
-│   │   ├── after.jpg
-│   │   ├── art.jpg
-│   │   ├── before.png
-│   │   ├── bone.jpg
-│   │   ├── drive.jpg
-│   │   ├── evo.jpg
-│   │   ├── fly.jpg
-│   │   ├── foot.png
-│   │   ├── footer.png
-│   │   ├── gline.jpg
-│   │   ├── hero-image.png
-│   │   ├── hero.png
-│   │   ├── hide.jpg
-│   │   ├── home.jpg
-│   │   ├── isy.jpg
-│   │   ├── joy.jpg
-│   │   ├── krio.jpg
-│   │   ├── line.jpg
-│   │   ├── loft.jpg
-│   │   ├── log.png
-│   │   ├── logo.png
-│   │   ├── logo2.png
-│   │   ├── mix.jpg
-│   │   ├── porta.jpg
-│   │   ├── vid.webm
-│   │   ├── video.mp4
-│   │   └── video.webm
-│   ├── features
-│   │   ├── admin
-│   │   │   ├── AdminDashboard.tsx
-│   │   │   └── AdminPanel.tsx
-│   │   ├── contact
-│   │   │   └── Contact.tsx
-│   │   ├── hero
-│   │   │   └── Hero.tsx
-│   │   ├── navigation
-│   │   │   ├── Footer.tsx
-│   │   │   └── Navigation.tsx
-│   │   ├── projects
-│   │   │   ├── BeforeAfterSlider.tsx
-│   │   │   └── RecentProjects.tsx
+├── frontend
+│   ├── index.html
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── app
+│   │   │   └── router.tsx
+│   │   ├── assets
+│   │   │   ├── after.jpg
+│   │   │   ├── art.jpg
+│   │   │   ├── before.png
+│   │   │   ├── bone.jpg
+│   │   │   ├── drive.jpg
+│   │   │   ├── evo.jpg
+│   │   │   ├── fly.jpg
+│   │   │   ├── foot.png
+│   │   │   ├── footer.png
+│   │   │   ├── gline.jpg
+│   │   │   ├── hero-image.png
+│   │   │   ├── hero.png
+│   │   │   ├── hide.jpg
+│   │   │   ├── home.jpg
+│   │   │   ├── isy.jpg
+│   │   │   ├── joy.jpg
+│   │   │   ├── krio.jpg
+│   │   │   ├── line.jpg
+│   │   │   ├── loft.jpg
+│   │   │   ├── log.png
+│   │   │   ├── logo.png
+│   │   │   ├── logo2.png
+│   │   │   ├── mix.jpg
+│   │   │   ├── porta.jpg
+│   │   │   ├── vid.webm
+│   │   │   ├── video.mp4
+│   │   │   └── video.webm
+│   │   ├── features
+│   │   │   ├── admin
+│   │   │   │   ├── AdminDashboard.tsx
+│   │   │   │   └── AdminPanel.tsx
+│   │   │   ├── contact
+│   │   │   │   └── Contact.tsx
+│   │   │   ├── hero
+│   │   │   │   └── Hero.tsx
+│   │   │   ├── navigation
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   └── Navigation.tsx
+│   │   │   ├── projects
+│   │   │   │   ├── BeforeAfterSlider.tsx
+│   │   │   │   └── RecentProjects.tsx
+│   │   │   ├── services
+│   │   │   │   └── StickyServices.tsx
+│   │   │   └── testimonials
+│   │   │       └── Testimonials.tsx
+│   │   ├── layout
+│   │   │   └── RootLayout.tsx
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   │   ├── AboutPage.tsx
+│   │   │   ├── BlogPage.tsx
+│   │   │   ├── Blogdetailpage.tsx
+│   │   │   ├── ContactPage.tsx
+│   │   │   ├── Doorscataloguepage.tsx
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── InteriorDesignPage.tsx
+│   │   │   ├── NotFound.tsx
+│   │   │   ├── ProcessPage.tsx
+│   │   │   ├── ProjectDetailPage.tsx
+│   │   │   ├── ProjectsPage.tsx
+│   │   │   ├── ServicesPage.tsx
+│   │   │   └── Untitled
 │   │   ├── services
-│   │   │   └── StickyServices.tsx
-│   │   └── testimonials
-│   │       └── Testimonials.tsx
-│   ├── layout
-│   │   └── RootLayout.tsx
-│   ├── main.tsx
-│   ├── pages
-│   │   ├── AboutPage.tsx
-│   │   ├── BlogPage.tsx
-│   │   ├── Blogdetailpage.tsx
-│   │   ├── ContactPage.tsx
-│   │   ├── Doorscataloguepage.tsx
-│   │   ├── HomePage.tsx
-│   │   ├── InteriorDesignPage.tsx
-│   │   ├── NotFound.tsx
-│   │   ├── ProcessPage.tsx
-│   │   ├── ProjectDetailPage.tsx
-│   │   ├── ProjectsPage.tsx
-│   │   ├── ServicesPage.tsx
-│   │   └── Untitled
-│   ├── shared
-│   │   ├── config
-│   │   ├── contexts
-│   │   │   └── LanguageContext.tsx
-│   │   ├── lib
-│   │   │   ├── EnhancedAnimatedTitle.tsx
-│   │   │   ├── EnhancedParallax.tsx
-│   │   │   ├── gsap-init.ts
-│   │   │   └── useGSAPAnimations.ts
-│   │   ├── styles
-│   │   │   └── globals.css
-│   │   └── ui
-│   │       ├── BlueprintSection.tsx
-│   │       ├── DepthLayers.tsx
-│   │       ├── EditorialSection.tsx
-│   │       ├── EnhancedDentTransition.tsx
-│   │       ├── FilmGrainTexture.tsx
-│   │       ├── FlipCounter.tsx
-│   │       ├── GlassCard.tsx
-│   │       ├── GridAnnotations.tsx
-│   │       ├── LayeredParallax.tsx
-│   │       ├── PageTransition.tsx
-│   │       ├── ParallaxImage.tsx
-│   │       ├── ParallaxSection.tsx
-│   │       ├── PremiumTextReveal.tsx
-│   │       ├── ScrollVideo.tsx
-│   │       ├── Scrollnav.tsx
-│   │       ├── SectionHeader.tsx
-│   │       ├── SlotMachineCounter.tsx
-│   │       ├── StorytellingTransition.tsx
-│   │       ├── SwissGraphicElements.tsx
-│   │       ├── TextReveal.tsx
-│   │       ├── TypewriterText.tsx
-│   │       ├── figma
-│   │       │   └── ImageWithFallback.tsx
-│   │       └── ui
-│   │           ├── accordion.tsx
-│   │           ├── alert-dialog.tsx
-│   │           ├── alert.tsx
-│   │           ├── aspect-ratio.tsx
-│   │           ├── avatar.tsx
-│   │           ├── badge.tsx
-│   │           ├── breadcrumb.tsx
-│   │           ├── button.tsx
-│   │           ├── calendar.tsx
-│   │           ├── card.tsx
-│   │           ├── carousel.tsx
-│   │           ├── chart.tsx
-│   │           ├── checkbox.tsx
-│   │           ├── collapsible.tsx
-│   │           ├── command.tsx
-│   │           ├── context-menu.tsx
-│   │           ├── dialog.tsx
-│   │           ├── drawer.tsx
-│   │           ├── dropdown-menu.tsx
-│   │           ├── form.tsx
-│   │           ├── hover-card.tsx
-│   │           ├── input-otp.tsx
-│   │           ├── input.tsx
-│   │           ├── label.tsx
-│   │           ├── menubar.tsx
-│   │           ├── navigation-menu.tsx
-│   │           ├── pagination.tsx
-│   │           ├── popover.tsx
-│   │           ├── progress.tsx
-│   │           ├── radio-group.tsx
-│   │           ├── resizable.tsx
-│   │           ├── scroll-area.tsx
-│   │           ├── select.tsx
-│   │           ├── separator.tsx
-│   │           ├── sheet.tsx
-│   │           ├── sidebar.tsx
-│   │           ├── skeleton.tsx
-│   │           ├── slider.tsx
-│   │           ├── sonner.tsx
-│   │           ├── switch.tsx
-│   │           ├── table.tsx
-│   │           ├── tabs.tsx
-│   │           ├── textarea.tsx
-│   │           ├── toggle-group.tsx
-│   │           ├── toggle.tsx
-│   │           ├── tooltip.tsx
-│   │           ├── use-mobile.ts
-│   │           └── utils.ts
-│   └── types
-│       └── image-types.d.ts
-├── structure
+│   │   │   ├── api.ts
+│   │   │   ├── authAPI.ts
+│   │   │   ├── blogAPI.ts
+│   │   │   ├── contactAPI.ts
+│   │   │   ├── projectsAPI.ts
+│   │   │   ├── serviceAPI.ts
+│   │   │   ├── socialMedia.ts
+│   │   │   └── testimonialsAPI.ts
+│   │   ├── shared
+│   │   │   ├── config
+│   │   │   ├── contexts
+│   │   │   │   └── LanguageContext.tsx
+│   │   │   ├── lib
+│   │   │   │   ├── EnhancedAnimatedTitle.tsx
+│   │   │   │   ├── EnhancedParallax.tsx
+│   │   │   │   ├── gsap-init.ts
+│   │   │   │   └── useGSAPAnimations.ts
+│   │   │   ├── styles
+│   │   │   │   └── globals.css
+│   │   │   └── ui
+│   │   │       ├── BlueprintSection.tsx
+│   │   │       ├── DepthLayers.tsx
+│   │   │       ├── EditorialSection.tsx
+│   │   │       ├── EnhancedDentTransition.tsx
+│   │   │       ├── FilmGrainTexture.tsx
+│   │   │       ├── FlipCounter.tsx
+│   │   │       ├── GlassCard.tsx
+│   │   │       ├── GridAnnotations.tsx
+│   │   │       ├── LayeredParallax.tsx
+│   │   │       ├── PageTransition.tsx
+│   │   │       ├── ParallaxImage.tsx
+│   │   │       ├── ParallaxSection.tsx
+│   │   │       ├── PremiumTextReveal.tsx
+│   │   │       ├── ScrollVideo.tsx
+│   │   │       ├── Scrollnav.tsx
+│   │   │       ├── SectionHeader.tsx
+│   │   │       ├── SlotMachineCounter.tsx
+│   │   │       ├── StorytellingTransition.tsx
+│   │   │       ├── SwissGraphicElements.tsx
+│   │   │       ├── TextReveal.tsx
+│   │   │       ├── TypewriterText.tsx
+│   │   │       ├── figma
+│   │   │       │   └── ImageWithFallback.tsx
+│   │   │       └── ui
+│   │   │           ├── accordion.tsx
+│   │   │           ├── alert-dialog.tsx
+│   │   │           ├── alert.tsx
+│   │   │           ├── aspect-ratio.tsx
+│   │   │           ├── avatar.tsx
+│   │   │           ├── badge.tsx
+│   │   │           ├── breadcrumb.tsx
+│   │   │           ├── button.tsx
+│   │   │           ├── calendar.tsx
+│   │   │           ├── card.tsx
+│   │   │           ├── carousel.tsx
+│   │   │           ├── chart.tsx
+│   │   │           ├── checkbox.tsx
+│   │   │           ├── collapsible.tsx
+│   │   │           ├── command.tsx
+│   │   │           ├── context-menu.tsx
+│   │   │           ├── dialog.tsx
+│   │   │           ├── drawer.tsx
+│   │   │           ├── dropdown-menu.tsx
+│   │   │           ├── form.tsx
+│   │   │           ├── hover-card.tsx
+│   │   │           ├── input-otp.tsx
+│   │   │           ├── input.tsx
+│   │   │           ├── label.tsx
+│   │   │           ├── menubar.tsx
+│   │   │           ├── navigation-menu.tsx
+│   │   │           ├── pagination.tsx
+│   │   │           ├── popover.tsx
+│   │   │           ├── progress.tsx
+│   │   │           ├── radio-group.tsx
+│   │   │           ├── resizable.tsx
+│   │   │           ├── scroll-area.tsx
+│   │   │           ├── select.tsx
+│   │   │           ├── separator.tsx
+│   │   │           ├── sheet.tsx
+│   │   │           ├── sidebar.tsx
+│   │   │           ├── skeleton.tsx
+│   │   │           ├── slider.tsx
+│   │   │           ├── sonner.tsx
+│   │   │           ├── switch.tsx
+│   │   │           ├── table.tsx
+│   │   │           ├── tabs.tsx
+│   │   │           ├── textarea.tsx
+│   │   │           ├── toggle-group.tsx
+│   │   │           ├── toggle.tsx
+│   │   │           ├── tooltip.tsx
+│   │   │           ├── use-mobile.ts
+│   │   │           └── utils.ts
+│   │   └── types
+│   │       └── image-types.d.ts
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
 ├── structure.txt
-├── tailwind.config.js
-├── tsconfig.json
-├── tsconfig.node.json
-├── update-colors.sh
-└── vite.config.ts
+└── update-colors.sh

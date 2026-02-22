@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
     # Database - PostgreSQL
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/entourage_av"
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:3000/entourage_av"
     
     # Admin Credentials
     ADMIN_USERNAME: str = "admin"
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     SESSION_MAX_AGE: int = 3600  # 1 hour in seconds
     
     # CORS
-    FRONTEND_URL: str = "http://localhost:5173"
+    FRONTEND_URL: str = "http://localhost:3000"
     
     # File Upload
     UPLOAD_DIR: str = "./static"

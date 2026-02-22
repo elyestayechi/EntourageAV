@@ -7,7 +7,7 @@ from app.core.security import (
     check_admin_session,
 )
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/auth", tags=["Authentication"], redirect_slashes=False)
 
 
 @router.post("/login", response_model=LoginResponse)
