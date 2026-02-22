@@ -34,7 +34,7 @@ export const getAllBlogPosts = async (params?: {
   skip?: number;
   limit?: number;
 }): Promise<BlogPost[]> => {
-  const response = await api.get<BlogPost[]>('/blog', { params });
+  const response = await api.get<BlogPost[]>('/blog/', { params });
   return response.data;
 };
 
@@ -67,13 +67,13 @@ export const deleteBlogPost = async (id: number): Promise<void> => {
   await api.delete(`/blog/${id}`);
 };
 
-export const getRelatedPosts = async (category: string, currentPostId: number, limit: number = 2): Promise<BlogPost[]> => {
-    const response = await api.get<BlogPost[]>('/blog', { 
-      params: { 
-        category, 
-        limit,
-        exclude_id: currentPostId 
-      } 
-    });
-    return response.data;
-  };
+export const getRelatedPosts = async (
+  category: string,
+  currentPostId: number,
+  limit: number = 2
+): Promise<BlogPost[]> => {
+  const response = await api.get<BlogPost[]>('/blog/', {
+    params: { category, limit, exclude_id: currentPostId },
+  });
+  return response.data;
+};

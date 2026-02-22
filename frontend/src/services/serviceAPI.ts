@@ -2,8 +2,8 @@ import api from './api';
 
 export interface Service {
   id: number;
-  number: string;
   slug: string;
+  number?: string;
   title: string;
   description: string;
   long_description?: string;
@@ -15,8 +15,8 @@ export interface Service {
 }
 
 export interface ServiceCreate {
-  number: string;
   slug: string;
+  number?: string;
   title: string;
   description: string;
   long_description?: string;
@@ -25,15 +25,10 @@ export interface ServiceCreate {
   benefits?: string[];
 }
 
-// Get all services
+// Get all services (public)
 export const getAllServices = async (): Promise<Service[]> => {
-  try {
-    const response = await api.get<Service[]>('/services');
-    return response.data;
-  } catch (error) {
-    console.error('Error in getAllServices:', error);
-    throw error;
-  }
+  const response = await api.get<Service[]>('/services/');
+  return response.data;
 };
 
 // Get single service by ID

@@ -52,13 +52,13 @@ export const getAllProjects = async (category?: string): Promise<Project[]> => {
 
 // Get single project by ID
 export const getProjectById = async (id: number): Promise<Project> => {
-  const response = await api.get<Project>(`/projects/${id}/`);
+  const response = await api.get<Project>(`/projects/${id}`);
   return response.data;
 };
 
 // Get project by slug
 export const getProjectBySlug = async (slug: string): Promise<Project> => {
-  const response = await api.get<Project>(`/projects/slug/${slug}/`);
+  const response = await api.get<Project>(`/projects/slug/${slug}`);
   return response.data;
 };
 
@@ -70,7 +70,7 @@ export const createProject = async (data: ProjectCreate): Promise<Project> => {
 
 // Update project (admin only)
 export const updateProject = async (id: number, data: Partial<ProjectCreate>): Promise<Project> => {
-  const response = await api.put<Project>(`/projects/${id}/`, data);
+  const response = await api.put<Project>(`/projects/${id}`, data);
   return response.data;
 };
 
@@ -87,7 +87,7 @@ export const addProjectImage = async (projectId: number, data: ProjectImageCreat
 
 // Update image pair (admin only)
 export const updateProjectImage = async (imageId: number, data: ProjectImageCreate): Promise<ProjectImage> => {
-  const response = await api.put<ProjectImage>(`/projects/images/${imageId}/`, data);
+  const response = await api.put<ProjectImage>(`/projects/images/${imageId}`, data);
   return response.data;
 };
 

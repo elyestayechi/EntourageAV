@@ -11,8 +11,8 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-// Routes that must NOT get a trailing slash appended
-const NO_TRAILING_SLASH = [
+// Patterns that must NEVER get a trailing slash
+const NO_SLASH_SUFFIXES = [
   '/auth/login',
   '/auth/logout',
   '/auth/check',
@@ -26,9 +26,17 @@ const NO_TRAILING_SLASH = [
 api.interceptors.request.use(
   (config) => {
     const url = config.url || '';
-    const shouldSkip = NO_TRAILING_SLASH.some(pattern => url.endsWith(pattern));
 
-    if (!shouldSkip && !url.includes('?') && !url.endsWith('/')) {
+    // Strip query string before checking
+    const [path] = url.split('?');
+
+    const shouldSkip =
+      // Explicit suffix match
+      NO_SLASH_SUFFIXES.some((suffix) => path.endsWith(suffix)) ||
+      // Route ends with a numeric ID — e.g. /services/1, /projects/42
+      /\/\d+$/.test(path);
+
+    if (!shouldSkip && !url.endsWith('/') && !url.includes('?')) {
       config.url = url + '/';
     }
 

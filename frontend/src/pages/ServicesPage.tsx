@@ -10,7 +10,7 @@ import { getImageUrl } from '../shared/utils/images';
 
 interface Service {
   id: number;
-  number: string;
+  number?: string;
   slug: string;
   title: string;
   description: string;
@@ -46,66 +46,43 @@ export function ServicesPage() {
   };
 
   useEffect(() => {
-    // Hero animation
     if (heroRef.current) {
       gsap.fromTo(
         heroRef.current.querySelectorAll('.animate-in'),
         { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-        }
+        { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' }
       );
     }
   }, []);
 
   useEffect(() => {
-    // Service cards animation - only run when services are loaded
     if (servicesRef.current && !loading && services.length > 0) {
       const cards = servicesRef.current.querySelectorAll('.service-card');
-      
       cards.forEach((card) => {
         gsap.fromTo(
           card,
           { opacity: 0, y: 80, scale: 0.95 },
           {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1.2,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-              toggleActions: 'play none none none',
-            },
+            opacity: 1, y: 0, scale: 1, duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: card, start: 'top 85%', toggleActions: 'play none none none' },
           }
         );
       });
     }
   }, [loading, services]);
 
-  if (loading) {
-    return <LoadingSpinner fullScreen text="Chargement des services..." />;
-  }
+  if (loading) return <LoadingSpinner fullScreen text="Chargement des services..." />;
 
   if (error) {
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>
-            Oups! Une erreur est survenue
-          </h1>
+          <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>Oups! Une erreur est survenue</h1>
           <p className="text-lg mb-8" style={{ color: '#5A5A5A' }}>{error}</p>
           <button
             onClick={loadServices}
             className="px-6 py-3 bg-[#2A2522] text-white rounded-lg hover:bg-[#3A3532] transition-colors"
-            style={{
-              clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
-            }}
+            style={{ clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}
           >
             Réessayer
           </button>
@@ -119,9 +96,7 @@ export function ServicesPage() {
       {/* Hero Section */}
       <section ref={heroRef} className="relative min-h-[50vh] flex items-center justify-center px-4 pt-32 pb-20">
         <FilmGrainTexture />
-        
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Number badge */}
           <div 
             className="inline-flex px-6 py-3 mb-6"
             style={{
@@ -135,13 +110,11 @@ export function ServicesPage() {
           >
             <span className="text-sm font-medium" style={{ color: '#2A2522' }}>SERVICES</span>
           </div>
-          
           <PremiumTextReveal>
             <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-[0.9]" style={{ color: '#2A2522' }}>
               NOTRE GAMME<br />D'EXPERTISES
             </h1>
           </PremiumTextReveal>
-          
           <p className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: '#5A5A5A' }}>
             Entourage AV vous accompagne dans tous vos projets de rénovation avec une expertise reconnue et un engagement qualité sans compromis.
           </p>
@@ -151,7 +124,6 @@ export function ServicesPage() {
       {/* Services Grid */}
       <section ref={servicesRef} className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-7xl mx-auto">
-          {/* Intro Text */}
           <div 
             className="p-8 mb-16 text-center"
             style={{
@@ -173,11 +145,7 @@ export function ServicesPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {services.map((service) => (
-              <div
-                key={service.id}
-                className="service-card group"
-              >
-                {/* Glass card with consistent styling */}
+              <div key={service.id} className="service-card group">
                 <div
                   className="h-full overflow-hidden transition-all duration-500 hover:scale-[1.02] flex flex-col"
                   style={{
@@ -189,59 +157,43 @@ export function ServicesPage() {
                     clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
                   }}
                 >
-                  {/* Header with Number and Title */}
                   <div className="p-6">
                     <div className="flex items-center gap-4 mb-4">
-                      <div 
-                        className="w-12 h-12 flex items-center justify-center text-xl font-bold"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.6)',
-                          clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
-                          color: '#2A2522',
-                        }}
-                      >
-                        {service.number}
-                      </div>
-                      <h3 className="text-xl font-bold" style={{ color: '#2A2522' }}>
-                        {service.title}
-                      </h3>
+                      {service.number && (
+                        <div 
+                          className="w-12 h-12 flex items-center justify-center text-xl font-bold"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.6)',
+                            clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+                            color: '#2A2522',
+                          }}
+                        >
+                          {service.number}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-bold" style={{ color: '#2A2522' }}>{service.title}</h3>
                     </div>
-                    
-                    <p className="text-sm leading-relaxed mb-4" style={{ color: '#5A5A5A' }}>
-                      {service.description}
-                    </p>
+                    <p className="text-sm leading-relaxed mb-4" style={{ color: '#5A5A5A' }}>{service.description}</p>
                   </div>
 
-                  {/* Image */}
                   {service.image && (
                     <div className="px-6 pb-6">
                       <div 
                         className="relative h-48 overflow-hidden"
-                        style={{
-                          clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
-                        }}
+                        style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}
                       >
-                        <img
-                          src={getImageUrl(service.image)}
-                          alt={service.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={getImageUrl(service.image)} alt={service.title} className="w-full h-full object-cover" />
                       </div>
                     </div>
                   )}
 
-                  {/* Content */}
                   <div className="p-6 pt-0 flex-1 flex flex-col">
                     {service.long_description && (
                       <div className="mb-6">
                         <h4 className="text-sm font-medium mb-2" style={{ color: '#2A2522' }}>Description</h4>
-                        <p className="text-sm leading-relaxed" style={{ color: '#5A5A5A' }}>
-                          {service.long_description}
-                        </p>
+                        <p className="text-sm leading-relaxed" style={{ color: '#5A5A5A' }}>{service.long_description}</p>
                       </div>
                     )}
-
-                    {/* Timeline */}
                     {service.timeline && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-3">
@@ -250,8 +202,6 @@ export function ServicesPage() {
                         </div>
                       </div>
                     )}
-
-                    {/* Benefits */}
                     {service.benefits && service.benefits.length > 0 && (
                       <div className="mb-6">
                         <h4 className="text-sm font-medium mb-3" style={{ color: '#2A2522' }}>Avantages</h4>
@@ -265,8 +215,6 @@ export function ServicesPage() {
                         </div>
                       </div>
                     )}
-
-                    {/* CTA */}
                     <div className="mt-auto pt-4 border-t border-white/20">
                       <Link
                         to="/contact"
@@ -313,9 +261,7 @@ export function ServicesPage() {
               clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
             }}
           >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>
-              Prêt à Transformer Votre Espace ?
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>Prêt à Transformer Votre Espace ?</h2>
             <p className="text-lg mb-8 leading-relaxed max-w-2xl mx-auto" style={{ color: '#5A5A5A' }}>
               Découvrez comment notre expertise et notre passion peuvent donner vie à vos projets les plus ambitieux.
             </p>
