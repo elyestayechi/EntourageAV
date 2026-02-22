@@ -16,6 +16,7 @@ class Testimonial(Base):
     project = Column(String(255), nullable=True)  # "Rénovation Complète"
     order_index = Column(Integer, default=0, index=True)  # Display order
     is_active = Column(Boolean, default=True, index=True)  # Show/hide
+    is_featured = Column(Boolean, default=False)  # ✅ New field for featured testimonials
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     

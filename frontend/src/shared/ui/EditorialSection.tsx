@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { FilmGrainTexture } from './FilmGrainTexture';
 
 interface EditorialItem {
   id: number;
@@ -46,8 +45,7 @@ export function EditorialSection() {
       className="bg-[#1A1A1A] relative py-16 md:py-24"
       data-section="editorial"
     >
-      {/* Consistent film grain texture */}
-      <FilmGrainTexture id="editorialGrain" opacity={0.04} withVignette={true} vignetteIntensity={0.12} />
+      
 
       {/* Editorial Container */}
       <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px]">
@@ -120,8 +118,7 @@ export function EditorialSection() {
                       }}
                     />
 
-                    {/* Film grain for realism */}
-                    <FilmGrainTexture className="absolute inset-0 opacity-[0.025] pointer-events-none mix-blend-multiply" />
+                    
                   </div>
                 </div>
               </div>

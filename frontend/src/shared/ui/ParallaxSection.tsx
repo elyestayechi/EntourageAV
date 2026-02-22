@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { gsap, ScrollTrigger } from '../lib/gsap-init';
+import { gsap } from '../lib/gsap-init';
 import { PremiumTextReveal } from './PremiumTextReveal';
-import { FilmGrainTexture } from './FilmGrainTexture';
+
 
 interface ParallaxItem {
   title: string;
@@ -44,7 +44,7 @@ const items: ParallaxItem[] = [
 
 export function ParallaxSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const clipPathRef = useRef<HTMLDivElement>(null);
+  
 
   // Define different organic shape clip-paths
   const shapeStyles: Record<string, string> = {
@@ -176,7 +176,7 @@ export function ParallaxSection() {
       data-section="parallax"
     >
       {/* Consistent film grain texture */}
-      <FilmGrainTexture id="parallaxGrain" opacity={0.03} withVignette={true} vignetteIntensity={0.15} />
+      
 
       <div className="container mx-auto px-8 sm:px-6 md:px-12 lg:px-16 max-w-[1600px] relative z-10">
         {items.map((item, index) => (

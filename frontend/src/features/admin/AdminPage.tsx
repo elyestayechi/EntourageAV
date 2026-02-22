@@ -3,6 +3,7 @@ import { LoginForm } from './LoginForm';
 import { AdminPanel } from './AdminPanel';
 import { checkAuth, logout } from '../../services/authAPI';
 
+
 export function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 

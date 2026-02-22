@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { gsap, ScrollTrigger } from '../lib/gsap-init';
+import { gsap } from '../lib/gsap-init';
 
 interface EnhancedDentTransitionProps {
   fromColor: string;

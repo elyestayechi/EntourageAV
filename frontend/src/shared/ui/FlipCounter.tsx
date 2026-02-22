@@ -15,11 +15,10 @@ export function FlipCounter({ value, className = '' }: FlipCounterProps) {
     if (!numbersRef.current || currentValue === value) return;
 
     // Slot machine spinning animation
-    const startValue = currentValue;
+   
     const endValue = value;
-    const spins = 2; // Number of full spins
-    const numbersToShow = 10; // 0-9
-    const totalNumbers = spins * numbersToShow + endValue;
+   
+    
 
     // Create timeline
     const tl = gsap.timeline({

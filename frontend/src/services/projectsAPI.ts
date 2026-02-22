@@ -21,6 +21,7 @@ export interface Project {
   duration?: string;
   surface?: string;
   image?: string;
+  is_featured?: boolean;  // ✅ Add this
   images: ProjectImage[];
   created_at: string;
   updated_at: string;
@@ -36,6 +37,7 @@ export interface ProjectCreate {
   duration?: string;
   surface?: string;
   image?: string;
+  is_featured?: boolean;  // ✅ Add this
 }
 
 export interface ProjectImageCreate {
@@ -49,6 +51,12 @@ export interface ProjectImageCreate {
 export const getAllProjects = async (category?: string): Promise<Project[]> => {
   const params = category ? { category } : {};
   const response = await api.get<Project[]>('/projects/', { params });
+  return response.data;
+};
+
+// ✅ NEW: Get featured projects (for homepage)
+export const getFeaturedProjects = async (limit: number = 3): Promise<Project[]> => {
+  const response = await api.get<Project[]>(`/projects/featured?limit=${limit}`);
   return response.data;
 };
 
@@ -82,7 +90,6 @@ export const deleteProject = async (id: number): Promise<void> => {
 };
 
 // Add image pair to project (admin only)
-// NOTE: no trailing slash — backend has redirect_slashes=False
 export const addProjectImage = async (projectId: number, data: ProjectImageCreate): Promise<ProjectImage> => {
   const response = await api.post<ProjectImage>(`/projects/${projectId}/images`, data);
   return response.data;

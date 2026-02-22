@@ -9,6 +9,7 @@ export interface Testimonial {
   project?: string;
   order_index: number;
   is_active: boolean;
+  is_featured?: boolean;  // ✅ Add this
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +22,7 @@ export interface TestimonialCreate {
   project?: string;
   order_index?: number;
   is_active?: boolean;
+  is_featured?: boolean;  // ✅ Add this
 }
 
 // Get all testimonials (admin only)
@@ -32,6 +34,12 @@ export const getAllTestimonials = async (): Promise<Testimonial[]> => {
 // Get active testimonials only (public)
 export const getActiveTestimonials = async (): Promise<Testimonial[]> => {
   const response = await api.get<Testimonial[]>('/testimonials/active');
+  return response.data;
+};
+
+// ✅ NEW: Get featured testimonials (for homepage)
+export const getFeaturedTestimonials = async (limit: number = 3): Promise<Testimonial[]> => {
+  const response = await api.get<Testimonial[]>(`/testimonials/featured?limit=${limit}`);
   return response.data;
 };
 

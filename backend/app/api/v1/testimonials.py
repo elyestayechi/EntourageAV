@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.api.deps import get_db, require_admin
 from app.crud import testimonial as crud_testimonial
@@ -38,6 +38,26 @@ def get_active_testimonials(db: Session = Depends(get_db)):
         List of active testimonials ordered by order_index
     """
     testimonials = crud_testimonial.get_active(db)
+    return testimonials
+
+
+@router.get("/featured", response_model=List[TestimonialResponse])
+def get_featured_testimonials(
+    db: Session = Depends(get_db),
+    limit: int = Query(3, ge=1, le=10, description="Number of featured testimonials to return")
+):
+    """
+    Get featured testimonials (limited to 3 by default).
+    Public endpoint - no authentication required.
+    
+    Args:
+        db: Database session
+        limit: Maximum number of testimonials to return (default 3)
+        
+    Returns:
+        List of featured testimonials (active and featured)
+    """
+    testimonials = crud_testimonial.get_featured(db, limit=limit)
     return testimonials
 
 

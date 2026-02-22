@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { gsap } from '../../shared/lib/gsap-init';
 import { ArrowRight } from 'lucide-react';
-import { getAllProjects } from '../../services/projectsAPI';
+import { getFeaturedProjects, getAllProjects } from '../../services/projectsAPI';
 import { BeforeAfterSlider } from './BeforeAfterSlider';
 
 // Fallback projects shown when API returns nothing
@@ -84,16 +84,35 @@ export function RecentProjects() {
   const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    getAllProjects()
+    // First try to get featured projects
+    getFeaturedProjects(3)
       .then((data) => {
         if (data && data.length > 0) {
-          // Take the 3 most recent projects (API returns them ordered)
-          setProjects(data.slice(0, 3));
+          setProjects(data);
+        } else {
+          // If no featured projects, fall back to most recent ones
+          return getAllProjects();
+        }
+      })
+      .then((allData) => {
+        if (allData && allData.length > 0) {
+          setProjects(allData.slice(0, 3));
         } else {
           setProjects(FALLBACK_PROJECTS as any);
         }
       })
-      .catch(() => setProjects(FALLBACK_PROJECTS as any));
+      .catch(() => {
+        // On error, try to get any projects as fallback
+        getAllProjects()
+          .then((data) => {
+            if (data && data.length > 0) {
+              setProjects(data.slice(0, 3));
+            } else {
+              setProjects(FALLBACK_PROJECTS as any);
+            }
+          })
+          .catch(() => setProjects(FALLBACK_PROJECTS as any));
+      });
   }, []);
 
   useEffect(() => {

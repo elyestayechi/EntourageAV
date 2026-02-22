@@ -25,11 +25,11 @@ import {
 } from '../../services/socialMedia';
 import { uploadFile } from '../../services/uploadAPI';
 
-// ─── Static fallback testimonials ─────────────────────────────────────────────
-const STATIC_TESTIMONIALS = [
-  { id: -1, name: 'Marie & Jean Dubois', location: 'Paris 16ème', text: "Entourage AV a transformé notre appartement en chef-d'œuvre moderne. Leur attention aux détails et leur professionnalisme ont dépassé toutes nos attentes.", rating: 5, project: 'Rénovation Complète', order_index: 0, is_active: true, isStatic: true },
-  { id: -2, name: 'Sophie Laurent', location: 'Lyon', text: "Une équipe exceptionnelle qui a donné vie à notre vision avec précision et créativité. Chaque aspect reflète leur engagement envers l'excellence.", rating: 5, project: 'Rénovation Premium', order_index: 1, is_active: true, isStatic: true },
-  { id: -3, name: 'Pierre Martin', location: 'Marseille', text: "Du concept à la réalisation, Entourage AV a livré au-delà de nos rêves. Leur approche moderne a rendu tout le processus transparent et sans stress.", rating: 5, project: 'Transformation Intérieure', order_index: 2, is_active: true, isStatic: true },
+// ─── Static fallback testimonials with show/hide option ─────────────────────────
+const STATIC_TESTIMONIALS: StaticTestimonial[] = [
+  { id: -1, name: 'Marie & Jean Dubois', location: 'Paris 16ème', text: "Entourage AV a transformé notre appartement en chef-d'œuvre moderne. Leur attention aux détails et leur professionnalisme ont dépassé toutes nos attentes.", rating: 5, project: 'Rénovation Complète', order_index: 0, is_active: true, isStatic: true, show_on_site: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: -2, name: 'Sophie Laurent', location: 'Lyon', text: "Une équipe exceptionnelle qui a donné vie à notre vision avec précision et créativité. Chaque aspect reflète leur engagement envers l'excellence.", rating: 5, project: 'Rénovation Premium', order_index: 1, is_active: true, isStatic: true, show_on_site: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: -3, name: 'Pierre Martin', location: 'Marseille', text: "Du concept à la réalisation, Entourage AV a livré au-delà de nos rêves. Leur approche moderne a rendu tout le processus transparent et sans stress.", rating: 5, project: 'Transformation Intérieure', order_index: 2, is_active: true, isStatic: true, show_on_site: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
 ];
 
 // ─── i18n ──────────────────────────────────────────────────────────────────────
@@ -56,7 +56,15 @@ const T = {
     testimonialText: 'Testimonial Text', customerReview: 'Customer review...',
     rating: 'Rating (1-5)', orderIndex: 'Order Index', project: 'Project (optional)',
     active: 'Active (visible on site)', inactive: 'Inactive (hidden from site)',
+    featured: 'Featured on Homepage', notFeatured: 'Not Featured',
+    featuredDesc: 'Featured items appear on the homepage (up to 3)',
     staticBadge: 'Static', staticNote: 'This is a hardcoded static testimonial. Add API testimonials above to replace them.',
+    staticSettings: 'Static Testimonials Settings',
+    showStaticOnSite: 'Show on website',
+    hideStaticFromSite: 'Hide from website',
+    staticVisible: 'Visible',
+    staticHidden: 'Hidden',
+    clickToToggle: 'Click eye to toggle visibility',
     markAsRead: 'Mark as read', noItems: (type: string) => `No ${type} yet. Click "Add New" to get started.`,
     noContacts: 'No contact messages yet.', email: 'Email', phone: 'Phone',
     updated: (item: string) => `${item} updated successfully`,
@@ -95,7 +103,15 @@ const T = {
     testimonialText: 'Texte du témoignage', customerReview: 'Avis du client...',
     rating: 'Note (1-5)', orderIndex: "Ordre d'affichage", project: 'Projet (optionnel)',
     active: 'Actif (visible sur le site)', inactive: 'Inactif (masqué du site)',
+    featured: 'À la une sur la page d\'accueil', notFeatured: 'Non mis en avant',
+    featuredDesc: 'Les éléments à la une apparaissent sur la page d\'accueil (jusqu\'à 3)',
     staticBadge: 'Statique', staticNote: "Ce témoignage est codé en dur. Ajoutez des témoignages via l'API pour les remplacer.",
+    staticSettings: 'Paramètres des témoignages statiques',
+    showStaticOnSite: 'Afficher sur le site',
+    hideStaticFromSite: 'Masquer du site',
+    staticVisible: 'Visible',
+    staticHidden: 'Masqué',
+    clickToToggle: 'Cliquez sur l\'œil pour basculer la visibilité',
     markAsRead: 'Marquer comme lu', noItems: (type: string) => `Aucun(e) ${type} pour l'instant. Cliquez sur "Ajouter".`,
     noContacts: "Aucun message de contact pour l'instant.", email: 'Email', phone: 'Téléphone',
     updated: (item: string) => `${item} mis à jour`,
@@ -134,6 +150,7 @@ interface Project {
   id: number; title: string; description: string; category: string;
   image?: string; align?: 'left' | 'right'; slug?: string; number?: string;
   location?: string; duration?: string; surface?: string;
+  is_featured?: boolean;
   images?: any[];
 }
 
@@ -147,6 +164,21 @@ interface ContactSubmission {
   id: number; name: string; email: string; phone: string; message: string;
   created_at: string; is_read: boolean; services?: string[]; location?: string;
   project_type?: string; surface?: string;
+}
+
+interface StaticTestimonial {
+  id: number;
+  name: string;
+  location: string;
+  text: string;
+  rating: number;
+  project: string;
+  order_index: number;
+  is_active: boolean;
+  isStatic: boolean;
+  show_on_site: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 type ViewType = 'dashboard' | 'services' | 'projects' | 'blog' | 'contacts' | 'testimonials' | 'social-media';
@@ -224,7 +256,8 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
-  const [testimonials, setTestimonials] = useState<(Testimonial & { isStatic?: boolean })[]>([]);
+  const [testimonials, setTestimonials] = useState<(Testimonial | StaticTestimonial)[]>([]);
+  const [staticTestimonials, setStaticTestimonials] = useState<StaticTestimonial[]>(STATIC_TESTIMONIALS);
   const [socialMedia, setSocialMedia] = useState<SocialMediaLink[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<any>({});
@@ -250,7 +283,14 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       setProjects(projectsData);
       setBlogPosts(blogsData);
       setContacts(contactsData as ContactSubmission[]);
-      setTestimonials(testimonialsData.length > 0 ? testimonialsData : (STATIC_TESTIMONIALS as any));
+      
+      // Only use static testimonials if no API testimonials exist
+      if (testimonialsData.length > 0) {
+        setTestimonials(testimonialsData);
+      } else {
+        setTestimonials(staticTestimonials);
+      }
+      
       setSocialMedia(socialData as SocialMediaLink[]);
     } catch (err) {
       setError(t.failedToLoad);
@@ -263,6 +303,27 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     setSuccess(msg);
     setTimeout(() => setSuccess(null), 3000);
   };
+
+  // Toggle static testimonial visibility
+const toggleStaticTestimonial = (id: number) => {
+  setStaticTestimonials(prev => 
+    prev.map(t => 
+      t.id === id ? { ...t, show_on_site: !t.show_on_site } : t
+    )
+  );
+  
+  // Also update the testimonials state to reflect the change, but only for static ones
+  setTestimonials(prev => 
+    prev.map(t => {
+      if (t.id === id && 'isStatic' in t) {
+        return { ...t, show_on_site: !t.show_on_site };
+      }
+      return t;
+    })
+  );
+  
+  showSuccess('Static testimonial visibility updated');
+};
 
   // ── Image pair helpers ──
   const addImagePair = () => {
@@ -298,12 +359,37 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     if (currentView === 'services') {
       setFormData({ id: tempId, title: '', description: '', image: '', number: '', slug: '', long_description: '', timeline: '', benefits: [] });
     } else if (currentView === 'projects') {
-      setFormData({ id: tempId, title: '', description: '', category: '', image: '', align: 'left', slug: '', number: '', location: '', duration: '', surface: '', imagePairs: [], deletedImagePairIds: [] });
+      setFormData({ 
+        id: tempId, 
+        title: '', 
+        description: '', 
+        category: '', 
+        image: '', 
+        align: 'left', 
+        slug: '', 
+        number: '', 
+        location: '', 
+        duration: '', 
+        surface: '', 
+        imagePairs: [], 
+        deletedImagePairIds: [],
+        is_featured: false
+      });
     } else if (currentView === 'blog') {
       const today = new Date().toISOString().split('T')[0];
       setFormData({ id: tempId, title: '', category: '', date: today, excerpt: '', image: '', slug: '', content: '', author: 'Entourage AV', read_time: '5 min' });
     } else if (currentView === 'testimonials') {
-      setFormData({ id: tempId, name: '', location: '', text: '', rating: 5, project: '', order_index: 0, is_active: true });
+      setFormData({ 
+        id: tempId, 
+        name: '', 
+        location: '', 
+        text: '', 
+        rating: 5, 
+        project: '', 
+        order_index: 0, 
+        is_active: true,
+        is_featured: false
+      });
     } else if (currentView === 'social-media') {
       setFormData({ id: tempId, platform: '', url: '', order_index: socialMedia.length, is_active: true });
     }
@@ -409,7 +495,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
         } else {
           const created = await createTestimonial(formData);
           setTestimonials((prev) => {
-            const withoutStatic = prev.filter((item) => !item.isStatic);
+            const withoutStatic = prev.filter((item) => !('isStatic' in item));
             return [...withoutStatic, created];
           });
           showSuccess(t.created('Témoignage'));
@@ -449,7 +535,13 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       else if (type === 'testimonials') {
         await deleteTestimonial(id);
         const remaining = testimonials.filter((item) => item.id !== id);
-        setTestimonials(remaining.filter((item) => !item.isStatic).length === 0 ? (STATIC_TESTIMONIALS as any) : remaining);
+        // If no API testimonials left, show static ones that are set to visible
+        if (remaining.filter((item) => !('isStatic' in item)).length === 0) {
+          const visibleStatic = staticTestimonials.filter(s => s.show_on_site);
+          setTestimonials(visibleStatic.length > 0 ? visibleStatic : staticTestimonials);
+        } else {
+          setTestimonials(remaining);
+        }
         showSuccess(t.deleted('Témoignage'));
       }
       else if (type === 'social-media') {
@@ -498,7 +590,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
           { icon: FileText, count: projects.length, label: t.projects, trend: t.trend.projects },
           { icon: Users, count: blogPosts.length, label: t.blog, trend: t.trend.blog },
           { icon: MessageSquare, count: contacts.length, label: t.messages, trend: t.trend.messages },
-          { icon: Star, count: testimonials.filter((x) => !x.isStatic).length, label: t.testimonials, trend: t.projectRenovation(testimonials.filter((x) => x.is_active && !x.isStatic).length) },
+          { icon: Star, count: testimonials.filter((x) => !('isStatic' in x)).length, label: t.testimonials, trend: t.projectRenovation(testimonials.filter((x) => 'is_active' in x && x.is_active && !('isStatic' in x)).length) },
           { icon: Share2, count: socialMedia.filter((x) => x.is_active).length, label: t.socialMedia, trend: `${socialMedia.length} total` },
         ].map(({ icon: Icon, count, label, trend }, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 md:p-8 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
@@ -635,11 +727,34 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                 <label className={labelClass}>{t.project}</label>
                 <input type="text" placeholder="Rénovation complète - Paris 15ème" value={formData.project || ''} onChange={(e) => setFormData({ ...formData, project: e.target.value })} className={inputClass} />
               </div>
+              
+              {/* Active toggle */}
               <div>
-                <button type="button" onClick={() => setFormData({ ...formData, is_active: !formData.is_active })} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${formData.is_active ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${formData.is_active ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/10 text-white/50 border border-white/10'}`}
+                >
                   {formData.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                   {formData.is_active ? t.active : t.inactive}
                 </button>
+              </div>
+
+              {/* Featured toggle */}
+              <div className="border-t border-white/10 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, is_featured: !formData.is_featured })}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    formData.is_featured 
+                      ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+                      : 'bg-white/10 text-white/50 border border-white/10'
+                  }`}
+                >
+                  {formData.is_featured ? <Star className="w-4 h-4 fill-current" /> : <Star className="w-4 h-4" />}
+                  {formData.is_featured ? t.featured : t.notFeatured}
+                </button>
+                <p className="text-white/30 text-xs mt-1">{t.featuredDesc}</p>
               </div>
             </>
           )}
@@ -713,6 +828,23 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                       <label className={labelClass}>{t.surface}</label>
                       <input type="text" placeholder="85m²" value={formData.surface || ''} onChange={(e) => setFormData({ ...formData, surface: e.target.value })} className={inputClass} />
                     </div>
+                  </div>
+
+                  {/* Featured toggle */}
+                  <div className="border-t border-white/10 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, is_featured: !formData.is_featured })}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        formData.is_featured 
+                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+                          : 'bg-white/10 text-white/50 border border-white/10'
+                      }`}
+                    >
+                      {formData.is_featured ? <Star className="w-4 h-4 fill-current" /> : <Star className="w-4 h-4" />}
+                      {formData.is_featured ? t.featured : t.notFeatured}
+                    </button>
+                    <p className="text-white/30 text-xs mt-1">{t.featuredDesc}</p>
                   </div>
 
                   {/* Before / After image pairs */}
@@ -828,7 +960,15 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                   <img src={item.image} alt={item.title} className="w-full md:w-48 h-48 object-cover rounded-xl flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 )}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3 tracking-tight">{item.title}</h3>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{item.title}</h3>
+                    {item.is_featured && (
+                      <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-current" />
+                        Featured
+                      </span>
+                    )}
+                  </div>
                   {item.category && (
                     <span className="inline-block px-3 md:px-4 py-1 md:py-1.5 bg-[#F6F2E8]/20 text-[#F6F2E8] rounded-full text-xs font-bold uppercase tracking-wider mb-2 md:mb-3">
                       {item.category}
@@ -861,9 +1001,9 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
 
   // ─── Testimonials ──────────────────────────────────────────────────────────────
   const renderTestimonials = () => {
-    const apiTestimonials = testimonials.filter((x) => !x.isStatic);
-    const staticTestimonials = testimonials.filter((x) => x.isStatic);
+    const apiTestimonials = testimonials.filter((x): x is Testimonial => !('isStatic' in x));
     const hasApiTestimonials = apiTestimonials.length > 0;
+    const visibleStaticTestimonials = staticTestimonials.filter((x) => x.show_on_site);
 
     return (
       <div className="space-y-6 md:space-y-8">
@@ -877,9 +1017,9 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
 
         {renderForm()}
 
-        {!hasApiTestimonials && (
+        {!hasApiTestimonials && visibleStaticTestimonials.length === 0 && (
           <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-300 text-sm">
-            ℹ️ {t.staticNote}
+            ℹ️ No testimonials are visible. Add API testimonials or enable static ones below.
           </div>
         )}
 
@@ -894,6 +1034,12 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'}`}>
                         {item.is_active ? 'Active' : 'Inactive'}
                       </span>
+                      {item.is_featured && (
+                        <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          Featured
+                        </span>
+                      )}
                     </div>
                     <p className="text-white/50 text-sm mb-2">{item.location}</p>
                     <div className="flex items-center gap-1 mb-3">
@@ -919,35 +1065,65 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
           </div>
         )}
 
-        {staticTestimonials.length > 0 && (
-          <div>
-            <h3 className="text-lg font-medium text-white/40 uppercase tracking-wider mb-4">— {t.staticBadge} —</h3>
-            <div className="grid grid-cols-1 gap-4 md:gap-6">
-              {staticTestimonials.map((item) => (
-                <div key={item.id} className="bg-white/3 backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 opacity-60">
-                  <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-white/80 tracking-tight">{item.name}</h3>
-                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-500/20 text-blue-400">
-                          {lang === 'fr' ? 'Statique' : 'Static'}
+        {/* Static Testimonials Section with Toggle */}
+        <div>
+          <h3 className="text-lg font-medium text-white/40 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span>— {t.staticBadge} —</span>
+            <span className="text-xs text-white/30">({t.clickToToggle})</span>
+          </h3>
+          <div className="grid grid-cols-1 gap-4 md:gap-6">
+            {staticTestimonials.map((item) => (
+              <div key={item.id} className="bg-white/3 backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8">
+                <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-white/80 tracking-tight">{item.name}</h3>
+                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-500/20 text-blue-400">
+                        {lang === 'fr' ? 'Statique' : 'Static'}
+                      </span>
+                      {item.show_on_site ? (
+                        <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                          {t.staticVisible}
                         </span>
-                      </div>
-                      <p className="text-white/50 text-sm mb-2">{item.location}</p>
-                      <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 ${i < item.rating ? 'text-yellow-400/60 fill-yellow-400/60' : 'text-white/10'}`} />)}
-                      </div>
-                      <p className="text-white/50 leading-relaxed text-sm line-clamp-2 italic">"{item.text}"</p>
+                      ) : (
+                        <span className="px-2 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs">
+                          {t.staticHidden}
+                        </span>
+                      )}
                     </div>
+                    <p className="text-white/50 text-sm mb-2">{item.location}</p>
+                    <div className="flex items-center gap-1 mb-3">
+                      {[...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 ${i < item.rating ? 'text-yellow-400/60 fill-yellow-400/60' : 'text-white/10'}`} />)}
+                    </div>
+                    <p className="text-white/50 leading-relaxed text-sm line-clamp-2 italic">"{item.text}"</p>
+                    {item.project && <p className="text-white/30 text-xs mt-2">Project: {item.project}</p>}
+                  </div>
+                  <div className="flex md:flex-col gap-2">
+                    <button 
+                      onClick={() => toggleStaticTestimonial(item.id)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        item.show_on_site 
+                          ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' 
+                          : 'bg-white/10 hover:bg-white/20 text-white/50'
+                      }`}
+                      title={item.show_on_site ? t.hideStaticFromSite : t.showStaticOnSite}
+                    >
+                      {item.show_on_site ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    </button>
                     <div className="text-white/30 text-xs italic self-center">
                       {lang === 'fr' ? 'Lecture seule' : 'Read-only'}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+          <p className="text-white/30 text-xs mt-4">
+            {lang === 'fr' 
+              ? 'Les témoignages statiques apparaissent uniquement quand aucun témoignage API nest disponible. Utilisez les boutons œil pour les masquer/afficher.'
+              : 'Static testimonials only appear when no API testimonials are available. Use eye buttons to hide/show them.'}
+          </p>
+        </div>
       </div>
     );
   };

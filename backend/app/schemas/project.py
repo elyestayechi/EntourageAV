@@ -37,6 +37,7 @@ class ProjectBase(BaseModel):
     duration: Optional[str] = Field(None, max_length=100)
     surface: Optional[str] = Field(None, max_length=100)
     image: Optional[str] = Field(None, max_length=500)  # ✅ Cover image URL
+    is_featured: Optional[bool] = Field(default=False)  # ✅ New field
 
 
 class ProjectCreate(ProjectBase):
@@ -54,7 +55,8 @@ class ProjectUpdate(BaseModel):
     description: Optional[str] = None
     duration: Optional[str] = Field(None, max_length=100)
     surface: Optional[str] = Field(None, max_length=100)
-    image: Optional[str] = Field(None, max_length=500)  # ✅ Cover image URL
+    image: Optional[str] = Field(None, max_length=500)
+    is_featured: Optional[bool] = None  # ✅ New field
 
 
 class ProjectResponse(ProjectBase):

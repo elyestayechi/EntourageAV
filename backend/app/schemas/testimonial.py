@@ -12,6 +12,7 @@ class TestimonialBase(BaseModel):
     project: Optional[str] = Field(None, max_length=255)
     order_index: int = Field(default=0)
     is_active: bool = Field(default=True)
+    is_featured: Optional[bool] = Field(default=False)  # ✅ New field
 
 
 class TestimonialCreate(TestimonialBase):
@@ -28,6 +29,7 @@ class TestimonialUpdate(BaseModel):
     project: Optional[str] = Field(None, max_length=255)
     order_index: Optional[int] = None
     is_active: Optional[bool] = None
+    is_featured: Optional[bool] = None  # ✅ New field
 
 
 class TestimonialResponse(TestimonialBase):

@@ -37,6 +37,26 @@ def get_projects(
     return projects
 
 
+@router.get("/featured", response_model=List[ProjectResponse])
+def get_featured_projects(
+    db: Session = Depends(get_db),
+    limit: int = Query(3, ge=1, le=10, description="Number of featured projects to return")
+):
+    """
+    Get featured projects (limited to 3 by default).
+    Public endpoint - no authentication required.
+    
+    Args:
+        db: Database session
+        limit: Maximum number of projects to return (default 3)
+        
+    Returns:
+        List of featured projects
+    """
+    projects = crud_project.get_featured(db, limit=limit)
+    return projects
+
+
 @router.get("/{project_id}", response_model=ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):
     """

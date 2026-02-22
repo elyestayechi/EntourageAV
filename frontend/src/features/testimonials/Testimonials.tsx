@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { gsap } from '../../shared/lib/gsap-init';
 import { Star } from 'lucide-react';
-import { getActiveTestimonials, Testimonial } from '../../services/testimonialsAPI';
+import { getFeaturedTestimonials, getActiveTestimonials, Testimonial } from '../../services/testimonialsAPI';
 
 // Static fallback testimonials shown when no API data is available
 const STATIC_TESTIMONIALS = [
@@ -44,18 +44,37 @@ export function Testimonials() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getActiveTestimonials()
+    // First try to get featured testimonials
+    getFeaturedTestimonials(3)
       .then((data) => {
         if (data && data.length > 0) {
           setTestimonials(data);
         } else {
-          // Use static fallbacks when no API testimonials exist
+          // If no featured testimonials, fall back to active ones
+          return getActiveTestimonials();
+        }
+      })
+      .then((allData) => {
+        if (allData && allData.length > 0) {
+          setTestimonials(allData.slice(0, 3));
+        } else {
           setTestimonials(STATIC_TESTIMONIALS as any);
         }
       })
       .catch(() => {
-        // On error, use static fallbacks
-        setTestimonials(STATIC_TESTIMONIALS as any);
+        // On error, try to get active testimonials as fallback
+        getActiveTestimonials()
+          .then((data) => {
+            if (data && data.length > 0) {
+              setTestimonials(data.slice(0, 3));
+            } else {
+              setTestimonials(STATIC_TESTIMONIALS as any);
+            }
+          })
+          .catch(() => {
+            // On error, use static fallbacks
+            setTestimonials(STATIC_TESTIMONIALS as any);
+          });
       })
       .finally(() => setLoaded(true));
   }, []);

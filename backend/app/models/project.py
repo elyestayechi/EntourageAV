@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean  # Add Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -19,6 +19,7 @@ class Project(Base):
     duration = Column(String(100), nullable=True)  # "6 semaines"
     surface = Column(String(100), nullable=True)  # "85m²"
     image = Column(String(500), nullable=True)      # ✅ Cover image URL
+    is_featured = Column(Boolean, default=False)    # ✅ New field for featured projects
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
