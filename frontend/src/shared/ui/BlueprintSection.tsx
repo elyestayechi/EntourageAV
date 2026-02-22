@@ -3,7 +3,6 @@ import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import { FilmGrainTexture } from './FilmGrainTexture';
 import { FlipCounter } from './FlipCounter';
 
-// Process steps data
 const processSteps = [
   {
     number: '01',
@@ -17,7 +16,7 @@ const processSteps = [
     number: '02',
     title: 'Conception',
     subtitle: 'Plans et modélisation',
-    description: 'Élaboration de plans détaillés avec modélisation 3D, choix des matériaux et calendrier précis d\'exécution.',
+    description: "Élaboration de plans détaillés avec modélisation 3D, choix des matériaux et calendrier précis d'exécution.",
     details: 'Plans techniques • Devis détaillé • Planning prévisionnel',
     image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop',
   },
@@ -55,66 +54,44 @@ const processSteps = [
   },
 ];
 
-// Single Step Item Component
-function StepItem({ 
-  step, 
+function StepItem({
+  step,
   index,
-  isActive 
-}: { 
-  step: { number: string; title: string; subtitle: string; description: string; details: string; image: string };
+  isActive,
+}: {
+  step: typeof processSteps[number];
   index: number;
   isActive: boolean;
 }) {
-  const titleRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!titleRef.current || !subtitleRef.current || !descriptionRef.current || 
-        !detailsRef.current || !numberRef.current || !isActive) return;
+    if (
+      !titleRef.current || !subtitleRef.current || !descriptionRef.current ||
+      !detailsRef.current || !numberRef.current || !isActive
+    ) return;
 
-    // Reset position - horizontal slide from left
-    gsap.set([numberRef.current, titleRef.current, subtitleRef.current], {
-      x: -50,
-      opacity: 0
-    });
+    gsap.set([numberRef.current, titleRef.current, subtitleRef.current], { x: -50, opacity: 0 });
+    gsap.set([descriptionRef.current, detailsRef.current], { x: -30, opacity: 0 });
 
-    gsap.set([descriptionRef.current, detailsRef.current], {
-      x: -30,
-      opacity: 0
-    });
-
-    // Animate in horizontally from left to right (matching dent direction)
     gsap.to([numberRef.current, titleRef.current, subtitleRef.current], {
-      x: 0,
-      opacity: 1,
-      duration: 0.7,
-      ease: 'power3.out',
-      stagger: 0.05
+      x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.05,
     });
-
     gsap.to([descriptionRef.current, detailsRef.current], {
-      x: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power3.out',
-      delay: 0.1,
-      stagger: 0.05
+      x: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1, stagger: 0.05,
     });
   }, [isActive, index]);
 
   return (
     <>
-      {/* Left Column - Number and Step */}
       <div>
         <div className="mb-6">
           <div ref={numberRef}>
-            <div 
-              className="text-7xl md:text-8xl font-bold opacity-10"
-              style={{ color: 'var(--color-navy-sky)' }}
-            >
+            <div className="text-7xl md:text-8xl font-bold opacity-10" style={{ color: 'var(--color-navy-sky)' }}>
               {step.number}
             </div>
           </div>
@@ -122,41 +99,25 @@ function StepItem({
 
         <div className="flex items-center gap-3 mb-4">
           <div className="flex" style={{ perspective: '800px' }}>
-            <FlipCounter
-              value={parseInt(step.number)}
-            />
+            <FlipCounter value={parseInt(step.number)} />
           </div>
-          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }}></div>
+          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }} />
         </div>
 
-        <h3 
-          ref={titleRef}
-          className="text-3xl md:text-4xl font-bold mb-2"
-          style={{ color: 'var(--color-navy-sky)' }}
-        >
+        <h3 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-navy-sky)' }}>
           {step.title}
         </h3>
-
-        <h4 
-          ref={subtitleRef}
-          className="text-xl md:text-2xl font-light"
-          style={{ color: 'var(--color-base-slate)' }}
-        >
+        <h4 ref={subtitleRef} className="text-xl md:text-2xl font-light" style={{ color: 'var(--color-base-slate)' }}>
           {step.subtitle}
         </h4>
       </div>
 
-      {/* Right Column - Description and Details */}
       <div>
         <p ref={descriptionRef} className="text-base md:text-lg mb-6 leading-relaxed" style={{ color: 'var(--color-base-slate)' }}>
           {step.description}
         </p>
-
         <div ref={detailsRef} className="pt-6 border-t" style={{ borderColor: 'rgba(42, 37, 34, 0.1)' }}>
-          <div 
-            className="text-xs uppercase tracking-wider mb-3"
-            style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}
-          >
+          <div className="text-xs uppercase tracking-wider mb-3" style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}>
             Inclus
           </div>
           <p className="text-sm" style={{ color: 'var(--color-base-slate)', opacity: 0.8 }}>
@@ -172,41 +133,36 @@ export function BlueprintSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stickyContainerRef = useRef<HTMLDivElement>(null);
   const clipPathRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  // Horizontal dent controls
-  const DENT_HEIGHT = 3; // Height of the dent (percentage from bottom edge)
-  const DENT_SMALL_SIDE_WIDTH = 6; // Width of the small inner edge (in rem)
-  const DENT_LARGE_SIDE_WIDTH = 8; // Width of the large outer edge (in rem)
+  const DENT_HEIGHT = 3;
+  const DENT_SMALL_SIDE_WIDTH = 6;
+  const DENT_LARGE_SIDE_WIDTH = 8;
 
   useEffect(() => {
+    // Guard against React Strict Mode double-invoke and hot reload remounts
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     if (!sectionRef.current || !stickyContainerRef.current || !clipPathRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Calculate dent positions - moves left to right horizontally
-      const dentPositions = {
-        start: '20%',
-        end: '75%'
-      };
+      gsap.set(clipPathRef.current, { '--dent-position': '20%' });
 
-      // Set initial horizontal dent position
-      gsap.set(clipPathRef.current, {
-        '--dent-position': dentPositions.start,
-      });
-
-      // Animate the dent moving left to right across the bottom
       gsap.to(clipPathRef.current, {
-        '--dent-position': dentPositions.end,
+        '--dent-position': '75%',
         ease: 'power1.inOut',
         scrollTrigger: {
           trigger: stickyContainerRef.current,
           start: 'top top',
           end: `+=${(processSteps.length - 1) * 100}%`,
           scrub: 1.5,
+          // Lower than ScrollVideo so it measures after ScrollVideo's spacer is settled
+          refreshPriority: -1,
         },
       });
 
-      // Create scroll triggers for each process step
       processSteps.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: stickyContainerRef.current,
@@ -214,20 +170,22 @@ export function BlueprintSection() {
           end: () => `top+=${(index + 1) * window.innerHeight} top`,
           onEnter: () => setCurrentStepIndex(index),
           onEnterBack: () => setCurrentStepIndex(index),
+          refreshPriority: -1,
         });
       });
 
-      // Pin the sticky container
       ScrollTrigger.create({
         trigger: stickyContainerRef.current,
         start: 'top top',
         end: `+=${(processSteps.length - 1) * 100}%`,
         pin: true,
         pinSpacing: true,
+        refreshPriority: -1,
       });
     }, sectionRef);
 
     return () => {
+      initializedRef.current = false;
       ctx.revert();
     };
   }, []);
@@ -238,27 +196,23 @@ export function BlueprintSection() {
       className="bg-[#FAFAF9] relative py-16 md:py-24 pb-32"
       data-section="blueprint"
     >
-      {/* Consistent film grain texture */}
       <FilmGrainTexture />
 
-      {/* Title Section */}
       <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] mb-24">
-        <div className="uppercase text-xs mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
-          style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}>
-          <div className="w-8 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.6 }}></div>
+        <div
+          className="uppercase text-xs mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
+          style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}
+        >
+          <div className="w-8 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.6 }} />
           PROCESSUS
         </div>
-        
-        
       </div>
 
-      {/* Sticky Image Section with Text Outside */}
       <div ref={stickyContainerRef} className="h-screen relative">
         <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] h-full">
           <div className="h-full flex items-center justify-center">
             <div className="w-full max-w-6xl">
-              {/* Horizontal image with dent moving left to right on bottom edge */}
-              <div 
+              <div
                 ref={clipPathRef}
                 className="relative w-full overflow-hidden shadow-2xl rounded-lg mb-12"
                 style={{
@@ -278,29 +232,22 @@ export function BlueprintSection() {
                     0.5rem 100%,
                     0 calc(100% - 0.5rem),
                     0 0.5rem
-                  )`
+                  )`,
                 } as React.CSSProperties}
               >
                 <img
                   src={processSteps[currentStepIndex].image}
                   alt={processSteps[currentStepIndex].title}
                   className="w-full h-full object-cover"
-                  style={{
-                    transition: 'opacity 0.6s ease-in-out',
-                  }}
+                  style={{ transition: 'opacity 0.6s ease-in-out' }}
                   key={currentStepIndex}
                 />
-                
-                {/* Gradient overlay for depth */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
-                
-                {/* Film grain */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
                 <FilmGrainTexture />
               </div>
 
-              {/* Text Content Below Image */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto">
-                <StepItem 
+                <StepItem
                   step={processSteps[currentStepIndex]}
                   index={currentStepIndex}
                   isActive={true}

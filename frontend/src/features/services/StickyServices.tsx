@@ -4,13 +4,12 @@ import { FlipCounter } from '../../shared/ui/FlipCounter';
 import { FilmGrainTexture } from '../../shared/ui/FilmGrainTexture';
 import { SlotMachineCounter } from '../../shared/ui/SlotMachineCounter';
 
-// Service pairs data with images
 const servicePairs = [
   {
     id: 1,
     services: [
-      { number: '01', title: 'Rénovations Intérieures', description: 'Transformations complètes d\'espaces résidentiels et commerciaux avec finitions de qualité.' },
-      { number: '02', title: 'Design d\'Intérieur', description: 'Conception et aménagement d\'espaces personnalisés alliant esthétique et fonctionnalité.' },
+      { number: '01', title: 'Rénovations Intérieures', description: "Transformations complètes d'espaces résidentiels et commerciaux avec finitions de qualité." },
+      { number: '02', title: "Design d'Intérieur", description: "Conception et aménagement d'espaces personnalisés alliant esthétique et fonctionnalité." },
     ],
     imageUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
   },
@@ -53,16 +52,14 @@ const servicePairs = [
   },
 ];
 
-// Single Service Item Component
-function ServiceItem({ 
-  service, 
+function ServiceItem({
+  service,
   index,
-  isActive 
-}: { 
+  isActive,
+}: {
   service: { number: string; title: string; description: string };
   index: number;
   isActive: boolean;
-  key?: React.Key;
 }) {
   const titleRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -70,41 +67,18 @@ function ServiceItem({
   useEffect(() => {
     if (!titleRef.current || !descriptionRef.current || !isActive) return;
 
-    // Reset position
-    gsap.set([titleRef.current], {
-      y: 30,
-      opacity: 0
-    });
+    gsap.set(titleRef.current, { y: 30, opacity: 0 });
+    gsap.set(descriptionRef.current, { y: 20, opacity: 0 });
 
-    gsap.set(descriptionRef.current, {
-      y: 20,
-      opacity: 0
-    });
-
-    // Animate in with luxury timing
-    gsap.to([titleRef.current], {
-      y: 0,
-      opacity: 1,
-      duration: 0.7,
-      ease: 'power3.out',
-      stagger: 0.05
-    });
-
-    gsap.to(descriptionRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power3.out',
-      delay: 0.1
-    });
+    gsap.to(titleRef.current, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' });
+    gsap.to(descriptionRef.current, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 });
   }, [isActive, index]);
 
   return (
     <div className="mb-10 last:mb-0">
       <div className="flex items-start gap-3 mb-3">
-        {/* Title Component */}
         <div className="leading-[1.15] flex-1">
-          <div 
+          <div
             ref={titleRef}
             className="text-2xl md:text-4xl lg:text-5xl font-bold mb-1"
             style={{ color: 'var(--color-navy-sky)' }}
@@ -113,8 +87,6 @@ function ServiceItem({
           </div>
         </div>
       </div>
-
-      {/* Description */}
       <div className="overflow-hidden">
         <div ref={descriptionRef} className="transition-all duration-700">
           <p className="text-base md:text-lg max-w-2xl" style={{ color: 'var(--color-base-slate)' }}>
@@ -128,49 +100,52 @@ function ServiceItem({
 
 export function StickyServices() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const servicesContainerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const clipPathRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
   const [currentPairIndex, setCurrentPairIndex] = useState(0);
 
-  // Trapezoid dent controls
-  const DENT_WIDTH = 3; // Width of the dent (percentage from left edge)
-  const DENT_SMALL_SIDE_HEIGHT = 6; // Height of the small inner edge (in rem)
-  const DENT_LARGE_SIDE_HEIGHT = 8; // Height of the large outer edge (in rem)
+  const DENT_WIDTH = 3;
+  const DENT_SMALL_SIDE_HEIGHT = 6;
+  const DENT_LARGE_SIDE_HEIGHT = 8;
 
   useEffect(() => {
-    if (!sectionRef.current || !servicesContainerRef.current || !imageContainerRef.current || !clipPathRef.current) return;
+    // Guard against Strict Mode double-invoke and hot reload remounts
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    if (!sectionRef.current || !stickyRef.current || !clipPathRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Calculate dent positions - fixed range to ensure dent stays within frame
-      const calculateDentPositions = () => {
-        return {
-          start: '20%',
-          end: '75%'
-        };
-      };
-
-      // Get calculated positions
-      const dentPositions = calculateDentPositions();
-
-      // Set initial position
-      gsap.set(clipPathRef.current, {
-        '--dent-position': dentPositions.start,
+      // Pin the inner container via GSAP — removes reliance on CSS sticky
+      // which conflicts with GSAP's spacer calculations
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom bottom',
+        pin: stickyRef.current,
+        pinSpacing: false,
+        anticipatePin: 1, // pre-calculates pin layout before you hit the boundary
+        refreshPriority: 0,
       });
 
-      // Animate the dent moving down the left side
+      // Dent animation
+      gsap.set(clipPathRef.current, { '--dent-position': '20%' });
       gsap.to(clipPathRef.current, {
-        '--dent-position': dentPositions.end,
+        '--dent-position': '75%',
         ease: 'power1.inOut',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
           end: 'bottom bottom',
           scrub: 1.5,
+          refreshPriority: 0,
         },
       });
 
-      // Create scroll triggers for each service pair
+      // Step triggers
       servicePairs.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: sectionRef.current,
@@ -178,240 +153,158 @@ export function StickyServices() {
           end: () => `top+=${(index + 1) * window.innerHeight} top`,
           onEnter: () => setCurrentPairIndex(index),
           onEnterBack: () => setCurrentPairIndex(index),
+          refreshPriority: 0,
         });
       });
-    });
+    }, sectionRef); // scoped cleanup
 
-    return () => ctx.revert();
+    return () => {
+      initializedRef.current = false;
+      ctx.revert();
+    };
   }, []);
 
   return (
-    <>
-      <div
-        ref={sectionRef}
-        className="bg-[#FAFAF9] relative"
-        data-section="services"
-        style={{ height: `${servicePairs.length * 100 + 60}vh` }}
-      >
-        {/* Consistent film grain texture */}
-        <FilmGrainTexture />
+    <div
+      ref={sectionRef}
+      className="bg-[#FAFAF9] relative"
+      data-section="services"
+      style={{ height: `${servicePairs.length * 100 + 60}vh` }}
+    >
+      <FilmGrainTexture />
 
-        {/* Sticky Services Container */}
-        <div className="sticky top-0 h-screen flex items-center" style={{ background: '#FAFAF9' }}>
-          <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-24 items-center" style={{ perspective: '2000px' }}>
-              {/* Left side - Number + Service Info */}
-              <div className="lg:col-span-5 relative" style={{ transformStyle: 'preserve-3d' }}>
-                {/* Slot Machine Counter - positioned outside/above titles */}
-                <div className="mb-8 sm:mb-10 lg:mb-12 px-8 sm:px-10 lg:px-12">
-                  <SlotMachineCounter 
-                    number={`0${currentPairIndex + 1}`}
-                    isActive={true}
-                  />
-                </div>
+      {/* GSAP pins this div — no CSS sticky */}
+      <div ref={stickyRef} className="h-screen flex items-center" style={{ background: '#FAFAF9' }}>
+        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-24 items-center" style={{ perspective: '2000px' }}>
 
-                {/* Services container without frame */}
-                <div 
-                  className="relative p-8 sm:p-10 lg:p-12"
-                  style={{ 
-                    transform: 'translateZ(0px)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  {/* Service Pair Details */}
-                  <div className="overflow-hidden relative" style={{ height: '480px', maxHeight: '60vh' }}>
-                    <div
-                      ref={servicesContainerRef}
-                      className="absolute inset-0"
-                    >
-                      {servicePairs.map((pair, index) => (
-                        <div
-                          key={index}
-                          className={`absolute inset-0 transition-all duration-500 ${
-                            index === currentPairIndex
-                              ? 'opacity-100'
-                              : 'opacity-0 pointer-events-none'
-                          }`}
-                        >
-                          {/* Pair Number */}
-                          <div className="flex items-center gap-3 mb-6 sm:mb-8 md:mb-12">
-                            <div className="flex" style={{ perspective: '800px' }}>
-                              <FlipCounter
-                                value={pair.id}
-                              />
-                            </div>
-                            <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }}></div>
-                          </div>
-
-                          {/* Services List */}
-                          <div className="space-y-4 sm:space-y-6 md:space-y-8">
-                            {pair.services.map((service, serviceIndex) => (
-                              <ServiceItem
-                                key={serviceIndex}
-                                service={service}
-                                index={index * 2 + serviceIndex}
-                                isActive={index === currentPairIndex}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            {/* Left side */}
+            <div className="lg:col-span-5 relative" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="mb-8 sm:mb-10 lg:mb-12 px-8 sm:px-10 lg:px-12">
+                <SlotMachineCounter
+                  number={`0${currentPairIndex + 1}`}
+                  isActive={true}
+                />
               </div>
 
-              {/* Right side - Image with dented corner */}
-              <div ref={imageContainerRef} className="lg:col-span-7 relative block mt-8 lg:mt-0" style={{ transformStyle: 'preserve-3d' }}>
-                {/* Deep background layers */}
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                
-                {/* Mid layers */}
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-20px) scale(1.02)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                
-                {/* Front layer */}
-                <div 
-                  className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50"
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(-10px) scale(1.01)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                ></div>
-                
-                <div 
-                  className="relative w-full max-w-md lg:max-w-none mx-auto" 
-                  style={{ 
-                    aspectRatio: '4/5',
-                    transform: 'translateZ(0px)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div 
-                    ref={clipPathRef}
-                    className="glass-warm-glow-intense relative w-full h-full overflow-hidden"
-                    style={{
-                      '--dent-position': '15%',
-                      clipPath: `polygon(
-                        0 0.5rem,
-                        0.5rem 0,
-                        100% 0,
-                        100% calc(100% - 0.5rem),
-                        calc(100% - 0.5rem) 100%,
-                        0 100%,
-                        0% calc(var(--dent-position) + ${DENT_LARGE_SIDE_HEIGHT}rem),
-                        ${DENT_WIDTH}% calc(var(--dent-position) + ${DENT_SMALL_SIDE_HEIGHT}rem),
-                        ${DENT_WIDTH}% calc(var(--dent-position) - ${DENT_SMALL_SIDE_HEIGHT}rem),
-                        0% calc(var(--dent-position) - ${DENT_LARGE_SIDE_HEIGHT}rem)
-                      )`
-                    } as React.CSSProperties}
-                  >
+              <div
+                className="relative p-8 sm:p-10 lg:p-12"
+                style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
+              >
+                <div className="overflow-hidden relative" style={{ height: '480px', maxHeight: '60vh' }}>
+                  <div ref={servicesContainerRef} className="absolute inset-0">
                     {servicePairs.map((pair, index) => (
-                      <img
+                      <div
                         key={index}
-                        data-service-image={index * 2}
-                        src={pair.imageUrl}
-                        alt={pair.services[0].title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        style={{
-                          opacity: index === currentPairIndex ? 1 : 0,
-                          transition: 'opacity 0.5s ease-in-out',
-                          willChange: 'opacity',
-                        }}
-                      />
+                        className={`absolute inset-0 transition-all duration-500 ${
+                          index === currentPairIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-6 sm:mb-8 md:mb-12">
+                          <div className="flex" style={{ perspective: '800px' }}>
+                            <FlipCounter value={pair.id} />
+                          </div>
+                          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
+                        </div>
+
+                        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                          {pair.services.map((service, serviceIndex) => (
+                            <ServiceItem
+                              key={serviceIndex}
+                              service={service}
+                              index={index * 2 + serviceIndex}
+                              isActive={index === currentPairIndex}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     ))}
-
-                    {/* Environmental storytelling overlays */}
-                    
-                    {/* Blueprint wireframe overlay - fades from visible to invisible */}
-                    <div 
-                      className="absolute inset-0 pointer-events-none z-10"
-                      style={{
-                        backgroundImage: `linear-gradient(0deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%),
-                                         linear-gradient(90deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%)`,
-                        backgroundSize: '40px 40px',
-                        opacity: 0.3,
-                        mixBlendMode: 'multiply',
-                        animation: 'blueprintFade 3s ease-in-out infinite alternate',
-                      }}
-                    />
-
-                    {/* Light rays from top suggesting transformation */}
-                    <div
-                      className="absolute inset-0 pointer-events-none z-20"
-                      style={{
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%)',
-                        mixBlendMode: 'soft-light',
-                      }}
-                    />
-
-                    {/* Dust particles effect */}
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-screen z-30">
-                      <svg width="100%" height="100%">
-                        <filter id="dustNoise">
-                          <feTurbulence
-                            type="fractalNoise"
-                            baseFrequency="0.8"
-                            numOctaves="4"
-                            seed="2"
-                          />
-                          <feColorMatrix
-                            type="saturate"
-                            values="0"
-                          />
-                        </filter>
-                        <rect width="100%" height="100%" filter="url(#dustNoise)" />
-                      </svg>
-                    </div>
-
-                    {/* Film grain for realism */}
-                    <FilmGrainTexture />
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Right side - Image */}
+            <div ref={imageContainerRef} className="lg:col-span-7 relative block mt-8 lg:mt-0" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50" style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
+
+              <div
+                className="relative w-full max-w-md lg:max-w-none mx-auto"
+                style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
+              >
+                <div
+                  ref={clipPathRef}
+                  className="glass-warm-glow-intense relative w-full h-full overflow-hidden"
+                  style={{
+                    '--dent-position': '15%',
+                    clipPath: `polygon(
+                      0 0.5rem,
+                      0.5rem 0,
+                      100% 0,
+                      100% calc(100% - 0.5rem),
+                      calc(100% - 0.5rem) 100%,
+                      0 100%,
+                      0% calc(var(--dent-position) + ${DENT_LARGE_SIDE_HEIGHT}rem),
+                      ${DENT_WIDTH}% calc(var(--dent-position) + ${DENT_SMALL_SIDE_HEIGHT}rem),
+                      ${DENT_WIDTH}% calc(var(--dent-position) - ${DENT_SMALL_SIDE_HEIGHT}rem),
+                      0% calc(var(--dent-position) - ${DENT_LARGE_SIDE_HEIGHT}rem)
+                    )`,
+                  } as React.CSSProperties}
+                >
+                  {servicePairs.map((pair, index) => (
+                    <img
+                      key={index}
+                      src={pair.imageUrl}
+                      alt={pair.services[0].title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{
+                        opacity: index === currentPairIndex ? 1 : 0,
+                        transition: 'opacity 0.5s ease-in-out',
+                        willChange: 'opacity',
+                      }}
+                    />
+                  ))}
+
+                  <div
+                    className="absolute inset-0 pointer-events-none z-10"
+                    style={{
+                      backgroundImage: `linear-gradient(0deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%),
+                                       linear-gradient(90deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%)`,
+                      backgroundSize: '40px 40px',
+                      opacity: 0.3,
+                      mixBlendMode: 'multiply',
+                      animation: 'blueprintFade 3s ease-in-out infinite alternate',
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none z-20"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%)',
+                      mixBlendMode: 'soft-light',
+                    }}
+                  />
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-screen z-30">
+                    <svg width="100%" height="100%">
+                      <filter id="dustNoise">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" seed="2" />
+                        <feColorMatrix type="saturate" values="0" />
+                      </filter>
+                      <rect width="100%" height="100%" filter="url(#dustNoise)" />
+                    </svg>
+                  </div>
+                  <FilmGrainTexture />
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-      
       </div>
-    </>
+    </div>
   );
 }

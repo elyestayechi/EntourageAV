@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import {
   ArrowLeft, Plus, Edit2, Trash2, Save, TrendingUp, Users, FileText,
-  MessageSquare, LogOut, Upload, X, Star, Eye, EyeOff, Globe, ImagePlus,
+  MessageSquare, LogOut, Upload, X, Star, Eye, EyeOff, Globe, ImagePlus, Share2,
 } from 'lucide-react';
 
 import { getAllServices, createService, updateService, deleteService } from '../../services/serviceAPI';
@@ -19,6 +19,10 @@ import {
   getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial,
   toggleTestimonialActive, Testimonial,
 } from '../../services/testimonialsAPI';
+import {
+  getAllSocialMedia, createSocialMedia, updateSocialMedia, deleteSocialMedia,
+  toggleSocialMediaActive, SocialMediaLink,
+} from '../../services/socialMedia';
 import { uploadFile } from '../../services/uploadAPI';
 
 // ─── Static fallback testimonials ─────────────────────────────────────────────
@@ -35,6 +39,7 @@ const T = {
     adminPanel: 'Admin Panel', backToSite: 'Back to site', logout: 'Logout',
     dashboard: 'Dashboard', services: 'Services', projects: 'Projects', blog: 'Blog',
     testimonials: 'Testimonials', contacts: 'Contacts', messages: 'Messages', unread: 'unread',
+    socialMedia: 'Social Media', platform: 'Platform', platformPlaceholder: 'Instagram, Facebook, Twitter...',
     refresh: 'Refresh', addNew: 'Add New', editItem: 'Edit Item', addNewItem: 'Add New Item',
     saveChanges: 'Save Changes', saving: 'Saving...', cancel: 'Cancel', delete: 'Delete',
     confirmDelete: 'Are you sure you want to delete this item?', loading: 'Loading...',
@@ -57,7 +62,7 @@ const T = {
     updated: (item: string) => `${item} updated successfully`,
     created: (item: string) => `${item} created successfully`,
     deleted: (item: string) => `${item} deleted`,
-    activated: 'Testimonial activated', deactivated: 'Testimonial deactivated', markedAsRead: 'Marked as read',
+    activated: 'Activated', deactivated: 'Deactivated', markedAsRead: 'Marked as read',
     trend: { services: '+12%', projects: '+8%', blog: '+24%', messages: 'New', testimonials: 'active' },
     projectRenovation: (n: number) => `${n} active`,
     beforeAfterPairs: 'Before / After Image Pairs',
@@ -67,11 +72,13 @@ const T = {
     pairLabel: 'Pair Label (optional)',
     removePair: 'Remove pair',
     noPairsYet: 'No image pairs yet. Add at least one before/after pair.',
+    url: 'URL',
   },
   fr: {
     adminPanel: 'Panneau Admin', backToSite: 'Retour au site', logout: 'Déconnexion',
     dashboard: 'Tableau de bord', services: 'Services', projects: 'Projets', blog: 'Blog',
     testimonials: 'Témoignages', contacts: 'Contacts', messages: 'Messages', unread: 'non lus',
+    socialMedia: 'Réseaux Sociaux', platform: 'Plateforme', platformPlaceholder: 'Instagram, Facebook, Twitter...',
     refresh: 'Actualiser', addNew: 'Ajouter', editItem: 'Modifier', addNewItem: 'Nouvel élément',
     saveChanges: 'Enregistrer', saving: 'Enregistrement...', cancel: 'Annuler', delete: 'Supprimer',
     confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet élément ?', loading: 'Chargement...',
@@ -94,16 +101,17 @@ const T = {
     updated: (item: string) => `${item} mis à jour`,
     created: (item: string) => `${item} créé`,
     deleted: (item: string) => `${item} supprimé`,
-    activated: 'Témoignage activé', deactivated: 'Témoignage désactivé', markedAsRead: 'Marqué comme lu',
+    activated: 'Activé', deactivated: 'Désactivé', markedAsRead: 'Marqué comme lu',
     trend: { services: '+12%', projects: '+8%', blog: '+24%', messages: 'Nouveau', testimonials: 'actifs' },
     projectRenovation: (n: number) => `${n} actifs`,
-    beforeAfterPairs: 'Paires d\'images Avant / Après',
+    beforeAfterPairs: "Paires d'images Avant / Après",
     addPair: 'Ajouter une paire',
     beforeImage: 'Image AVANT',
     afterImage: 'Image APRÈS',
     pairLabel: 'Libellé (optionnel)',
     removePair: 'Supprimer la paire',
-    noPairsYet: 'Aucune paire d\'images. Ajoutez au moins une paire avant/après.',
+    noPairsYet: "Aucune paire d'images. Ajoutez au moins une paire avant/après.",
+    url: 'URL',
   },
 };
 
@@ -114,8 +122,8 @@ interface Service {
 }
 
 interface ImagePair {
-  tempId: string;      // local only, for React key
-  id?: number;         // backend id (if already saved)
+  tempId: string;
+  id?: number;
   before_image: string;
   after_image: string;
   label: string;
@@ -141,7 +149,7 @@ interface ContactSubmission {
   project_type?: string; surface?: string;
 }
 
-type ViewType = 'dashboard' | 'services' | 'projects' | 'blog' | 'contacts' | 'testimonials';
+type ViewType = 'dashboard' | 'services' | 'projects' | 'blog' | 'contacts' | 'testimonials' | 'social-media';
 
 function parseAPIError(err: any): string {
   const detail = err?.response?.data?.detail;
@@ -217,6 +225,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [testimonials, setTestimonials] = useState<(Testimonial & { isStatic?: boolean })[]>([]);
+  const [socialMedia, setSocialMedia] = useState<SocialMediaLink[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -229,18 +238,20 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     setLoading(true);
     setError(null);
     try {
-      const [servicesData, projectsData, blogsData, contactsData, testimonialsData] = await Promise.all([
+      const [servicesData, projectsData, blogsData, contactsData, testimonialsData, socialData] = await Promise.all([
         getAllServices().catch((err) => { console.error('services:', err); return []; }),
         getAllProjects().catch((err) => { console.error('projects:', err); return []; }),
         getAllBlogPosts().catch((err) => { console.error('blog:', err); return []; }),
         getAllContacts().catch((err) => { console.error('contacts:', err); return [] as APIContactSubmission[]; }),
         getAllTestimonials().catch((err) => { console.error('testimonials:', err); return [] as Testimonial[]; }),
+        getAllSocialMedia().catch((err) => { console.error('social-media:', err); return [] as SocialMediaLink[]; }),
       ]);
       setServices(servicesData);
       setProjects(projectsData);
       setBlogPosts(blogsData);
       setContacts(contactsData as ContactSubmission[]);
       setTestimonials(testimonialsData.length > 0 ? testimonialsData : (STATIC_TESTIMONIALS as any));
+      setSocialMedia(socialData as SocialMediaLink[]);
     } catch (err) {
       setError(t.failedToLoad);
     } finally {
@@ -293,6 +304,8 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       setFormData({ id: tempId, title: '', category: '', date: today, excerpt: '', image: '', slug: '', content: '', author: 'Entourage AV', read_time: '5 min' });
     } else if (currentView === 'testimonials') {
       setFormData({ id: tempId, name: '', location: '', text: '', rating: 5, project: '', order_index: 0, is_active: true });
+    } else if (currentView === 'social-media') {
+      setFormData({ id: tempId, platform: '', url: '', order_index: socialMedia.length, is_active: true });
     }
   };
 
@@ -300,7 +313,6 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     if (item.isStatic) return;
     setEditingId(item.id);
     if (currentView === 'projects') {
-      // Map existing images → ImagePair shape
       const imagePairs: ImagePair[] = (item.images ?? []).map((img: any, idx: number) => ({
         tempId: `existing-${img.id ?? idx}`,
         id: img.id,
@@ -356,14 +368,11 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
           showSuccess(t.created('Projet'));
         }
 
-        // ── Sync image pairs ──
-        // 1. Delete removed pairs
         for (const id of (formData.deletedImagePairIds ?? [])) {
           await deleteProjectImage(id).catch(console.error);
         }
-        // 2. Create or update pairs
         for (const pair of (formData.imagePairs ?? [])) {
-          if (!pair.before_image && !pair.after_image) continue; // skip empty
+          if (!pair.before_image && !pair.after_image) continue;
           const pairPayload = {
             before_image: pair.before_image,
             after_image: pair.after_image,
@@ -376,7 +385,6 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
             await addProjectImage(projectId, pairPayload).catch(console.error);
           }
         }
-        // Reload projects to get fresh images list
         const refreshed = await getAllProjects().catch(() => projects);
         setProjects(refreshed);
 
@@ -396,15 +404,27 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       } else if (currentView === 'testimonials') {
         if (editingId && editingId > 0) {
           const updated = await updateTestimonial(editingId, formData);
-          setTestimonials(testimonials.map((t) => t.id === editingId ? updated : t));
+          setTestimonials(testimonials.map((item) => item.id === editingId ? updated : item));
           showSuccess(t.updated('Témoignage'));
         } else {
           const created = await createTestimonial(formData);
           setTestimonials((prev) => {
-            const withoutStatic = prev.filter((t) => !t.isStatic);
+            const withoutStatic = prev.filter((item) => !item.isStatic);
             return [...withoutStatic, created];
           });
           showSuccess(t.created('Témoignage'));
+        }
+
+      } else if (currentView === 'social-media') {
+        const payload = clean();
+        if (editingId && editingId > 0) {
+          const updated = await updateSocialMedia(editingId, payload);
+          setSocialMedia(socialMedia.map((s) => s.id === editingId ? updated : s));
+          showSuccess(t.updated('Réseau social'));
+        } else {
+          const created = await createSocialMedia(payload);
+          setSocialMedia([...socialMedia, created]);
+          showSuccess(t.created('Réseau social'));
         }
       }
 
@@ -428,9 +448,14 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       else if (type === 'contacts') { await deleteContact(id); setContacts(contacts.filter((c) => c.id !== id)); showSuccess(t.deleted('Message')); }
       else if (type === 'testimonials') {
         await deleteTestimonial(id);
-        const remaining = testimonials.filter((t) => t.id !== id);
-        setTestimonials(remaining.filter((t) => !t.isStatic).length === 0 ? (STATIC_TESTIMONIALS as any) : remaining);
+        const remaining = testimonials.filter((item) => item.id !== id);
+        setTestimonials(remaining.filter((item) => !item.isStatic).length === 0 ? (STATIC_TESTIMONIALS as any) : remaining);
         showSuccess(t.deleted('Témoignage'));
+      }
+      else if (type === 'social-media') {
+        await deleteSocialMedia(id);
+        setSocialMedia(socialMedia.filter((s) => s.id !== id));
+        showSuccess(t.deleted('Réseau social'));
       }
     } catch (err: any) {
       setError(parseAPIError(err));
@@ -456,16 +481,25 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     } catch (err: any) { setError(parseAPIError(err)); }
   };
 
+  const handleToggleSocialMedia = async (id: number) => {
+    try {
+      const updated = await toggleSocialMediaActive(id);
+      setSocialMedia(socialMedia.map((s) => s.id === id ? updated : s));
+      showSuccess(updated.is_active ? t.activated : t.deactivated);
+    } catch (err: any) { setError(parseAPIError(err)); }
+  };
+
   // ─── Dashboard ───────────────────────────────────────────────────────────────
   const renderDashboard = () => (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 md:gap-6">
         {[
           { icon: TrendingUp, count: services.length, label: t.services, trend: t.trend.services },
           { icon: FileText, count: projects.length, label: t.projects, trend: t.trend.projects },
           { icon: Users, count: blogPosts.length, label: t.blog, trend: t.trend.blog },
           { icon: MessageSquare, count: contacts.length, label: t.messages, trend: t.trend.messages },
           { icon: Star, count: testimonials.filter((x) => !x.isStatic).length, label: t.testimonials, trend: t.projectRenovation(testimonials.filter((x) => x.is_active && !x.isStatic).length) },
+          { icon: Share2, count: socialMedia.filter((x) => x.is_active).length, label: t.socialMedia, trend: `${socialMedia.length} total` },
         ].map(({ icon: Icon, count, label, trend }, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 md:p-8 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
             <div className="relative z-10">
@@ -488,9 +522,9 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
             <h3 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 tracking-tight">{t.manageContent}</h3>
             <p className="text-white/60 mb-6 md:mb-8 text-sm md:text-lg">{t.manageDesc}</p>
             <div className="flex flex-wrap gap-2 md:gap-3">
-              {(['services', 'projects', 'blog', 'testimonials'] as ViewType[]).map((view) => (
+              {(['services', 'projects', 'blog', 'testimonials', 'social-media'] as ViewType[]).map((view) => (
                 <button key={view} onClick={() => setCurrentView(view)} className="px-4 md:px-6 py-2 md:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full transition-all duration-300 text-xs md:text-sm font-medium uppercase tracking-wider hover:scale-105 capitalize">
-                  {t[view as keyof typeof t] as string}
+                  {view === 'social-media' ? t.socialMedia : t[view as keyof typeof t] as string}
                 </button>
               ))}
             </div>
@@ -517,15 +551,60 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     const subfolder = currentView === 'services' ? 'services' : currentView === 'projects' ? 'projects' : currentView === 'blog' ? 'blog' : 'testimonials';
     const inputClass = "w-full px-4 md:px-6 py-3 md:py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all backdrop-blur-sm";
     const labelClass = "block text-sm font-medium text-white/60 mb-2 uppercase tracking-wider";
-
     const imagePairs: ImagePair[] = formData.imagePairs ?? [];
 
     return (
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 md:p-8 mb-6 md:mb-8">
         <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 tracking-tight">
-          {formData.title || formData.name ? t.editItem : t.addNewItem}
+          {formData.title || formData.name || formData.platform ? t.editItem : t.addNewItem}
         </h3>
         <div className="space-y-4 md:space-y-5">
+
+          {/* ── Social Media form ── */}
+          {currentView === 'social-media' && (
+            <>
+              <div>
+                <label className={labelClass}>{t.platform}</label>
+                <input
+                  type="text"
+                  placeholder={t.platformPlaceholder}
+                  value={formData.platform || ''}
+                  onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t.url}</label>
+                <input
+                  type="url"
+                  placeholder="https://instagram.com/yourpage"
+                  value={formData.url || ''}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t.orderIndex}</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={formData.order_index ?? 0}
+                  onChange={(e) => setFormData({ ...formData, order_index: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${formData.is_active ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/10 text-white/50 border border-white/10'}`}
+                >
+                  {formData.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  {formData.is_active ? t.active : t.inactive}
+                </button>
+              </div>
+            </>
+          )}
 
           {/* ── Testimonial form ── */}
           {currentView === 'testimonials' && (
@@ -566,7 +645,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
           )}
 
           {/* ── Service / Project / Blog forms ── */}
-          {currentView !== 'testimonials' && (
+          {currentView !== 'testimonials' && currentView !== 'social-media' && (
             <>
               <div>
                 <label className={labelClass}>{t.title}</label>
@@ -610,7 +689,6 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                 </div>
               )}
 
-              {/* Cover image — only for services and blog, NOT projects (projects use before/after pairs) */}
               {currentView !== 'projects' && (
                 <ImageUpload
                   value={formData.image || ''}
@@ -620,7 +698,6 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                 />
               )}
 
-              {/* ── Project-specific fields ── */}
               {currentView === 'projects' && (
                 <>
                   <div>
@@ -638,103 +715,51 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                     </div>
                   </div>
 
-                  {/* ════════════════════════════════════════════════
-                      BEFORE / AFTER IMAGE PAIRS SECTION
-                  ════════════════════════════════════════════════ */}
+                  {/* Before / After image pairs */}
                   <div className="border border-white/15 rounded-2xl p-5 bg-white/3">
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
                         <ImagePlus className="w-5 h-5 text-[#F6F2E8]" />
-                        <h4 className="text-white font-bold text-base uppercase tracking-wider">
-                          {t.beforeAfterPairs}
-                        </h4>
-                        <span className="px-2 py-0.5 text-xs bg-white/10 text-white/60 rounded-full">
-                          {imagePairs.length}
-                        </span>
+                        <h4 className="text-white font-bold text-base uppercase tracking-wider">{t.beforeAfterPairs}</h4>
+                        <span className="px-2 py-0.5 text-xs bg-white/10 text-white/60 rounded-full">{imagePairs.length}</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={addImagePair}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#F6F2E8]/10 hover:bg-[#F6F2E8]/20 border border-[#F6F2E8]/20 rounded-xl text-[#F6F2E8] text-sm font-medium transition-all"
-                      >
+                      <button type="button" onClick={addImagePair} className="flex items-center gap-2 px-4 py-2 bg-[#F6F2E8]/10 hover:bg-[#F6F2E8]/20 border border-[#F6F2E8]/20 rounded-xl text-[#F6F2E8] text-sm font-medium transition-all">
                         <Plus className="w-4 h-4" />
                         {t.addPair}
                       </button>
                     </div>
 
                     {imagePairs.length === 0 ? (
-                      <p className="text-white/30 text-sm text-center py-6 italic">
-                        {t.noPairsYet}
-                      </p>
+                      <p className="text-white/30 text-sm text-center py-6 italic">{t.noPairsYet}</p>
                     ) : (
                       <div className="space-y-5">
                         {imagePairs.map((pair, idx) => (
-                          <div
-                            key={pair.tempId}
-                            className="border border-white/10 rounded-xl p-4 bg-white/5 relative"
-                          >
-                            {/* Pair header */}
+                          <div key={pair.tempId} className="border border-white/10 rounded-xl p-4 bg-white/5 relative">
                             <div className="flex items-center justify-between mb-4">
-                              <span className="text-white/50 text-xs font-bold uppercase tracking-widest">
-                                Paire {idx + 1}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeImagePair(idx)}
-                                className="p-1.5 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors"
-                                title={t.removePair}
-                              >
+                              <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Paire {idx + 1}</span>
+                              <button type="button" onClick={() => removeImagePair(idx)} className="p-1.5 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors" title={t.removePair}>
                                 <Trash2 className="w-3.5 h-3.5 text-red-400" />
                               </button>
                             </div>
-
-                            {/* Before + After uploads side by side */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              {/* BEFORE */}
                               <div className="border border-orange-500/20 rounded-xl p-3 bg-orange-500/5">
                                 <div className="flex items-center gap-2 mb-3">
                                   <span className="w-2 h-2 rounded-full bg-orange-400" />
-                                  <span className="text-orange-300 text-xs font-bold uppercase tracking-widest">
-                                    {t.beforeImage}
-                                  </span>
+                                  <span className="text-orange-300 text-xs font-bold uppercase tracking-widest">{t.beforeImage}</span>
                                 </div>
-                                <ImageUpload
-                                  value={pair.before_image}
-                                  onChange={(url) => updateImagePair(idx, 'before_image', url)}
-                                  subfolder="projects"
-                                  label=""
-                                />
+                                <ImageUpload value={pair.before_image} onChange={(url) => updateImagePair(idx, 'before_image', url)} subfolder="projects" label="" />
                               </div>
-
-                              {/* AFTER */}
                               <div className="border border-green-500/20 rounded-xl p-3 bg-green-500/5">
                                 <div className="flex items-center gap-2 mb-3">
                                   <span className="w-2 h-2 rounded-full bg-green-400" />
-                                  <span className="text-green-300 text-xs font-bold uppercase tracking-widest">
-                                    {t.afterImage}
-                                  </span>
+                                  <span className="text-green-300 text-xs font-bold uppercase tracking-widest">{t.afterImage}</span>
                                 </div>
-                                <ImageUpload
-                                  value={pair.after_image}
-                                  onChange={(url) => updateImagePair(idx, 'after_image', url)}
-                                  subfolder="projects"
-                                  label=""
-                                />
+                                <ImageUpload value={pair.after_image} onChange={(url) => updateImagePair(idx, 'after_image', url)} subfolder="projects" label="" />
                               </div>
                             </div>
-
-                            {/* Optional label */}
                             <div>
-                              <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">
-                                {t.pairLabel}
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="ex: Salle de bain, Cuisine..."
-                                value={pair.label}
-                                onChange={(e) => updateImagePair(idx, 'label', e.target.value)}
-                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 text-sm"
-                              />
+                              <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">{t.pairLabel}</label>
+                              <input type="text" placeholder="ex: Salle de bain, Cuisine..." value={pair.label} onChange={(e) => updateImagePair(idx, 'label', e.target.value)} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 text-sm" />
                             </div>
                           </div>
                         ))}
@@ -744,7 +769,6 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                 </>
               )}
 
-              {/* Blog-specific fields */}
               {currentView === 'blog' && (
                 <>
                   <div>
@@ -779,10 +803,10 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
     );
   };
 
-  // ─── Content list ──────────────────────────────────────────────────────────────
+  // ─── Content list (services / projects / blog) ────────────────────────────────
   const renderContentList = () => {
     const items = currentView === 'services' ? services : currentView === 'projects' ? projects : blogPosts;
-    const viewLabel = t[currentView as keyof typeof t] as string;
+    const viewLabel = currentView === 'services' ? t.services : currentView === 'projects' ? t.projects : t.blog;
 
     return (
       <div className="space-y-6 md:space-y-8">
@@ -812,11 +836,8 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                   )}
                   <p className="text-white/60 leading-relaxed text-sm md:text-base line-clamp-3">{item.description || item.excerpt}</p>
                   {item.slug && <p className="text-white/40 text-xs mt-2">/{item.slug}</p>}
-                  {/* Show image pair count for projects */}
                   {currentView === 'projects' && (
-                    <p className="text-white/30 text-xs mt-1">
-                      {(item.images ?? []).length} paire(s) avant/après
-                    </p>
+                    <p className="text-white/30 text-xs mt-1">{(item.images ?? []).length} paire(s) avant/après</p>
                   )}
                 </div>
                 <div className="flex md:flex-col gap-3 w-full md:w-auto flex-shrink-0">
@@ -882,7 +903,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
                     {item.project && <p className="text-white/40 text-xs mt-2">Project: {item.project}</p>}
                   </div>
                   <div className="flex md:flex-col gap-3 flex-shrink-0">
-                    <button onClick={() => handleToggleTestimonial(item.id)} className={`p-3 md:p-4 rounded-xl transition-all duration-300 hover:scale-105 ${item.is_active ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-white/10 hover:bg-white/20'}`} title={item.is_active ? 'Deactivate' : 'Activate'}>
+                    <button onClick={() => handleToggleTestimonial(item.id)} className={`p-3 md:p-4 rounded-xl transition-all duration-300 hover:scale-105 ${item.is_active ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-white/10 hover:bg-white/20'}`}>
                       {item.is_active ? <Eye className="w-4 h-4 text-green-400 mx-auto" /> : <EyeOff className="w-4 h-4 text-white/50 mx-auto" />}
                     </button>
                     <button onClick={() => handleEdit(item)} className="p-3 md:p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-105">
@@ -930,6 +951,56 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
       </div>
     );
   };
+
+  // ─── Social Media ──────────────────────────────────────────────────────────────
+  const renderSocialMedia = () => (
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tight">{t.socialMedia}</h2>
+        <button onClick={handleAdd} className="flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 bg-[#F6F2E8] text-black rounded-full hover:bg-white transition-all duration-300 font-bold uppercase tracking-wider hover:scale-105 text-sm md:text-base">
+          <Plus className="w-4 h-4 md:w-5 md:h-5" />
+          {t.addNew}
+        </button>
+      </div>
+
+      {renderForm()}
+
+      <div className="grid grid-cols-1 gap-4 md:gap-6">
+        {socialMedia.map((item) => (
+          <div key={item.id} className={`bg-white/5 backdrop-blur-md border ${item.is_active ? 'border-white/10' : 'border-white/5 opacity-60'} rounded-2xl p-6 md:p-8 hover:bg-white/10 transition-all duration-500`}>
+            <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">{item.platform}</h3>
+                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'}`}>
+                    {item.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-white/50 text-sm hover:text-white/80 transition-colors break-all">
+                  {item.url}
+                </a>
+                <p className="text-white/30 text-xs mt-1">Order: {item.order_index}</p>
+              </div>
+              <div className="flex md:flex-col gap-3 flex-shrink-0">
+                <button onClick={() => handleToggleSocialMedia(item.id)} className={`p-3 md:p-4 rounded-xl transition-all duration-300 hover:scale-105 ${item.is_active ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-white/10 hover:bg-white/20'}`}>
+                  {item.is_active ? <Eye className="w-4 h-4 text-green-400 mx-auto" /> : <EyeOff className="w-4 h-4 text-white/50 mx-auto" />}
+                </button>
+                <button onClick={() => handleEdit(item)} className="p-3 md:p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-105">
+                  <Edit2 className="w-4 h-4 md:w-5 md:h-5 text-white mx-auto" />
+                </button>
+                <button onClick={() => handleDelete(item.id, 'social-media')} className="p-3 md:p-4 bg-red-500/20 hover:bg-red-500/30 rounded-xl transition-all duration-300 hover:scale-105">
+                  <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-red-400 mx-auto" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {socialMedia.length === 0 && (
+          <div className="text-center py-16 text-white/40">{t.noItems(t.socialMedia.toLowerCase())}</div>
+        )}
+      </div>
+    </div>
+  );
 
   // ─── Contacts ──────────────────────────────────────────────────────────────────
   const renderContacts = () => (
@@ -1033,13 +1104,19 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
         {/* Nav tabs */}
         <div className="mb-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <nav className="flex gap-2 sm:gap-3 min-w-max sm:min-w-0">
-            {(['dashboard', 'services', 'projects', 'blog', 'testimonials', 'contacts'] as ViewType[]).map((view) => (
+            {(['dashboard', 'services', 'projects', 'blog', 'testimonials', 'contacts', 'social-media'] as ViewType[]).map((view) => (
               <button
                 key={view}
                 onClick={() => setCurrentView(view)}
                 className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm transition-all duration-300 whitespace-nowrap ${currentView === view ? 'bg-[#F6F2E8] text-black' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
               >
-                {t[view as keyof typeof t] as string}
+                {view === 'dashboard' ? t.dashboard
+                  : view === 'services' ? t.services
+                  : view === 'projects' ? t.projects
+                  : view === 'blog' ? t.blog
+                  : view === 'testimonials' ? t.testimonials
+                  : view === 'contacts' ? t.contacts
+                  : t.socialMedia}
                 {view === 'contacts' && contacts.filter((c) => !c.is_read).length > 0 && (
                   <span className="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded-full text-xs">
                     {contacts.filter((c) => !c.is_read).length}
@@ -1054,6 +1131,7 @@ export function AdminPanel({ onLogout }: { onLogout?: () => void }) {
         {(currentView === 'services' || currentView === 'projects' || currentView === 'blog') && renderContentList()}
         {currentView === 'testimonials' && renderTestimonials()}
         {currentView === 'contacts' && renderContacts()}
+        {currentView === 'social-media' && renderSocialMedia()}
       </div>
     </div>
   );
