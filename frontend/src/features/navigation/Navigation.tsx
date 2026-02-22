@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Menu, X, Settings, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react';
 
 interface NavigationItem {
   path: string;
@@ -190,17 +190,7 @@ export function Navigation() {
               Contact
             </Link>
 
-            {/* Admin Icon */}
-            <Link
-              to="/admin"
-              className="transition-all duration-300 opacity-50 hover:opacity-100 whitespace-nowrap"
-              style={{
-                color: isActive('/admin') ? 'rgba(42, 37, 34, 1)' : 'rgba(255, 255, 255, 0.95)',
-                filter: 'drop-shadow(0 1px 3px rgba(255, 255, 255, 0.8))',
-              }}
-            >
-              <Settings className="w-4 h-4" />
-            </Link>
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -406,18 +396,7 @@ export function Navigation() {
                 </Link>
               ))}
 
-              {/* Admin - subtle at the bottom */}
-              <Link
-                to="/admin"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-center gap-2 transition-colors duration-300 opacity-40 hover:opacity-100 whitespace-nowrap"
-                style={{
-                  color: isActive('/admin') ? 'var(--color-gold)' : 'rgba(250, 248, 245, 0.8)',
-                }}
-              >
-                <Settings className="w-5 h-5" />
-                <span className="text-sm uppercase tracking-wider font-medium">Admin</span>
-              </Link>
+             
             </div>
           </div>
         </div>

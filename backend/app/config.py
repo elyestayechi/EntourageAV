@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme123"
     
+    # Security
+    SECRET_KEY: str = "your-super-secret-key-change-this-in-production"
+    SESSION_MAX_AGE: int = 3600  # 1 hour in seconds
     
     # CORS
     FRONTEND_URL: str = "http://localhost:3000"
