@@ -89,38 +89,38 @@ function StepItem({
   return (
     <>
       <div>
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div ref={numberRef}>
-            <div className="text-7xl md:text-8xl font-bold opacity-10" style={{ color: 'var(--color-navy-sky)' }}>
+            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold opacity-10" style={{ color: 'var(--color-navy-sky)' }}>
               {step.number}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3 sm:mb-4">
           <div className="flex" style={{ perspective: '800px' }}>
             <FlipCounter value={parseInt(step.number)} />
           </div>
-          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }} />
+          <div className="w-8 sm:w-12 md:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }} />
         </div>
 
-        <h3 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-navy-sky)' }}>
+        <h3 ref={titleRef} className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-navy-sky)' }}>
           {step.title}
         </h3>
-        <h4 ref={subtitleRef} className="text-xl md:text-2xl font-light" style={{ color: 'var(--color-base-slate)' }}>
+        <h4 ref={subtitleRef} className="text-lg sm:text-xl md:text-2xl font-light mb-3" style={{ color: 'var(--color-base-slate)' }}>
           {step.subtitle}
         </h4>
       </div>
 
       <div>
-        <p ref={descriptionRef} className="text-base md:text-lg mb-6 leading-relaxed" style={{ color: 'var(--color-base-slate)' }}>
+        <p ref={descriptionRef} className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed" style={{ color: 'var(--color-base-slate)' }}>
           {step.description}
         </p>
-        <div ref={detailsRef} className="pt-6 border-t" style={{ borderColor: 'rgba(42, 37, 34, 0.1)' }}>
-          <div className="text-xs uppercase tracking-wider mb-3" style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}>
+        <div ref={detailsRef} className="pt-4 sm:pt-6 border-t" style={{ borderColor: 'rgba(42, 37, 34, 0.1)' }}>
+          <div className="text-xs uppercase tracking-wider mb-2 sm:mb-3" style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}>
             Inclus
           </div>
-          <p className="text-sm" style={{ color: 'var(--color-base-slate)', opacity: 0.8 }}>
+          <p className="text-xs sm:text-sm" style={{ color: 'var(--color-base-slate)', opacity: 0.8 }}>
             {step.details}
           </p>
         </div>
@@ -141,7 +141,6 @@ export function BlueprintSection() {
   const DENT_LARGE_SIDE_WIDTH = 8;
 
   useEffect(() => {
-    // Guard against React Strict Mode double-invoke and hot reload remounts
     if (initializedRef.current) return;
     initializedRef.current = true;
 
@@ -158,7 +157,6 @@ export function BlueprintSection() {
           start: 'top top',
           end: `+=${(processSteps.length - 1) * 100}%`,
           scrub: 1.5,
-          // Lower than ScrollVideo so it measures after ScrollVideo's spacer is settled
           refreshPriority: -1,
         },
       });
@@ -193,28 +191,29 @@ export function BlueprintSection() {
   return (
     <div
       ref={sectionRef}
-      className="bg-[#FAFAF9] relative py-16 md:py-24 pb-32"
+      className="bg-[#FAFAF9] relative py-12 sm:py-16 md:py-20 lg:py-24"
       data-section="blueprint"
     >
       <FilmGrainTexture />
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] mb-24">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 relative max-w-[1800px] mb-12 sm:mb-16 md:mb-20 lg:mb-24">
         <div
-          className="uppercase text-xs mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
+          className="uppercase text-xs mb-3 sm:mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
           style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}
         >
-          <div className="w-8 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.6 }} />
+          <div className="w-6 sm:w-8 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.6 }} />
           PROCESSUS
         </div>
       </div>
 
-      <div ref={stickyContainerRef} className="h-screen relative">
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] h-full">
-          <div className="h-full flex items-center justify-center">
+      <div ref={stickyContainerRef} className="min-h-screen relative">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 relative max-w-[1800px] h-full">
+          <div className="h-full flex items-center justify-center py-8 sm:py-12">
             <div className="w-full max-w-6xl">
+              {/* Image - Hidden on mobile, shows on md screens and up */}
               <div
                 ref={clipPathRef}
-                className="relative w-full overflow-hidden shadow-2xl rounded-lg mb-12"
+                className="relative w-full overflow-hidden shadow-2xl rounded-lg mb-8 sm:mb-10 md:mb-12 hidden md:block"
                 style={{
                   aspectRatio: '21/9',
                   '--dent-position': '20%',
@@ -246,7 +245,19 @@ export function BlueprintSection() {
                 <FilmGrainTexture />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto">
+              {/* Mobile Image - Simplified, shows on mobile only */}
+              <div className="md:hidden mb-6">
+                <div className="relative w-full rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                  <img
+                    src={processSteps[currentStepIndex].image}
+                    alt={processSteps[currentStepIndex].title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 sm:gap-8 max-w-5xl mx-auto px-4 sm:px-0">
                 <StepItem
                   step={processSteps[currentStepIndex]}
                   index={currentStepIndex}

@@ -75,12 +75,12 @@ function ServiceItem({
   }, [isActive, index]);
 
   return (
-    <div className="mb-10 last:mb-0">
+    <div className="mb-8 sm:mb-10 last:mb-0">
       <div className="flex items-start gap-3 mb-3">
         <div className="leading-[1.15] flex-1">
           <div
             ref={titleRef}
-            className="text-2xl md:text-4xl lg:text-5xl font-bold mb-1"
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3"
             style={{ color: 'var(--color-navy-sky)' }}
           >
             {service.title}
@@ -89,7 +89,7 @@ function ServiceItem({
       </div>
       <div className="overflow-hidden">
         <div ref={descriptionRef} className="transition-all duration-700">
-          <p className="text-base md:text-lg max-w-2xl" style={{ color: 'var(--color-base-slate)' }}>
+          <p className="text-sm sm:text-base md:text-lg max-w-2xl" style={{ color: 'var(--color-base-slate)' }}>
             {service.description}
           </p>
         </div>
@@ -112,26 +112,22 @@ export function StickyServices() {
   const DENT_LARGE_SIDE_HEIGHT = 8;
 
   useEffect(() => {
-    // Guard against Strict Mode double-invoke and hot reload remounts
     if (initializedRef.current) return;
     initializedRef.current = true;
 
     if (!sectionRef.current || !stickyRef.current || !clipPathRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Pin the inner container via GSAP — removes reliance on CSS sticky
-      // which conflicts with GSAP's spacer calculations
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
         end: 'bottom bottom',
         pin: stickyRef.current,
         pinSpacing: false,
-        anticipatePin: 1, // pre-calculates pin layout before you hit the boundary
+        anticipatePin: 1,
         refreshPriority: 0,
       });
 
-      // Dent animation
       gsap.set(clipPathRef.current, { '--dent-position': '20%' });
       gsap.to(clipPathRef.current, {
         '--dent-position': '75%',
@@ -145,7 +141,6 @@ export function StickyServices() {
         },
       });
 
-      // Step triggers
       servicePairs.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: sectionRef.current,
@@ -156,7 +151,7 @@ export function StickyServices() {
           refreshPriority: 0,
         });
       });
-    }, sectionRef); // scoped cleanup
+    }, sectionRef);
 
     return () => {
       initializedRef.current = false;
@@ -173,41 +168,37 @@ export function StickyServices() {
     >
       <FilmGrainTexture />
 
-      {/* GSAP pins this div — no CSS sticky */}
       <div ref={stickyRef} className="h-screen flex items-center" style={{ background: '#FAFAF9' }}>
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px]">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-24 items-center" style={{ perspective: '2000px' }}>
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 relative max-w-[1800px] w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-12 lg:gap-16 items-center">
 
-            {/* Left side */}
-            <div className="lg:col-span-5 relative" style={{ transformStyle: 'preserve-3d' }}>
-              <div className="mb-8 sm:mb-10 lg:mb-12 px-8 sm:px-10 lg:px-12">
+            {/* Left side - Text Content */}
+            <div className="lg:col-span-5 order-2 lg:order-1">
+              <div className="mb-6 sm:mb-8 lg:mb-10">
                 <SlotMachineCounter
                   number={`0${currentPairIndex + 1}`}
                   isActive={true}
                 />
               </div>
 
-              <div
-                className="relative p-8 sm:p-10 lg:p-12"
-                style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-              >
-                <div className="overflow-hidden relative" style={{ height: '480px', maxHeight: '60vh' }}>
-                  <div ref={servicesContainerRef} className="absolute inset-0">
+              <div className="relative">
+                <div className="overflow-hidden relative" style={{ minHeight: '300px', maxHeight: '60vh' }}>
+                  <div ref={servicesContainerRef} className="relative">
                     {servicePairs.map((pair, index) => (
                       <div
                         key={index}
-                        className={`absolute inset-0 transition-all duration-500 ${
-                          index === currentPairIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        className={`transition-all duration-500 ${
+                          index === currentPairIndex ? 'block' : 'hidden'
                         }`}
                       >
-                        <div className="flex items-center gap-3 mb-6 sm:mb-8 md:mb-12">
+                        <div className="flex items-center gap-3 mb-4 sm:mb-6 md:mb-8">
                           <div className="flex" style={{ perspective: '800px' }}>
                             <FlipCounter value={pair.id} />
                           </div>
-                          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
+                          <div className="w-8 sm:w-12 md:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
                         </div>
 
-                        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                        <div className="space-y-4 sm:space-y-5 md:space-y-6">
                           {pair.services.map((service, serviceIndex) => (
                             <ServiceItem
                               key={serviceIndex}
@@ -224,18 +215,11 @@ export function StickyServices() {
               </div>
             </div>
 
-            {/* Right side - Image */}
-            <div ref={imageContainerRef} className="lg:col-span-7 relative block mt-8 lg:mt-0" style={{ transformStyle: 'preserve-3d' }}>
-              <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50" style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
-
+            {/* Right side - Image (Hidden on mobile, shows on lg screens) */}
+            <div ref={imageContainerRef} className="lg:col-span-7 order-1 lg:order-2 hidden lg:block">
               <div
-                className="relative w-full max-w-md lg:max-w-none mx-auto"
-                style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
+                className="relative w-full mx-auto"
+                style={{ aspectRatio: '4/5' }}
               >
                 <div
                   ref={clipPathRef}
@@ -265,7 +249,6 @@ export function StickyServices() {
                       style={{
                         opacity: index === currentPairIndex ? 1 : 0,
                         transition: 'opacity 0.5s ease-in-out',
-                        willChange: 'opacity',
                       }}
                     />
                   ))}
@@ -278,27 +261,22 @@ export function StickyServices() {
                       backgroundSize: '40px 40px',
                       opacity: 0.3,
                       mixBlendMode: 'multiply',
-                      animation: 'blueprintFade 3s ease-in-out infinite alternate',
                     }}
                   />
-                  <div
-                    className="absolute inset-0 pointer-events-none z-20"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%)',
-                      mixBlendMode: 'soft-light',
-                    }}
-                  />
-                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-screen z-30">
-                    <svg width="100%" height="100%">
-                      <filter id="dustNoise">
-                        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" seed="2" />
-                        <feColorMatrix type="saturate" values="0" />
-                      </filter>
-                      <rect width="100%" height="100%" filter="url(#dustNoise)" />
-                    </svg>
-                  </div>
                   <FilmGrainTexture />
                 </div>
+              </div>
+            </div>
+
+            {/* Mobile Image - Shows on mobile only (simplified) */}
+            <div className="lg:hidden order-3 mt-6">
+              <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+                <img
+                  src={servicePairs[currentPairIndex].imageUrl}
+                  alt={servicePairs[currentPairIndex].services[0].title}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                <div className="absolute inset-0 bg-black/10" />
               </div>
             </div>
 

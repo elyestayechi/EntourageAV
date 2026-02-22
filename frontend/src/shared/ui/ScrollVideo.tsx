@@ -9,7 +9,6 @@ export function ScrollVideo() {
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    // Guard against React Strict Mode double-invoke and hot reload remounts
     if (initializedRef.current) return;
     initializedRef.current = true;
 
@@ -23,16 +22,13 @@ export function ScrollVideo() {
     video.currentTime = 0;
 
     const ctx = gsap.context(() => {
-      // Create pin trigger immediately and synchronously so GSAP measures
-      // the section's position on the very first refresh pass — before any
-      // async work like video metadata loading.
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false, // the section's 400vh already provides scroll room
-        refreshPriority: 1, // measured before BlueprintSection (priority -1)
+        pinSpacing: false,
+        refreshPriority: 1,
       });
 
       const startScrub = () => {
@@ -48,8 +44,6 @@ export function ScrollVideo() {
           },
         });
 
-        // After scrub trigger is created, force a full remeasure.
-        // Needed because metadata can load after initial refresh has run.
         requestAnimationFrame(() => ScrollTrigger.refresh());
       };
 
@@ -81,14 +75,13 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* GSAP owns the pin — no `sticky` class here */}
       <div ref={containerRef} className="h-screen w-full overflow-hidden">
-        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-          <div className="text-center px-6">
-            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 tracking-tight uppercase">
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center px-4">
+          <div className="text-center w-full max-w-4xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-3 sm:mb-4 md:mb-6 tracking-tight uppercase">
               Notre Processus
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-white/70 uppercase tracking-widest">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/70 uppercase tracking-widest px-4">
               De la vision à la réalité
             </p>
           </div>
@@ -96,7 +89,7 @@ export function ScrollVideo() {
 
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain md:object-cover"
           muted
           playsInline
           preload="auto"
