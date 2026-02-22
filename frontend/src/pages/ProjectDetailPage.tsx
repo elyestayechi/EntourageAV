@@ -1,14 +1,21 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
-import { 
+import {
   ArrowLeft, Calendar, MapPin, Ruler, Clock,
   ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
 import { getProjectBySlug } from '../services/projectsAPI';
 import { LoadingSpinner } from '../shared/ui/LoadingSpinner';
-import { getImageUrl } from '../shared/utils/images';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+function resolveUrl(src: string | undefined | null): string {
+  if (!src) return '';
+  if (src.startsWith('http://') || src.startsWith('https://')) return src;
+  return `${BACKEND_URL}${src.startsWith('/') ? src : `/${src}`}`;
+}
 
 interface ProjectImage {
   before: string;
@@ -16,7 +23,6 @@ interface ProjectImage {
   label?: string;
 }
 
-// Only fields actually returned by the API
 interface ProjectDetail {
   id: number;
   slug: string;
@@ -25,16 +31,19 @@ interface ProjectDetail {
   category: string;
   location: string;
   description: string;
+  image?: string;
   images: ProjectImage[];
   duration?: string;
   surface?: string;
 }
 
-function ImageLightbox({ 
-  images, currentIndex, onClose, onNavigate 
-}: { 
-  images: ProjectImage[], currentIndex: number, onClose: () => void,
-  onNavigate: (direction: 'prev' | 'next') => void
+function ImageLightbox({
+  images, currentIndex, onClose, onNavigate,
+}: {
+  images: ProjectImage[];
+  currentIndex: number;
+  onClose: () => void;
+  onNavigate: (direction: 'prev' | 'next') => void;
 }) {
   const [viewMode, setViewMode] = useState<'before' | 'after'>('before');
 
@@ -51,7 +60,7 @@ function ImageLightbox({
   const currentImage = images[currentIndex];
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(20px)' }}
       onClick={onClose}
@@ -70,9 +79,12 @@ function ImageLightbox({
         </>
       )}
       <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
-        <div className="relative aspect-video overflow-hidden" style={{ clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}>
+        <div
+          className="relative aspect-video overflow-hidden"
+          style={{ clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}
+        >
           <img
-            src={viewMode === 'before' ? getImageUrl(currentImage.before) : getImageUrl(currentImage.after)}
+            src={viewMode === 'before' ? currentImage.before : currentImage.after}
             alt={viewMode === 'before' ? 'Avant' : 'Après'}
             className="w-full h-full object-cover transition-opacity duration-500"
           />
@@ -118,7 +130,7 @@ export function ProjectDetailPage() {
     try {
       setLoading(true);
       const data = await getProjectBySlug(slug!);
-      // Map API image shape (before_image/after_image) to local shape (before/after)
+      // ✅ Map API shape and resolve all URLs here
       const mapped: ProjectDetail = {
         id: data.id,
         slug: data.slug,
@@ -129,9 +141,10 @@ export function ProjectDetailPage() {
         description: data.description,
         duration: data.duration,
         surface: data.surface,
-        images: (data.images ?? []).map((img: any) => ({
-          before: img.before_image ?? img.before ?? '',
-          after: img.after_image ?? img.after ?? '',
+        image: resolveUrl((data as any).image),
+        images: ((data as any).images ?? []).map((img: any) => ({
+          before: resolveUrl(img.before_image ?? img.before ?? ''),
+          after: resolveUrl(img.after_image ?? img.after ?? ''),
           label: img.label,
         })),
       };
@@ -146,16 +159,26 @@ export function ProjectDetailPage() {
   const navigateImage = (direction: 'prev' | 'next') => {
     if (!project) return;
     const maxIndex = project.images.length - 1;
-    setSelectedImageIndex(prev => direction === 'prev' ? (prev > 0 ? prev - 1 : maxIndex) : (prev < maxIndex ? prev + 1 : 0));
+    setSelectedImageIndex((prev) =>
+      direction === 'prev' ? (prev > 0 ? prev - 1 : maxIndex) : (prev < maxIndex ? prev + 1 : 0)
+    );
   };
 
   useEffect(() => {
     if (heroRef.current && project) {
-      gsap.fromTo(heroRef.current.querySelectorAll('.animate-in'), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' });
+      gsap.fromTo(
+        heroRef.current.querySelectorAll('.animate-in'),
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' }
+      );
     }
     if (contentRef.current && project) {
       contentRef.current.querySelectorAll('.fade-in-section').forEach((element) => {
-        gsap.fromTo(element, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 85%', toggleActions: 'play none none none' } });
+        gsap.fromTo(
+          element,
+          { opacity: 0, y: 60 },
+          { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 85%', toggleActions: 'play none none none' } }
+        );
       });
     }
   }, [project]);
@@ -167,7 +190,11 @@ export function ProjectDetailPage() {
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4" style={{ color: '#2A2522' }}>Projet non trouvé</h1>
-          <Link to="/realisations" className="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all duration-300" style={{ background: 'rgba(0, 0, 0, 0.85)', color: 'var(--color-base-cream)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}>
+          <Link
+            to="/realisations"
+            className="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all duration-300"
+            style={{ background: 'rgba(0, 0, 0, 0.85)', color: 'var(--color-base-cream)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}
+          >
             <ArrowLeft className="w-5 h-5" />
             Retour aux projets
           </Link>
@@ -184,13 +211,13 @@ export function ProjectDetailPage() {
           <button
             onClick={() => navigate('/realisations')}
             className="inline-flex items-center gap-2 px-6 py-3 mb-8 font-medium transition-all duration-300 hover:scale-105 animate-in"
-            style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)', color: '#2A2522' }}
+            style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)', color: '#2A2522' }}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Retour aux projets</span>
           </button>
 
-          <div className="inline-flex px-6 py-3 mb-6 animate-in" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}>
+          <div className="inline-flex px-6 py-3 mb-6 animate-in" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)' }}>
             <span className="text-sm font-medium" style={{ color: '#2A2522' }}>PROJET {project.number}</span>
           </div>
 
@@ -221,11 +248,11 @@ export function ProjectDetailPage() {
         </div>
       </section>
 
-      {/* Stats (only show available data) */}
+      {/* Stats */}
       {(project.surface || project.duration) && (
         <section className="py-12 px-4 bg-[#FAFAF9]">
           <div className="max-w-5xl mx-auto">
-            <div className="flex flex-wrap justify-center gap-12 p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
+            <div className="flex flex-wrap justify-center gap-12 p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
               {project.surface && (
                 <div className="text-center">
                   <Ruler className="w-8 h-8 mx-auto mb-3" style={{ color: '#2A2522' }} />
@@ -254,7 +281,14 @@ export function ProjectDetailPage() {
       <section ref={contentRef} className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-5xl mx-auto space-y-16">
 
-          {/* Images Gallery */}
+          {/* Cover image (if no pairs) */}
+          {project.image && project.images.length === 0 && (
+            <div className="fade-in-section overflow-hidden" style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', aspectRatio: '16/9' }}>
+              <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          {/* Before/After gallery */}
           {project.images.length > 0 && (
             <div className="fade-in-section">
               <h2 className="text-3xl font-bold mb-8" style={{ color: '#2A2522' }}>Transformation Visuelle</h2>
@@ -266,7 +300,12 @@ export function ProjectDetailPage() {
                     className="relative group overflow-hidden transition-all duration-300 hover:scale-[1.02]"
                     style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', aspectRatio: project.images.length === 1 ? '16/9' : '4/3' }}
                   >
-                    <img src={getImageUrl(image.before)} alt={`${project.title} - ${image.label ?? `Image ${idx + 1}`}`} className="w-full h-full object-cover" />
+                    <img
+                      src={image.before}
+                      alt={`${project.title} - ${image.label ?? `Image ${idx + 1}`}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}>
                       <div className="text-white text-center">
                         <p className="text-lg font-medium mb-2">Voir Avant / Après</p>
@@ -280,7 +319,7 @@ export function ProjectDetailPage() {
           )}
 
           {/* Description */}
-          <div className="fade-in-section p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
+          <div className="fade-in-section p-8" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)' }}>
             <h2 className="text-3xl font-bold mb-6" style={{ color: '#2A2522' }}>Description du Projet</h2>
             <p className="text-lg leading-relaxed" style={{ color: '#5A5A5A' }}>{project.description}</p>
             <div className="mt-6 pt-6 border-t border-white/20">
@@ -294,14 +333,14 @@ export function ProjectDetailPage() {
           </div>
 
           {/* CTA */}
-          <div className="fade-in-section p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}>
+          <div className="fade-in-section p-12 text-center" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: '#2A2522' }}>Un Projet Similaire en Tête ?</h2>
             <p className="text-lg mb-8 leading-relaxed max-w-2xl mx-auto" style={{ color: '#5A5A5A' }}>Contactez-nous pour discuter de votre projet et découvrir comment nous pouvons vous aider à le concrétiser.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/contact" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)', border: '1px solid rgba(80, 80, 80, 0.25)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: 'var(--color-base-cream)' }}>
+              <Link to="/contact" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)', border: '1px solid rgba(80, 80, 80, 0.25)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: 'var(--color-base-cream)' }}>
                 <span className="uppercase tracking-wider text-sm font-bold">Contactez-Nous</span>
               </Link>
-              <Link to="/realisations" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: '#2A2522' }}>
+              <Link to="/realisations" className="inline-flex items-center justify-center gap-3 px-10 py-5 font-medium transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(255, 255, 255, 0.5)', clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)', color: '#2A2522' }}>
                 <span className="uppercase tracking-wider text-sm font-bold">Voir Tous Les Projets</span>
               </Link>
             </div>
@@ -310,7 +349,12 @@ export function ProjectDetailPage() {
       </section>
 
       {lightboxOpen && (
-        <ImageLightbox images={project.images} currentIndex={selectedImageIndex} onClose={() => setLightboxOpen(false)} onNavigate={navigateImage} />
+        <ImageLightbox
+          images={project.images}
+          currentIndex={selectedImageIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={navigateImage}
+        />
       )}
     </div>
   );

@@ -34,7 +34,9 @@ api.interceptors.request.use(
       // Explicit suffix match
       NO_SLASH_SUFFIXES.some((suffix) => path.endsWith(suffix)) ||
       // Route ends with a numeric ID — e.g. /services/1, /projects/42
-      /\/\d+$/.test(path);
+      /\/\d+$/.test(path) ||
+      // Route contains a slug segment — e.g. /blog/slug/my-post, /projects/slug/my-project
+      /\/slug\//.test(path);
 
     if (!shouldSkip && !url.endsWith('/') && !url.includes('?')) {
       config.url = url + '/';
