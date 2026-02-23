@@ -104,3 +104,15 @@ def health_check():
         "database": "connected",
         "environment": settings.ENVIRONMENT,
     }
+
+@app.get("/debug-cors")
+def debug_cors():
+    """Debug endpoint to check CORS configuration"""
+    return {
+        "cors_origins": cors_origins,
+        "environment": settings.ENVIRONMENT,
+        "is_production": settings.is_production,
+        "frontend_url": settings.FRONTEND_URL,
+        "vercel_url": settings.VERCEL_URL,
+        "custom_domain": settings.CUSTOM_DOMAIN,
+    }
