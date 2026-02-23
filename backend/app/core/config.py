@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     # ── Security ───────────────────────────────────────────────────────────────
-    SECRET_KEY: str
+    SECRET_KEY: str = "2d1d2151848947a946cc808ea29bcbf1bae3e5c9b366983d55cdeef5680cc25c"
     SESSION_MAX_AGE: int = 86400  # 24 hours in seconds
 
     # ── Admin credentials ──────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     S3_REGION: str = "auto"
     S3_BUCKET: str = "categorized-matchbox-mnbqbr"         # categorized-matchbox-mnbqbr
     S3_ACCESS_KEY: str = "tid_FHEsWFAbUrTbhaIaTr_LNBCeXziybhxqyHuVimv_wkUZuM_wdg"     # tid_FHEsWF...
-    S3_SECRET_KEY: str = ""     # your secret key (from Railway bucket dashboard)
+    S3_SECRET_KEY: str = "tsec_rBO2b02IR9bnKdxikQtv-yAt5AUI_C76EtC5xv20kEyWSFxv7huyZ0W6swvMSTEK4l+eZt"     # your secret key (from Railway bucket dashboard)
 
     @property
     def is_production(self) -> bool:
