@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FilmGrainTexture } from '../../shared/ui/FilmGrainTexture';
-import { getActiveSocialMedia, SocialMediaLink } from '../../services/socialMedia';
+import { getActiveSocialMedia, type SocialMediaLink } from '../../services/socialMedia';
 import logo from '../../assets/logo.png';
 
 // Fallback static social links shown when API is unavailable
@@ -48,7 +49,6 @@ function SocialIcon({ platform }: { platform: string }) {
     </svg>
   );
 
-  // Generic globe icon for unknown platforms
   return (
     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -76,12 +76,14 @@ export function Footer() {
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img
-              src={logo}
-              alt="Entourage AV Renovation"
-              className="w-36 md:w-44 h-auto"
-              style={{ filter: 'invert(1) brightness(0)' }}
-            />
+            <Link to="/">
+              <img
+                src={logo}
+                alt="Entourage AV Renovation"
+                className="w-36 md:w-44 h-auto"
+                style={{ filter: 'invert(1) brightness(0)' }}
+              />
+            </Link>
           </div>
 
           {/* Nav columns */}
@@ -90,26 +92,26 @@ export function Footer() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-widest text-black/35 mb-5">Projets</h3>
               <ul className="flex flex-col gap-3">
-                <li><a href="/realisations" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Réalisations</a></li>
-                <li><a href="/processus" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Processus</a></li>
+                <li><Link to="/realisations" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Réalisations</Link></li>
+                <li><Link to="/processus" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Processus</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-widest text-black/35 mb-5">Showroom</h3>
               <ul className="flex flex-col gap-3">
-                <li><a href="/design-interieur" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Design Intérieur</a></li>
-                <li><a href="/catalogue-portes" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Catalogue Portes</a></li>
+                <li><Link to="/design-interieur" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Design Intérieur</Link></li>
+                <li><Link to="/catalogue-portes" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Catalogue Portes</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-widest text-black/35 mb-5">Entreprise</h3>
               <ul className="flex flex-col gap-3">
-                <li><a href="/services" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Services</a></li>
-                <li><a href="/a-propos" className="text-sm text-black/50 hover:text-black transition-colors duration-300">À Propos</a></li>
-                <li><a href="/blog" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Blog</a></li>
-                <li><a href="/contact" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Contact</a></li>
+                <li><Link to="/services" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Services</Link></li>
+                <li><Link to="/a-propos" className="text-sm text-black/50 hover:text-black transition-colors duration-300">À Propos</Link></li>
+                <li><Link to="/blog" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Blog</Link></li>
+                <li><Link to="/contact" className="text-sm text-black/50 hover:text-black transition-colors duration-300">Contact</Link></li>
               </ul>
             </div>
 
@@ -126,7 +128,6 @@ export function Footer() {
           </p>
 
           <div className="flex items-center gap-5">
-            {/* Dynamic social links from API */}
             {socialLinks.map((link) => (
               <a
                 key={link.id}
