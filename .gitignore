@@ -3,8 +3,6 @@ node_modules/
 __pycache__/
 
 # Environment
-.env
-.env.local
 *.pyc
 
 # Build outputs
