@@ -4,10 +4,10 @@ export interface UploadResponse {
   message: string;
   file_path: string;
   url: string;
-  full_url?: string; // Computed full backend URL
+  full_url?: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
 
 export const uploadFile = async (
   file: File,
@@ -16,9 +16,9 @@ export const uploadFile = async (
   const formData = new FormData();
   formData.append('file', file);
 
-  // Pass subfolder as query param (not in body) — consistent with the backend route
+  // No trailing slash, subfolder as query param — no slash before ?
   const response = await api.post<UploadResponse>(
-    `/upload/?subfolder=${subfolder}`,
+    `/upload?subfolder=${subfolder}`,
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -26,13 +26,8 @@ export const uploadFile = async (
   );
 
   const data = response.data;
-
-  // Build the full absolute URL so images load correctly regardless of
-  // which subfolder (services, blog, projects, testimonials) is used.
   const relativePath = data.url.startsWith('/') ? data.url : `/${data.url}`;
   data.full_url = `${BACKEND_URL}${relativePath}`;
-
-  // Override url with the full URL so callers don't need to worry about it
   data.url = data.full_url;
 
   return data;
@@ -42,11 +37,6 @@ export const deleteUploadedFile = async (filePath: string): Promise<void> => {
   await api.delete(`/upload/${filePath}`);
 };
 
-/**
- * Helper: resolve any image src to a displayable URL.
- * - If already absolute (https://...), return as-is
- * - If relative (/static/...), prepend backend URL
- */
 export const resolveImageUrl = (src: string | undefined | null): string => {
   if (!src) return '';
   if (src.startsWith('http://') || src.startsWith('https://')) return src;

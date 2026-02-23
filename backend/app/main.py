@@ -12,14 +12,8 @@ Base.metadata.create_all(bind=engine)
 
 
 def run_safe_migrations():
-    """
-    Safely add any missing columns to existing tables.
-    Uses inspect() to check before altering — safe to run on every startup.
-    """
     with engine.connect() as conn:
         inspector = inspect(engine)
-
-        # ── projects.image ─────────────────────────────────────────────────
         project_cols = [c["name"] for c in inspector.get_columns("projects")]
         if "image" not in project_cols:
             conn.execute(text("ALTER TABLE projects ADD COLUMN image VARCHAR(500)"))
@@ -30,17 +24,14 @@ run_safe_migrations()
 
 
 # ── CORS origins ───────────────────────────────────────────────────────────────
-# Build list from all configured origins — filters out empty strings so
-# missing optional env vars don't create blank entries.
 allowed_origins = [o.strip() for o in [
-    "http://localhost:3000",        # local frontend dev
-    "http://localhost:5173",        # Vite default port
-    settings.FRONTEND_URL,         # primary origin (set in .env)
-    settings.VERCEL_URL,           # Vercel deployment URL
-    settings.CUSTOM_DOMAIN,        # future production domain
+    "http://localhost:3000",
+    "http://localhost:5173",
+    settings.FRONTEND_URL,
+    settings.VERCEL_URL,
+    settings.CUSTOM_DOMAIN,
 ] if o and o.strip()]
 
-# Deduplicate while preserving order
 seen: set = set()
 cors_origins = []
 for origin in allowed_origins:
@@ -51,7 +42,6 @@ for origin in allowed_origins:
 print(f"✅ CORS allowed origins: {cors_origins}")
 
 
-# Initialize FastAPI app
 app = FastAPI(
     title="Entourage AV API",
     description="Backend API for Entourage AV renovation company website",
@@ -60,7 +50,6 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# ⚠️ CORS must be added FIRST (runs last due to reverse middleware order)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -69,19 +58,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Session middleware added AFTER CORS
+# SameSite=None + Secure is REQUIRED for cross-site cookies (Vercel → Railway)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     max_age=settings.SESSION_MAX_AGE,
-    same_site="lax" if not settings.is_production else "strict",
-    https_only=settings.is_production,
+    same_site="none",       # required for cross-origin requests
+    https_only=True,        # required when same_site="none"
 )
 
-# Mount static files directory
 app.mount("/static", StaticFiles(directory=settings.UPLOAD_DIR), name="static")
-
-# Include API router
 app.include_router(api_router, prefix="/api/v1")
 
 
