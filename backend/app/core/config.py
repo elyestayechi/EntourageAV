@@ -29,10 +29,10 @@ class Settings(BaseSettings):
     ALLOWED_EXTENSIONS: str = "jpg,jpeg,png,webp"
 
     # ── Railway S3 Object Storage ──────────────────────────────────────────────
-    S3_ENDPOINT: str = ""       # https://t3.storageapi.dev
+    S3_ENDPOINT: str = "https://t3.storageapi.dev"       # https://t3.storageapi.dev
     S3_REGION: str = "auto"
-    S3_BUCKET: str = ""         # categorized-matchbox-mnbqbr
-    S3_ACCESS_KEY: str = ""     # tid_FHEsWF...
+    S3_BUCKET: str = "categorized-matchbox-mnbqbr"         # categorized-matchbox-mnbqbr
+    S3_ACCESS_KEY: str = "tid_FHEsWFAbUrTbhaIaTr_LNBCeXziybhxqyHuVimv_wkUZuM_wdg"     # tid_FHEsWF...
     S3_SECRET_KEY: str = ""     # your secret key (from Railway bucket dashboard)
 
     @property
