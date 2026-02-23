@@ -1,46 +1,57 @@
 from pydantic_settings import BaseSettings
-from typing import List
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables"""
+    # ── App ────────────────────────────────────────────────────────────────────
+    APP_NAME: str = "Entourage AV API"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
 
-    # Database - PostgreSQL
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/entourage_av"
+    # ── Database ───────────────────────────────────────────────────────────────
+    DATABASE_URL: str
 
-    # Admin Credentials
+    # ── Security ───────────────────────────────────────────────────────────────
+    SECRET_KEY: str
+    SESSION_MAX_AGE: int = 86400  # 24 hours in seconds
+
+    # ── Admin credentials ──────────────────────────────────────────────────────
     ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "changeme123"
+    ADMIN_PASSWORD: str = "admin123"
 
-    # Security
-    SECRET_KEY: str = "your-super-secret-key-change-this-in-production"
-    SESSION_MAX_AGE: int = 3600  # 1 hour in seconds
-
-    # CORS
+    # ── CORS / Frontend URLs ───────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:3000"
+    VERCEL_URL: str = "https://entourage-av.vercel.app"        # e.g. https://entourage-av.vercel.app
+    CUSTOM_DOMAIN: str = ""     # e.g. https://www.entourageavrenovation.fr
 
-    # File Upload
-    UPLOAD_DIR: str = "./static"
-    MAX_FILE_SIZE: int = 5242880  # 5MB
+    # ── File uploads ───────────────────────────────────────────────────────────
+    UPLOAD_DIR: str = "static"
+    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10 MB
     ALLOWED_EXTENSIONS: str = "jpg,jpeg,png,webp"
 
-    # Application
-    DEBUG: bool = True
-    ENVIRONMENT: str = "development"
+    # ── Railway S3 Object Storage ──────────────────────────────────────────────
+    S3_ENDPOINT: str = ""       # https://t3.storageapi.dev
+    S3_REGION: str = "auto"
+    S3_BUCKET: str = ""         # categorized-matchbox-mnbqbr
+    S3_ACCESS_KEY: str = ""     # tid_FHEsWF...
+    S3_SECRET_KEY: str = ""     # your secret key (from Railway bucket dashboard)
 
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
 
     @property
-    def allowed_extensions_list(self) -> List[str]:
-        """Convert ALLOWED_EXTENSIONS string to list"""
-        return [ext.strip() for ext in self.ALLOWED_EXTENSIONS.split(",")]
+    def use_s3(self) -> bool:
+        return bool(
+            self.S3_ENDPOINT
+            and self.S3_ACCESS_KEY
+            and self.S3_SECRET_KEY
+            and self.S3_BUCKET
+        )
 
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # silently ignore any .env vars not declared here
 
 
-# Create global settings instance
 settings = Settings()

@@ -19,7 +19,7 @@ def run_safe_migrations():
     with engine.connect() as conn:
         inspector = inspect(engine)
 
-        # ── projects.image ────────────────────────────────────────────────────
+        # ── projects.image ─────────────────────────────────────────────────
         project_cols = [c["name"] for c in inspector.get_columns("projects")]
         if "image" not in project_cols:
             conn.execute(text("ALTER TABLE projects ADD COLUMN image VARCHAR(500)"))
@@ -27,6 +27,28 @@ def run_safe_migrations():
             print("✅ Migration: added 'image' column to projects table")
 
 run_safe_migrations()
+
+
+# ── CORS origins ───────────────────────────────────────────────────────────────
+# Build list from all configured origins — filters out empty strings so
+# missing optional env vars don't create blank entries.
+allowed_origins = [o.strip() for o in [
+    "http://localhost:3000",        # local frontend dev
+    "http://localhost:5173",        # Vite default port
+    settings.FRONTEND_URL,         # primary origin (set in .env)
+    settings.VERCEL_URL,           # Vercel deployment URL
+    settings.CUSTOM_DOMAIN,        # future production domain
+] if o and o.strip()]
+
+# Deduplicate while preserving order
+seen: set = set()
+cors_origins = []
+for origin in allowed_origins:
+    if origin not in seen:
+        seen.add(origin)
+        cors_origins.append(origin)
+
+print(f"✅ CORS allowed origins: {cors_origins}")
 
 
 # Initialize FastAPI app
@@ -38,10 +60,10 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# ⚠️ CORS must be added FIRST (it runs last due to reverse execution order)
+# ⚠️ CORS must be added FIRST (runs last due to reverse middleware order)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],  # e.g. "http://localhost:3000"
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,8 +93,7 @@ def root():
         "version": "1.0.0",
         "environment": settings.ENVIRONMENT,
         "docs": "/docs",
-        # Add this temporarily to confirm env is loading correctly:
-        "frontend_url": settings.FRONTEND_URL,
+        "cors_origins": cors_origins,
     }
 
 
