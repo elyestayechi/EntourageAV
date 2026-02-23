@@ -1,4 +1,4 @@
-import { authApi as api } from './api';
+import api from './api';
 
 export interface UploadResponse {
   message: string;
