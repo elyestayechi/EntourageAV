@@ -1,4 +1,4 @@
-import api from './api';
+import { authApi as api } from './api';
 
 export interface BlogPost {
   id: number;

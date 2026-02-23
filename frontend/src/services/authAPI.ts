@@ -1,4 +1,4 @@
-import api from './api';
+import { authApi } from './api';
 
 interface LoginCredentials {
   username: string;
@@ -16,15 +16,15 @@ interface CheckAuthResponse {
 }
 
 export const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>('/auth/login', credentials);
+  const response = await authApi.post<LoginResponse>('/auth/login', credentials);
   return response.data;
 };
 
 export const logout = async (): Promise<void> => {
-  await api.post('/auth/logout');
+  await authApi.post('/auth/logout');
 };
 
 export const checkAuth = async (): Promise<CheckAuthResponse> => {
-  const response = await api.get<CheckAuthResponse>('/auth/check');
+  const response = await authApi.get<CheckAuthResponse>('/auth/check');
   return response.data;
 };
