@@ -1,6 +1,7 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import text, inspect
 from app.core.config import settings
@@ -30,8 +31,6 @@ run_safe_migrations()
 
 
 # ── CORS origins ───────────────────────────────────────────────────────────────
-# Build list from all configured origins — filters out empty strings so
-# missing optional env vars don't create blank entries.
 allowed_origins = [o.strip() for o in [
     "http://localhost:3000",        # local frontend dev
     "http://localhost:5173",        # Vite default port
@@ -42,13 +41,46 @@ allowed_origins = [o.strip() for o in [
 
 # Deduplicate while preserving order
 seen: set = set()
-cors_origins = []
+cors_origins: list = []
 for origin in allowed_origins:
     if origin not in seen:
         seen.add(origin)
         cors_origins.append(origin)
 
 print(f"✅ CORS allowed origins: {cors_origins}")
+
+
+# ── Custom CORS middleware ─────────────────────────────────────────────────────
+# We use a custom middleware instead of FastAPI's built-in CORSMiddleware
+# because Railway's proxy layer can override the 'Access-Control-Allow-Origin'
+# header to '*', which breaks withCredentials requests from the browser.
+# This middleware sets the header directly on every response, overriding anything
+# the proxy injects.
+class CustomCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        origin = request.headers.get("origin", "")
+
+        # Handle CORS preflight requests
+        if request.method == "OPTIONS":
+            response = Response()
+            if origin in cors_origins:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
+                response.headers["Access-Control-Max-Age"] = "600"
+            return response
+
+        # Handle all other requests
+        response = await call_next(request)
+
+        if origin in cors_origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
+
+        return response
 
 
 # Initialize FastAPI app
@@ -60,20 +92,18 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# ⚠️ CORS must be added FIRST (runs last due to reverse middleware order)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ⚠️ Middleware order matters — added in reverse execution order.
+# CustomCORSMiddleware runs first (outermost), SessionMiddleware runs second.
 
-# Session middleware added AFTER CORS
+app.add_middleware(CustomCORSMiddleware)
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     max_age=settings.SESSION_MAX_AGE,
+    # "none" is required for cross-origin cookie sending (Vercel → Railway).
+    # "strict" would silently block the session cookie on every request.
+    # "none" requires https_only=True — both must be set together in production.
     same_site="none" if settings.is_production else "lax",
     https_only=settings.is_production,
 )
@@ -103,16 +133,4 @@ def health_check():
         "status": "healthy",
         "database": "connected",
         "environment": settings.ENVIRONMENT,
-    }
-
-@app.get("/debug-cors")
-def debug_cors():
-    """Debug endpoint to check CORS configuration"""
-    return {
-        "cors_origins": cors_origins,
-        "environment": settings.ENVIRONMENT,
-        "is_production": settings.is_production,
-        "frontend_url": settings.FRONTEND_URL,
-        "vercel_url": settings.VERCEL_URL,
-        "custom_domain": settings.CUSTOM_DOMAIN,
     }
