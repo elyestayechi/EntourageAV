@@ -35,6 +35,67 @@ def run_safe_migrations():
 run_safe_migrations()
 
 
+def configure_s3_cors():
+    """
+    Configure CORS on the Railway S3 bucket at startup.
+    This allows the Vercel frontend to load images directly from S3.
+    Safe to run on every startup — put_bucket_cors is idempotent.
+    """
+    if not settings.use_s3:
+        print("ℹ️  S3 not configured — skipping CORS setup")
+        return
+
+    try:
+        import boto3
+        from botocore.client import Config
+
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=settings.S3_ENDPOINT,
+            aws_access_key_id=settings.S3_ACCESS_KEY,
+            aws_secret_access_key=settings.S3_SECRET_KEY,
+            region_name=settings.S3_REGION,
+            config=Config(signature_version="s3v4"),
+        )
+
+        # Build allowed origins — filter out empty strings
+        allowed_origins = [
+            o for o in [
+                settings.VERCEL_URL,
+                settings.FRONTEND_URL,
+                settings.CUSTOM_DOMAIN,
+                "http://localhost:3000",
+                "http://localhost:5173",
+            ]
+            if o and o.strip()
+        ]
+
+        s3.put_bucket_cors(
+            Bucket=settings.S3_BUCKET,
+            CORSConfiguration={
+                "CORSRules": [
+                    {
+                        "AllowedHeaders": ["*"],
+                        "AllowedMethods": ["GET", "HEAD"],
+                        "AllowedOrigins": allowed_origins,
+                        "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
+                        "MaxAgeSeconds": 86400,
+                    }
+                ]
+            },
+        )
+        print(f"✅ S3 CORS configured for origins: {allowed_origins}")
+
+    except ImportError:
+        print("⚠️  boto3 not installed — S3 CORS not configured")
+    except Exception as e:
+        # Log but don't crash the server — CORS config failure shouldn't block startup
+        print(f"⚠️  S3 CORS configuration failed: {e}")
+        logger.warning(f"S3 CORS configuration failed: {e}")
+
+configure_s3_cors()
+
+
 # ── CORS origins ───────────────────────────────────────────────────────────────
 allowed_origins = [o.strip() for o in [
     "http://localhost:3000",        # local frontend dev
