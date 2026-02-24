@@ -19,10 +19,11 @@ export const uploadFile = async (
   formData.append('file', file);
 
   const response = await authApi.post<UploadResponse>(
-    `/upload/?subfolder=${subfolder}`,
+    '/upload/',
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
+      params: { subfolder },
     }
   );
 
