@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +8,10 @@ from sqlalchemy import text, inspect
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.database import engine, Base
+
+# ── Logging setup ──────────────────────────────────────────────────────────────
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("entourage.cors")
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -48,37 +53,52 @@ for origin in allowed_origins:
         cors_origins.append(origin)
 
 print(f"✅ CORS allowed origins: {cors_origins}")
+logger.info(f"✅ CORS allowed origins: {cors_origins}")
 
 
 # ── Custom CORS middleware ─────────────────────────────────────────────────────
 # We use a custom middleware instead of FastAPI's built-in CORSMiddleware
 # because Railway's proxy layer can override the 'Access-Control-Allow-Origin'
 # header to '*', which breaks withCredentials requests from the browser.
-# This middleware sets the header directly on every response, overriding anything
-# the proxy injects.
 class CustomCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         origin = request.headers.get("origin", "")
+        method = request.method
+        path = request.url.path
+
+        logger.debug(f"[CORS] {method} {path} | Origin: '{origin}'")
+        logger.debug(f"[CORS] Allowed origins: {cors_origins}")
+        logger.debug(f"[CORS] Origin match: {origin in cors_origins}")
 
         # Handle CORS preflight requests
-        if request.method == "OPTIONS":
+        if method == "OPTIONS":
             response = Response()
             if origin in cors_origins:
+                logger.debug(f"[CORS] ✅ Preflight ALLOWED for origin: {origin}")
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
                 response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
                 response.headers["Access-Control-Max-Age"] = "600"
+            else:
+                logger.warning(f"[CORS] ❌ Preflight BLOCKED for origin: '{origin}' — not in allowed list")
             return response
 
         # Handle all other requests
         response = await call_next(request)
 
         if origin in cors_origins:
+            logger.debug(f"[CORS] ✅ Response headers set for origin: {origin}")
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
+        else:
+            if origin:
+                logger.warning(f"[CORS] ❌ Response BLOCKED for origin: '{origin}' — not in allowed list")
+            # Log what header Railway/proxy may have injected
+            existing = response.headers.get("Access-Control-Allow-Origin", "NOT SET")
+            logger.debug(f"[CORS] Existing Access-Control-Allow-Origin header: '{existing}'")
 
         return response
 
@@ -102,7 +122,7 @@ app.add_middleware(
     secret_key=settings.SECRET_KEY,
     max_age=settings.SESSION_MAX_AGE,
     # "none" is required for cross-origin cookie sending (Vercel → Railway).
-    # "strict" would silently block the session cookie on every request.
+    # "strict" would silently block the session cookie on every request after login.
     # "none" requires https_only=True — both must be set together in production.
     same_site="none" if settings.is_production else "lax",
     https_only=settings.is_production,
