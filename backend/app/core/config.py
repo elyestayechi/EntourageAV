@@ -20,8 +20,13 @@ class Settings(BaseSettings):
 
     # ── CORS / Frontend URLs ───────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:3000"
-    VERCEL_URL: str = "https://entourage-av.vercel.app"        # e.g. https://entourage-av.vercel.app
-    CUSTOM_DOMAIN: str = ""     # e.g. https://www.entourageavrenovation.fr
+    VERCEL_URL: str = "https://entourage-av.vercel.app"
+    CUSTOM_DOMAIN: str = ""
+
+    # ── Backend URL (used to build proxied image URLs) ─────────────────────────
+    # In production this must be your Railway backend public URL.
+    # e.g. https://entourage-av-backend.up.railway.app
+    BACKEND_URL: str = "http://localhost:8000"
 
     # ── File uploads ───────────────────────────────────────────────────────────
     UPLOAD_DIR: str = "static"
@@ -29,11 +34,11 @@ class Settings(BaseSettings):
     ALLOWED_EXTENSIONS: str = "jpg,jpeg,png,webp"
 
     # ── Railway S3 Object Storage ──────────────────────────────────────────────
-    S3_ENDPOINT: str = "https://t3.storageapi.dev"       # https://t3.storageapi.dev
+    S3_ENDPOINT: str = "https://t3.storageapi.dev"
     S3_REGION: str = "auto"
-    S3_BUCKET: str = "categorized-matchbox-mnbqbr"         # categorized-matchbox-mnbqbr
-    S3_ACCESS_KEY: str = "tid_FHEsWFAbUrTbhaIaTr_LNBCeXziybhxqyHuVimv_wkUZuM_wdg"     # tid_FHEsWF...
-    S3_SECRET_KEY: str = "tsec_rBO2b02IR9bnKdxikQtv-yAt5AUI_C76EtC5xv20kEyWSFxv7huyZ0W6swvMSTEK4l+eZt"     # your secret key (from Railway bucket dashboard)
+    S3_BUCKET: str = "categorized-matchbox-mnbqbr"
+    S3_ACCESS_KEY: str = "tid_FHEsWFAbUrTbhaIaTr_LNBCeXziybhxqyHuVimv_wkUZuM_wdg"
+    S3_SECRET_KEY: str = "tsec_rBO2b02IR9bnKdxikQtv-yAt5AUI_C76EtC5xv20kEyWSFxv7huyZ0W6swvMSTEK4l+eZt"
 
     @property
     def is_production(self) -> bool:
@@ -51,7 +56,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
-        extra = "ignore"  # silently ignore any .env vars not declared here
+        extra = "ignore"
 
 
 settings = Settings()

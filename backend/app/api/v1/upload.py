@@ -1,7 +1,8 @@
+import io
 import os
 import uuid
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from app.core.config import settings
 from app.core.security import check_admin_session
 
@@ -32,13 +33,13 @@ def _get_content_type(filename: str) -> str:
     }.get(ext, "image/jpeg")
 
 
-# ── Railway S3 upload ──────────────────────────────────────────────────────────
-def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
+def _get_s3_client():
+    """Create and return a boto3 S3 client."""
     try:
-        import boto3  # pyright: ignore[reportMissingImports]
-        from botocore.client import Config  # pyright: ignore[reportMissingImports]
+        import boto3
+        from botocore.client import Config
 
-        s3 = boto3.client(
+        return boto3.client(
             "s3",
             endpoint_url=settings.S3_ENDPOINT,
             aws_access_key_id=settings.S3_ACCESS_KEY,
@@ -46,30 +47,40 @@ def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
             region_name=settings.S3_REGION,
             config=Config(signature_version="s3v4"),
         )
-
-        key = f"{subfolder}/{filename}" if subfolder else filename
-
-        s3.put_object(
-    Bucket=settings.S3_BUCKET,
-    Key=key,
-    Body=file_bytes,
-    ContentType=_get_content_type(filename),
-    ACL='public-read',
-)
-        public_url = f"https://{settings.S3_BUCKET}.t3.storageapi.dev/{key}"
-
-        return {
-            "message": "File uploaded to Railway S3",
-            "file_path": key,
-            "url": public_url,
-            "full_url": public_url,
-        }
-
     except ImportError:
         raise HTTPException(
             status_code=500,
             detail="boto3 not installed. Add 'boto3' to requirements.txt"
         )
+
+
+# ── Railway S3 upload ──────────────────────────────────────────────────────────
+def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
+    try:
+        s3 = _get_s3_client()
+        key = f"{subfolder}/{filename}" if subfolder else filename
+
+        s3.put_object(
+            Bucket=settings.S3_BUCKET,
+            Key=key,
+            Body=file_bytes,
+            ContentType=_get_content_type(filename),
+        )
+
+        # Return a proxied URL through our own backend instead of direct S3 URL.
+        # This avoids the Tigris/Railway S3 public access problem entirely —
+        # images are served through FastAPI which already has correct CORS headers.
+        proxy_url = f"{settings.BACKEND_URL}/api/v1/upload/media/{key}"
+
+        return {
+            "message": "File uploaded to Railway S3",
+            "file_path": key,
+            "url": proxy_url,
+            "full_url": proxy_url,
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
 
@@ -96,23 +107,43 @@ def _upload_to_local(file_bytes: bytes, filename: str, subfolder: str) -> dict:
 # ── Delete from S3 ─────────────────────────────────────────────────────────────
 def _delete_from_s3(key: str) -> None:
     try:
-        import boto3  # pyright: ignore[reportMissingImports]
-        from botocore.client import Config  # pyright: ignore[reportMissingImports]
-
-        s3 = boto3.client(
-            "s3",
-            endpoint_url=settings.S3_ENDPOINT,
-            aws_access_key_id=settings.S3_ACCESS_KEY,
-            aws_secret_access_key=settings.S3_SECRET_KEY,
-            region_name=settings.S3_REGION,
-            config=Config(signature_version="s3v4"),
-        )
+        s3 = _get_s3_client()
         s3.delete_object(Bucket=settings.S3_BUCKET, Key=key)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"S3 delete failed: {str(e)}")
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
+
+@router.get("/media/{file_path:path}")
+async def serve_media(file_path: str):
+    """
+    Proxy S3 images through the backend.
+    Since Tigris/Railway S3 doesn't support public bucket policies,
+    we fetch the object privately and stream it to the client.
+    The backend already has correct CORS headers so the browser accepts it.
+    """
+    if not settings.use_s3:
+        raise HTTPException(status_code=404, detail="S3 not configured")
+
+    try:
+        s3 = _get_s3_client()
+        obj = s3.get_object(Bucket=settings.S3_BUCKET, Key=file_path)
+        content_type = obj.get("ContentType", "image/jpeg")
+        body = obj["Body"].read()
+
+        return StreamingResponse(
+            io.BytesIO(body),
+            media_type=content_type,
+            headers={
+                # Cache aggressively on the client — images don't change
+                "Cache-Control": "public, max-age=31536000, immutable",
+            },
+        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"File not found: {str(e)}")
+
+
 @router.post("/")
 async def upload_file(
     request: Request,

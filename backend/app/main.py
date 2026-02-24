@@ -1,4 +1,3 @@
-import json
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
@@ -36,106 +35,13 @@ def run_safe_migrations():
 run_safe_migrations()
 
 
-def configure_s3():
-    """
-    Configure the Railway S3 bucket at startup:
-      1. Bucket policy  — makes every object publicly readable (fixes 403)
-      2. CORS policy    — allows the Vercel frontend to load images (fixes ERR_BLOCKED_BY_ORB)
-
-    Both calls are idempotent — safe to run on every startup.
-    """
-    if not settings.use_s3:
-        print("ℹ️  S3 not configured — skipping S3 setup")
-        return
-
-    try:
-        import boto3
-        from botocore.client import Config
-
-        s3 = boto3.client(
-            "s3",
-            endpoint_url=settings.S3_ENDPOINT,
-            aws_access_key_id=settings.S3_ACCESS_KEY,
-            aws_secret_access_key=settings.S3_SECRET_KEY,
-            region_name=settings.S3_REGION,
-            config=Config(signature_version="s3v4"),
-        )
-
-        # ── 1. Bucket policy: public read for all objects ──────────────────
-        # Railway S3 / Tigris may ignore per-object ACLs, so we set a bucket
-        # policy instead to guarantee every uploaded file is publicly accessible.
-        bucket_policy = {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Sid": "PublicReadGetObject",
-                    "Effect": "Allow",
-                    "Principal": "*",
-                    "Action": ["s3:GetObject"],
-                    "Resource": [f"arn:aws:s3:::{settings.S3_BUCKET}/*"],
-                }
-            ],
-        }
-
-        try:
-            s3.put_bucket_policy(
-                Bucket=settings.S3_BUCKET,
-                Policy=json.dumps(bucket_policy),
-            )
-            print(f"✅ S3 bucket policy set — all objects in '{settings.S3_BUCKET}' are now public")
-        except Exception as e:
-            print(f"⚠️  S3 bucket policy failed: {e}")
-            logger.warning(f"S3 bucket policy failed: {e}")
-
-        # ── 2. CORS policy: allow Vercel frontend to load images ───────────
-        allowed_origins = [
-            o for o in [
-                settings.VERCEL_URL,
-                settings.FRONTEND_URL,
-                settings.CUSTOM_DOMAIN,
-                "http://localhost:3000",
-                "http://localhost:5173",
-            ]
-            if o and o.strip()
-        ]
-
-        try:
-            s3.put_bucket_cors(
-                Bucket=settings.S3_BUCKET,
-                CORSConfiguration={
-                    "CORSRules": [
-                        {
-                            "AllowedHeaders": ["*"],
-                            "AllowedMethods": ["GET", "HEAD"],
-                            "AllowedOrigins": allowed_origins,
-                            "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
-                            "MaxAgeSeconds": 86400,
-                        }
-                    ]
-                },
-            )
-            print(f"✅ S3 CORS configured for origins: {allowed_origins}")
-        except Exception as e:
-            print(f"⚠️  S3 CORS configuration failed: {e}")
-            logger.warning(f"S3 CORS configuration failed: {e}")
-
-    except ImportError:
-        print("⚠️  boto3 not installed — S3 not configured")
-    except Exception as e:
-        # Never crash the server over S3 config
-        print(f"⚠️  S3 setup failed: {e}")
-        logger.warning(f"S3 setup failed: {e}")
-
-configure_s3()
-
-
 # ── CORS origins ───────────────────────────────────────────────────────────────
 allowed_origins = [o.strip() for o in [
-    "http://localhost:3000",        # local frontend dev
-    "http://localhost:5173",        # Vite default port
-    settings.FRONTEND_URL,         # primary origin (set in .env)
-    settings.VERCEL_URL,           # Vercel deployment URL
-    settings.CUSTOM_DOMAIN,        # future production domain
+    "http://localhost:3000",
+    "http://localhost:5173",
+    settings.FRONTEND_URL,
+    settings.VERCEL_URL,
+    settings.CUSTOM_DOMAIN,
 ] if o and o.strip()]
 
 # Deduplicate while preserving order
@@ -147,13 +53,11 @@ for origin in allowed_origins:
         cors_origins.append(origin)
 
 print(f"✅ CORS allowed origins: {cors_origins}")
+print(f"✅ Backend URL (for image proxying): {settings.BACKEND_URL}")
 logger.info(f"✅ CORS allowed origins: {cors_origins}")
 
 
 # ── Custom CORS middleware ─────────────────────────────────────────────────────
-# We use a custom middleware instead of FastAPI's built-in CORSMiddleware
-# because Railway's proxy layer can override the 'Access-Control-Allow-Origin'
-# header to '*', which breaks withCredentials requests from the browser.
 class CustomCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         origin = request.headers.get("origin", "")
@@ -161,37 +65,25 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         logger.debug(f"[CORS] {method} {path} | Origin: '{origin}'")
-        logger.debug(f"[CORS] Allowed origins: {cors_origins}")
-        logger.debug(f"[CORS] Origin match: {origin in cors_origins}")
 
         # Handle CORS preflight requests
         if method == "OPTIONS":
             response = Response()
             if origin in cors_origins:
-                logger.debug(f"[CORS] ✅ Preflight ALLOWED for origin: {origin}")
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
                 response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
                 response.headers["Access-Control-Max-Age"] = "600"
-            else:
-                logger.warning(f"[CORS] ❌ Preflight BLOCKED for origin: '{origin}' — not in allowed list")
             return response
 
-        # Handle all other requests
         response = await call_next(request)
 
         if origin in cors_origins:
-            logger.debug(f"[CORS] ✅ Response headers set for origin: {origin}")
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Cookie"
-        else:
-            if origin:
-                logger.warning(f"[CORS] ❌ Response BLOCKED for origin: '{origin}' — not in allowed list")
-            existing = response.headers.get("Access-Control-Allow-Origin", "NOT SET")
-            logger.debug(f"[CORS] Existing Access-Control-Allow-Origin header: '{existing}'")
 
         return response
 
@@ -205,18 +97,12 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# ⚠️ Middleware order matters — added in reverse execution order.
-# CustomCORSMiddleware runs first (outermost), SessionMiddleware runs second.
-
 app.add_middleware(CustomCORSMiddleware)
 
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     max_age=settings.SESSION_MAX_AGE,
-    # "none" is required for cross-origin cookie sending (Vercel → Railway).
-    # "strict" would silently block the session cookie on every request after login.
-    # "none" requires https_only=True — both must be set together in production.
     same_site="none" if settings.is_production else "lax",
     https_only=settings.is_production,
 )
@@ -237,6 +123,7 @@ def root():
         "environment": settings.ENVIRONMENT,
         "docs": "/docs",
         "cors_origins": cors_origins,
+        "backend_url": settings.BACKEND_URL,
     }
 
 
