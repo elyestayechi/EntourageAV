@@ -29,9 +29,17 @@ export const uploadFile = async (
 
   const data = response.data;
 
-  const relativePath = data.url.startsWith('/') ? data.url : `/${data.url}`;
-  data.full_url = `${BACKEND_URL}${relativePath}`;
-  data.url = data.full_url;
+  // Check if the URL is already absolute (S3 case) or relative (local case)
+  if (data.url.startsWith('http://') || data.url.startsWith('https://')) {
+    // S3 case - URL is already complete
+    data.full_url = data.url;
+    data.url = data.url;
+  } else {
+    // Local development case - prepend backend URL
+    const relativePath = data.url.startsWith('/') ? data.url : `/${data.url}`;
+    data.full_url = `${BACKEND_URL}${relativePath}`;
+    data.url = data.full_url;
+  }
 
   return data;
 };
