@@ -54,7 +54,7 @@ def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
     Key=key,
     Body=file_bytes,
     ContentType=_get_content_type(filename),
-    ACL='public-read',
+    ACL='public-rea',
 )
         public_url = f"{settings.S3_ENDPOINT}/{settings.S3_BUCKET}/{key}"
 
