@@ -56,7 +56,7 @@ def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
     ContentType=_get_content_type(filename),
     ACL='public-read',
 )
-        public_url = f"{settings.S3_ENDPOINT}/{settings.S3_BUCKET}/{key}"
+        public_url = f"https://{settings.S3_BUCKET}.t3.storageapi.dev/{key}"
 
         return {
             "message": "File uploaded to Railway S3",
