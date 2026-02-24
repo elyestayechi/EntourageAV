@@ -50,12 +50,12 @@ def _upload_to_s3(file_bytes: bytes, filename: str, subfolder: str) -> dict:
         key = f"{subfolder}/{filename}" if subfolder else filename
 
         s3.put_object(
-            Bucket=settings.S3_BUCKET,
-            Key=key,
-            Body=file_bytes,
-            ContentType=_get_content_type(filename),
-        )
-
+    Bucket=settings.S3_BUCKET,
+    Key=key,
+    Body=file_bytes,
+    ContentType=_get_content_type(filename),
+    ACL='public-read',
+)
         public_url = f"{settings.S3_ENDPOINT}/{settings.S3_BUCKET}/{key}"
 
         return {
