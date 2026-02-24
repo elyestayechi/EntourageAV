@@ -1,3 +1,4 @@
+import json
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
@@ -35,14 +36,16 @@ def run_safe_migrations():
 run_safe_migrations()
 
 
-def configure_s3_cors():
+def configure_s3():
     """
-    Configure CORS on the Railway S3 bucket at startup.
-    This allows the Vercel frontend to load images directly from S3.
-    Safe to run on every startup — put_bucket_cors is idempotent.
+    Configure the Railway S3 bucket at startup:
+      1. Bucket policy  — makes every object publicly readable (fixes 403)
+      2. CORS policy    — allows the Vercel frontend to load images (fixes ERR_BLOCKED_BY_ORB)
+
+    Both calls are idempotent — safe to run on every startup.
     """
     if not settings.use_s3:
-        print("ℹ️  S3 not configured — skipping CORS setup")
+        print("ℹ️  S3 not configured — skipping S3 setup")
         return
 
     try:
@@ -58,7 +61,33 @@ def configure_s3_cors():
             config=Config(signature_version="s3v4"),
         )
 
-        # Build allowed origins — filter out empty strings
+        # ── 1. Bucket policy: public read for all objects ──────────────────
+        # Railway S3 / Tigris may ignore per-object ACLs, so we set a bucket
+        # policy instead to guarantee every uploaded file is publicly accessible.
+        bucket_policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "PublicReadGetObject",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": ["s3:GetObject"],
+                    "Resource": [f"arn:aws:s3:::{settings.S3_BUCKET}/*"],
+                }
+            ],
+        }
+
+        try:
+            s3.put_bucket_policy(
+                Bucket=settings.S3_BUCKET,
+                Policy=json.dumps(bucket_policy),
+            )
+            print(f"✅ S3 bucket policy set — all objects in '{settings.S3_BUCKET}' are now public")
+        except Exception as e:
+            print(f"⚠️  S3 bucket policy failed: {e}")
+            logger.warning(f"S3 bucket policy failed: {e}")
+
+        # ── 2. CORS policy: allow Vercel frontend to load images ───────────
         allowed_origins = [
             o for o in [
                 settings.VERCEL_URL,
@@ -70,30 +99,34 @@ def configure_s3_cors():
             if o and o.strip()
         ]
 
-        s3.put_bucket_cors(
-            Bucket=settings.S3_BUCKET,
-            CORSConfiguration={
-                "CORSRules": [
-                    {
-                        "AllowedHeaders": ["*"],
-                        "AllowedMethods": ["GET", "HEAD"],
-                        "AllowedOrigins": allowed_origins,
-                        "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
-                        "MaxAgeSeconds": 86400,
-                    }
-                ]
-            },
-        )
-        print(f"✅ S3 CORS configured for origins: {allowed_origins}")
+        try:
+            s3.put_bucket_cors(
+                Bucket=settings.S3_BUCKET,
+                CORSConfiguration={
+                    "CORSRules": [
+                        {
+                            "AllowedHeaders": ["*"],
+                            "AllowedMethods": ["GET", "HEAD"],
+                            "AllowedOrigins": allowed_origins,
+                            "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
+                            "MaxAgeSeconds": 86400,
+                        }
+                    ]
+                },
+            )
+            print(f"✅ S3 CORS configured for origins: {allowed_origins}")
+        except Exception as e:
+            print(f"⚠️  S3 CORS configuration failed: {e}")
+            logger.warning(f"S3 CORS configuration failed: {e}")
 
     except ImportError:
-        print("⚠️  boto3 not installed — S3 CORS not configured")
+        print("⚠️  boto3 not installed — S3 not configured")
     except Exception as e:
-        # Log but don't crash the server — CORS config failure shouldn't block startup
-        print(f"⚠️  S3 CORS configuration failed: {e}")
-        logger.warning(f"S3 CORS configuration failed: {e}")
+        # Never crash the server over S3 config
+        print(f"⚠️  S3 setup failed: {e}")
+        logger.warning(f"S3 setup failed: {e}")
 
-configure_s3_cors()
+configure_s3()
 
 
 # ── CORS origins ───────────────────────────────────────────────────────────────
@@ -157,7 +190,6 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
         else:
             if origin:
                 logger.warning(f"[CORS] ❌ Response BLOCKED for origin: '{origin}' — not in allowed list")
-            # Log what header Railway/proxy may have injected
             existing = response.headers.get("Access-Control-Allow-Origin", "NOT SET")
             logger.debug(f"[CORS] Existing Access-Control-Allow-Origin header: '{existing}'")
 
