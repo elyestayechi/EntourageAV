@@ -29,17 +29,10 @@ export const uploadFile = async (
 
   const data = response.data;
 
-  // Check if the URL is already absolute (S3 case) or relative (local case)
-  if (data.url.startsWith('http://') || data.url.startsWith('https://')) {
-    // S3 case - URL is already complete
-    data.full_url = data.url;
-    data.url = data.url;
-  } else {
-    // Local development case - prepend backend URL
-    const relativePath = data.url.startsWith('/') ? data.url : `/${data.url}`;
-    data.full_url = `${BACKEND_URL}${relativePath}`;
-    data.url = data.full_url;
-  }
+  // The backend now returns a fully absolute proxied URL like:
+  // https://entourageav-production.up.railway.app/api/v1/upload/media/services/xxx.jpg
+  // We just use it as-is — no need to prepend anything.
+  data.full_url = data.url;
 
   return data;
 };
@@ -49,12 +42,14 @@ export const deleteUploadedFile = async (filePath: string): Promise<void> => {
 };
 
 /**
- * Helper: resolve any image src to a displayable URL.
- * - If already absolute (https://...), return as-is
- * - If relative (/static/...), prepend backend URL
+ * Resolve any image src to a displayable URL.
+ * - Already absolute (https://...) → return as-is
+ * - Relative (/static/... or /api/...) → prepend BACKEND_URL
+ * - Anything else → return as-is
  */
 export const resolveImageUrl = (src: string | undefined | null): string => {
   if (!src) return '';
   if (src.startsWith('http://') || src.startsWith('https://')) return src;
+  // Relative path — prepend backend
   return `${BACKEND_URL}${src.startsWith('/') ? src : `/${src}`}`;
 };
