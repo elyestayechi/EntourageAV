@@ -1,4 +1,4 @@
-import api from './api';
+import api, { authApi } from './api';
 
 export interface ContactSubmission {
   id: number;
@@ -25,8 +25,9 @@ export interface ContactFormData {
   surface?: string;
 }
 
+// ── Public endpoint ────────────────────────────────────────────────────────────
+
 export const submitContactForm = async (data: ContactFormData): Promise<ContactSubmission> => {
-  // Build a clean payload — never send undefined/null fields that the backend rejects
   const payload: Record<string, any> = {
     name: data.name,
     email: data.email,
@@ -35,8 +36,6 @@ export const submitContactForm = async (data: ContactFormData): Promise<ContactS
     services: data.services ?? [],
     location: data.location ?? '',
   };
-
-  // Only include optional fields if they have a value
   if (data.project_type) payload.project_type = data.project_type;
   if (data.surface) payload.surface = data.surface;
 
@@ -44,21 +43,23 @@ export const submitContactForm = async (data: ContactFormData): Promise<ContactS
   return response.data;
 };
 
+// ── Admin endpoints (require session cookie) ───────────────────────────────────
+
 export const getAllContacts = async (): Promise<ContactSubmission[]> => {
-  const response = await api.get<ContactSubmission[]>('/contacts/');
-  return response.data;
+  const response = await authApi.get<ContactSubmission[]>('/contacts/');
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getContactById = async (id: number): Promise<ContactSubmission> => {
-  const response = await api.get<ContactSubmission>(`/contacts/${id}`);
+  const response = await authApi.get<ContactSubmission>(`/contacts/${id}`);
   return response.data;
 };
 
 export const markContactAsRead = async (id: number): Promise<ContactSubmission> => {
-  const response = await api.put<ContactSubmission>(`/contacts/${id}/read`);
+  const response = await authApi.patch<ContactSubmission>(`/contacts/${id}/read`);
   return response.data;
 };
 
 export const deleteContact = async (id: number): Promise<void> => {
-  await api.delete(`/contacts/${id}`);
+  await authApi.delete(`/contacts/${id}`);
 };

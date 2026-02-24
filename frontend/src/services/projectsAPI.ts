@@ -1,4 +1,4 @@
-import api from './api';
+import api, { authApi } from './api';
 
 export interface ProjectImage {
   id: number;
@@ -21,7 +21,7 @@ export interface Project {
   duration?: string;
   surface?: string;
   image?: string;
-  is_featured?: boolean;  // ✅ Add this
+  is_featured?: boolean;
   images: ProjectImage[];
   created_at: string;
   updated_at: string;
@@ -37,7 +37,7 @@ export interface ProjectCreate {
   duration?: string;
   surface?: string;
   image?: string;
-  is_featured?: boolean;  // ✅ Add this
+  is_featured?: boolean;
 }
 
 export interface ProjectImageCreate {
@@ -47,61 +47,55 @@ export interface ProjectImageCreate {
   order_index: number;
 }
 
-// Get all projects (with optional category filter)
+// ── Public endpoints ───────────────────────────────────────────────────────────
+
 export const getAllProjects = async (category?: string): Promise<Project[]> => {
   const params = category ? { category } : {};
   const response = await api.get<Project[]>('/projects/', { params });
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-// ✅ NEW: Get featured projects (for homepage)
 export const getFeaturedProjects = async (limit: number = 3): Promise<Project[]> => {
   const response = await api.get<Project[]>(`/projects/featured?limit=${limit}`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-// Get single project by ID
 export const getProjectById = async (id: number): Promise<Project> => {
   const response = await api.get<Project>(`/projects/${id}`);
   return response.data;
 };
 
-// Get project by slug
 export const getProjectBySlug = async (slug: string): Promise<Project> => {
   const response = await api.get<Project>(`/projects/slug/${slug}`);
   return response.data;
 };
 
-// Create project (admin only)
+// ── Admin endpoints (require session cookie) ───────────────────────────────────
+
 export const createProject = async (data: ProjectCreate): Promise<Project> => {
-  const response = await api.post<Project>('/projects/', data);
+  const response = await authApi.post<Project>('/projects/', data);
   return response.data;
 };
 
-// Update project (admin only)
 export const updateProject = async (id: number, data: Partial<ProjectCreate>): Promise<Project> => {
-  const response = await api.put<Project>(`/projects/${id}`, data);
+  const response = await authApi.put<Project>(`/projects/${id}`, data);
   return response.data;
 };
 
-// Delete project (admin only)
 export const deleteProject = async (id: number): Promise<void> => {
-  await api.delete(`/projects/${id}`);
+  await authApi.delete(`/projects/${id}`);
 };
 
-// Add image pair to project (admin only)
 export const addProjectImage = async (projectId: number, data: ProjectImageCreate): Promise<ProjectImage> => {
-  const response = await api.post<ProjectImage>(`/projects/${projectId}/images`, data);
+  const response = await authApi.post<ProjectImage>(`/projects/${projectId}/images`, data);
   return response.data;
 };
 
-// Update image pair (admin only)
 export const updateProjectImage = async (imageId: number, data: ProjectImageCreate): Promise<ProjectImage> => {
-  const response = await api.put<ProjectImage>(`/projects/images/${imageId}`, data);
+  const response = await authApi.put<ProjectImage>(`/projects/images/${imageId}`, data);
   return response.data;
 };
 
-// Delete image pair (admin only)
 export const deleteProjectImage = async (imageId: number): Promise<void> => {
-  await api.delete(`/projects/images/${imageId}`);
+  await authApi.delete(`/projects/images/${imageId}`);
 };

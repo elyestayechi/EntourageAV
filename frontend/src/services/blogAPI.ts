@@ -1,4 +1,4 @@
-import api from './api';
+import api, { authApi } from './api';
 
 export interface BlogPost {
   id: number;
@@ -27,7 +27,8 @@ export interface BlogCreate {
   read_time?: string;
 }
 
-// Get all blog posts (with optional filters)
+// ── Public endpoints ───────────────────────────────────────────────────────────
+
 export const getAllBlogPosts = async (params?: {
   category?: string;
   search?: string;
@@ -35,36 +36,17 @@ export const getAllBlogPosts = async (params?: {
   limit?: number;
 }): Promise<BlogPost[]> => {
   const response = await api.get<BlogPost[]>('/blog/', { params });
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-// Get single blog post by ID
 export const getBlogPostById = async (id: number): Promise<BlogPost> => {
   const response = await api.get<BlogPost>(`/blog/${id}`);
   return response.data;
 };
 
-// Get blog post by slug
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost> => {
   const response = await api.get<BlogPost>(`/blog/slug/${slug}`);
   return response.data;
-};
-
-// Create blog post (admin only)
-export const createBlogPost = async (data: BlogCreate): Promise<BlogPost> => {
-  const response = await api.post<BlogPost>('/blog/', data);
-  return response.data;
-};
-
-// Update blog post (admin only)
-export const updateBlogPost = async (id: number, data: Partial<BlogCreate>): Promise<BlogPost> => {
-  const response = await api.put<BlogPost>(`/blog/${id}`, data);
-  return response.data;
-};
-
-// Delete blog post (admin only)
-export const deleteBlogPost = async (id: number): Promise<void> => {
-  await api.delete(`/blog/${id}`);
 };
 
 export const getRelatedPosts = async (
@@ -75,5 +57,21 @@ export const getRelatedPosts = async (
   const response = await api.get<BlogPost[]>('/blog/', {
     params: { category, limit, exclude_id: currentPostId },
   });
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+// ── Admin endpoints (require session cookie) ───────────────────────────────────
+
+export const createBlogPost = async (data: BlogCreate): Promise<BlogPost> => {
+  const response = await authApi.post<BlogPost>('/blog/', data);
   return response.data;
+};
+
+export const updateBlogPost = async (id: number, data: Partial<BlogCreate>): Promise<BlogPost> => {
+  const response = await authApi.put<BlogPost>(`/blog/${id}`, data);
+  return response.data;
+};
+
+export const deleteBlogPost = async (id: number): Promise<void> => {
+  await authApi.delete(`/blog/${id}`);
 };

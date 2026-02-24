@@ -1,13 +1,15 @@
-import api from './api';
+import { authApi } from './api';
 
 export interface UploadResponse {
   message: string;
   file_path: string;
   url: string;
-  full_url?: string; // Computed full backend URL
+  full_url?: string;
 }
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+// ── Admin endpoint (require session cookie) ────────────────────────────────────
 
 export const uploadFile = async (
   file: File,
@@ -16,8 +18,7 @@ export const uploadFile = async (
   const formData = new FormData();
   formData.append('file', file);
 
-  // Pass subfolder as query param (not in body) — consistent with the backend route
-  const response = await api.post<UploadResponse>(
+  const response = await authApi.post<UploadResponse>(
     `/upload/?subfolder=${subfolder}`,
     formData,
     {
@@ -27,19 +28,15 @@ export const uploadFile = async (
 
   const data = response.data;
 
-  // Build the full absolute URL so images load correctly regardless of
-  // which subfolder (services, blog, projects, testimonials) is used.
   const relativePath = data.url.startsWith('/') ? data.url : `/${data.url}`;
   data.full_url = `${BACKEND_URL}${relativePath}`;
-
-  // Override url with the full URL so callers don't need to worry about it
   data.url = data.full_url;
 
   return data;
 };
 
 export const deleteUploadedFile = async (filePath: string): Promise<void> => {
-  await api.delete(`/upload/${filePath}`);
+  await authApi.delete(`/upload/${filePath}`);
 };
 
 /**
