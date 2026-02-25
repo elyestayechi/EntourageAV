@@ -2,49 +2,41 @@ import { useEffect, useRef } from 'react';
 import { gsap } from '../lib/gsap-init';
 
 interface StorytellingTransitionProps {
-  /** The chapter theme color */
   themeColor: 'warm' | 'premium' | 'modern' | 'luxury';
-  /** Chapter number */
   chapter: number;
-  /** Chapter title */
   title: string;
-  /** Optional subtitle */
   subtitle?: string;
-  /** Dark variant for seamless flow with dark sections */
   darkVariant?: boolean;
 }
 
 export function StorytellingTransition({ 
   themeColor, 
   chapter, 
-  title, 
+  title,
+  subtitle,
   darkVariant 
 }: StorytellingTransitionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const numberRef = useRef<HTMLDivElement>(null);
+  const numberRef    = useRef<HTMLDivElement>(null);
+  const textRef      = useRef<HTMLDivElement>(null);
 
   const colorMap = {
-    warm: 'var(--color-navy-sky)',
+    warm:    'var(--color-navy-sky)',
     premium: 'var(--color-navy-blue)',
-    modern: 'var(--color-navy-ocean)',
-    luxury: 'var(--color-navy-midnight)'
+    modern:  'var(--color-navy-ocean)',
+    luxury:  'var(--color-navy-midnight)',
   };
 
   const accentColor = colorMap[themeColor];
 
   useEffect(() => {
-    if (!containerRef.current || !numberRef.current) return;
-
+    if (!containerRef.current) return;
     const ctx = gsap.context(() => {
-      // Number fade in and scale
       gsap.fromTo(
         numberRef.current,
         { opacity: 0, scale: 0.8 },
         {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: 'back.out(1.5)',
+          opacity: 1, scale: 1, duration: 1, ease: 'back.out(1.5)',
           scrollTrigger: {
             trigger: containerRef.current,
             start: 'top 70%',
@@ -52,41 +44,64 @@ export function StorytellingTransition({
           },
         }
       );
+      if (textRef.current) {
+        gsap.fromTo(
+          textRef.current,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.2,
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: 'top 70%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }
     }, containerRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
     <div
       ref={containerRef}
-      className="relative py-16 md:py-24 overflow-hidden"
+      className="relative py-12 md:py-20 overflow-hidden"
       style={{
-        background: darkVariant 
-          ? '#1A1A1A' 
+        background: darkVariant
+          ? '#1A1A1A'
           : `linear-gradient(180deg, transparent 0%, ${accentColor}08 50%, transparent 100%)`,
       }}
     >
-      {/* Chapter number - large and dramatic */}
-      <div className="container mx-auto px-8 relative z-10">
-        <div className="flex items-center gap-8 md:gap-16">
-          {/* Huge chapter number */}
+      <div className="container mx-auto px-4 sm:px-8 relative z-10">
+        <div className="flex items-center gap-4 sm:gap-8 md:gap-16">
+          {/* Large chapter number */}
           <div
             ref={numberRef}
-            className="text-[120px] md:text-[200px] lg:text-[280px] font-bold leading-none opacity-10"
-            style={{ color: darkVariant ? '#ffffff' : accentColor }}
+            className="text-[80px] sm:text-[120px] md:text-[180px] lg:text-[240px] font-bold leading-none flex-shrink-0"
+            style={{
+              color: darkVariant ? '#ffffff' : accentColor,
+              opacity: 0.1,
+            }}
           >
             {String(chapter).padStart(2, '0')}
           </div>
 
-          {/* Title */}
-          <div className="flex-1">
+          {/* Title + subtitle */}
+          <div ref={textRef} className="flex-1 min-w-0">
             <h3
-              className="text-2xl md:text-4xl lg:text-5xl font-bold"
+              className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold leading-tight"
               style={{ color: darkVariant ? '#ffffff' : accentColor }}
             >
               {title}
             </h3>
+            {subtitle && (
+              <p
+                className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl"
+                style={{ color: darkVariant ? 'rgba(255,255,255,0.65)' : '#5A5A5A' }}
+              >
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
       </div>
