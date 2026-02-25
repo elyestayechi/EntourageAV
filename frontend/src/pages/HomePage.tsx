@@ -7,7 +7,7 @@ import { Testimonials } from '../features/testimonials/Testimonials';
 import { StorytellingTransition } from '../shared/ui/StorytellingTransition';
 import { ScrollNav } from '../shared/ui/Scrollnav';
 import { ArrowRight } from 'lucide-react';
-import footerImage from '../assets/footer.png';
+import footerImage from '../assets/footer.webp';
 
 export function HomePage() {
   return (

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from '../../shared/lib/gsap-init';
 import { FilmGrainTexture } from '../../shared/ui/FilmGrainTexture';
-import logo from '../../assets/log.png';
-import heroImage from '../../assets/hero.png';
+import logo from '../../assets/log.webp';
+import heroImage from '../../assets/hero.webp';
 
 export function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
