@@ -18,6 +18,14 @@ export function ScrollVideo() {
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
+    // iOS requires a user gesture to unlock video scrubbing via currentTime
+    const unlockVideo = () => {
+      video.play().then(() => video.pause()).catch(() => {});
+      document.removeEventListener('touchstart', unlockVideo);
+    };
+    document.addEventListener('touchstart', unlockVideo, { once: true });
+
+    video.load();        // re-triggers load on every mount, fixes iOS reload blank
     video.pause();
     video.currentTime = 0;
 
@@ -119,7 +127,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video — source tags let iOS Safari pick mp4, others get webm */}
+        {/* Video */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
