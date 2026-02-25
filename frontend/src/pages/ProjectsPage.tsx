@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 import { useState, useRef, useEffect } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
 import { Calendar, MapPin, X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
 import { getAllProjects } from '../services/projectsAPI';
 import { LoadingSpinner } from '../shared/ui/LoadingSpinner';
 
@@ -311,36 +310,38 @@ export function ProjectsPage() {
       {/* Hero */}
       <section
         ref={heroRef}
-        className="relative min-h-[50vh] flex items-center justify-center px-4 pt-32 pb-20"
+        className="relative min-h-[50vh] flex items-center justify-center px-4 pt-28 sm:pt-32 pb-16 sm:pb-20"
       >
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="max-w-xs sm:max-w-2xl md:max-w-4xl mx-auto text-center relative z-10">
           <div
-            className="inline-flex px-6 py-3 mb-6"
+            className="inline-flex px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               border: '1px solid rgba(255, 255, 255, 0.3)',
-              clipPath:
-                'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+              clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
             }}
           >
-            <span className="text-sm font-medium" style={{ color: '#2A2522' }}>
+            <span className="text-xs sm:text-sm font-medium" style={{ color: '#2A2522' }}>
               RÉALISATIONS
             </span>
           </div>
-          <PremiumTextReveal>
-            <h1
-              className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-[0.9]"
-              style={{ color: '#2A2522' }}
-            >
-              NOS TRANSFORMATIONS
-              <br />À LA LOUPE
-            </h1>
-          </PremiumTextReveal>
+
+          {/* Title - constrained on mobile so it doesn't overflow */}
+          <h1
+            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 leading-[0.95] break-words"
+            style={{ color: '#2A2522' }}
+          >
+            NOS TRANSFORMATIONS
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
+            À LA LOUPE
+          </h1>
+
           <p
-            className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-lg md:text-xl max-w-xs sm:max-w-2xl mx-auto leading-relaxed px-2"
             style={{ color: '#5A5A5A' }}
           >
             Découvrez nos projets de rénovation réalisés avec passion et expertise. Chaque
