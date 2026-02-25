@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { useState, useRef, useEffect } from 'react';
 import { gsap } from '../shared/lib/gsap-init';
 import { Calendar, MapPin, X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { PremiumTextReveal } from '../shared/ui/PremiumTextReveal';
 import { getAllProjects } from '../services/projectsAPI';
 import { LoadingSpinner } from '../shared/ui/LoadingSpinner';
 
@@ -307,14 +308,15 @@ export function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      {/* Hero */}
+      {/* ── Hero — matches ServicesPage style exactly ── */}
       <section
         ref={heroRef}
-        className="relative min-h-[50vh] flex items-center justify-center px-4 pt-28 sm:pt-32 pb-16 sm:pb-20"
+        className="relative min-h-[50vh] flex items-center justify-center px-4 pt-32 pb-20"
       >
-        <div className="max-w-xs sm:max-w-2xl md:max-w-4xl mx-auto text-center relative z-10">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          {/* Pill badge */}
           <div
-            className="inline-flex px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6"
+            className="inline-flex px-6 py-3 mb-6"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(40px) saturate(180%)',
@@ -324,28 +326,27 @@ export function ProjectsPage() {
               clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
             }}
           >
-            <span className="text-xs sm:text-sm font-medium" style={{ color: '#2A2522' }}>
-              RÉALISATIONS
-            </span>
+            <span className="text-sm font-medium" style={{ color: '#2A2522' }}>RÉALISATIONS</span>
           </div>
 
-          {/* Title - constrained on mobile so it doesn't overflow */}
-          <h1
-            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 leading-[0.95] break-words"
-            style={{ color: '#2A2522' }}
-          >
-            NOS TRANSFORMATIONS
-            <br className="hidden sm:block" />
-            <span className="sm:hidden"> </span>
-            À LA LOUPE
-          </h1>
+          {/* Title — same sizing scale as ServicesPage */}
+          <PremiumTextReveal>
+            <h1
+              className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-[0.9]"
+              style={{ color: '#2A2522' }}
+            >
+              NOS TRANSFORMATIONS
+              <br />
+              À LA LOUPE
+            </h1>
+          </PremiumTextReveal>
 
           <p
-            className="text-sm sm:text-lg md:text-xl max-w-xs sm:max-w-2xl mx-auto leading-relaxed px-2"
+            className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed"
             style={{ color: '#5A5A5A' }}
           >
-            Découvrez nos projets de rénovation réalisés avec passion et expertise. Chaque
-            transformation raconte une histoire unique.
+            Découvrez nos projets de rénovation réalisés avec passion et expertise.
+            Chaque transformation raconte une histoire unique.
           </p>
         </div>
       </section>

@@ -3,8 +3,8 @@ import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import videoSrc from '../../assets/vid.webm';
 
 export function ScrollVideo() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const videoRef     = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
@@ -12,10 +12,9 @@ export function ScrollVideo() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const video = videoRef.current;
-    const section = sectionRef.current;
+    const video     = videoRef.current;
+    const section   = sectionRef.current;
     const container = containerRef.current;
-
     if (!video || !section || !container) return;
 
     video.pause();
@@ -27,26 +26,26 @@ export function ScrollVideo() {
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        // pinSpacing: true ensures the section pushes other elements down properly
-        // instead of false which can cause overlap with adjacent sections
-        pinSpacing: true,
-        refreshPriority: 1,
+        pinSpacing: false,   // section's own 400vh height creates the scroll space
+        anticipatePin: 1,    // prevents pop-in on fast scroll
+        refreshPriority: 2,
       });
 
       const startScrub = () => {
         gsap.to(video, {
-          currentTime: video.duration,
+          currentTime: video.duration || 0,
           ease: 'none',
           scrollTrigger: {
             trigger: section,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 2,
-            refreshPriority: 1,
+            scrub: 1.5,
+            refreshPriority: 2,
           },
         });
 
-        requestAnimationFrame(() => ScrollTrigger.refresh());
+        // Delay refresh so layout is fully stable (fonts, images loaded)
+        setTimeout(() => ScrollTrigger.refresh(true), 300);
       };
 
       if (video.readyState >= 1) {
@@ -54,6 +53,15 @@ export function ScrollVideo() {
       } else {
         video.addEventListener('loadedmetadata', startScrub, { once: true });
       }
+
+      // Re-measure on resize so pins don't drift
+      let resizeTimer: ReturnType<typeof setTimeout>;
+      const onResize = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
+      };
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
     }, sectionRef);
 
     return () => {
@@ -63,35 +71,30 @@ export function ScrollVideo() {
   }, []);
 
   return (
-    /*
-      isolation: isolate creates a new stacking context so this section
-      never bleeds into or overlaps adjacent sections.
-      position: relative + z-index: 0 resets the stack for children.
-    */
     <section
       ref={sectionRef}
-      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A] overflow-hidden"
-      style={{ height: '400vh', isolation: 'isolate' }}
+      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
+      style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay z-10">
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 1 }}>
         <svg width="100%" height="100%">
-          <filter id="scrollVideoNoise">
+          <filter id="svn">
             <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
           </filter>
-          <rect width="100%" height="100%" filter="url(#scrollVideoNoise)" />
+          <rect width="100%" height="100%" filter="url(#svn)" />
         </svg>
       </div>
 
-      {/* GSAP-pinned container — willChange hints GPU */}
+      {/* Pinned viewport container */}
       <div
         ref={containerRef}
-        className="relative h-screen w-full overflow-hidden"
-        style={{ willChange: 'transform' }}
+        className="relative w-full overflow-hidden"
+        style={{ height: '100vh', willChange: 'transform' }}
       >
-        {/* Mobile text */}
+        {/* Mobile label */}
         <div
-          className="md:hidden absolute inset-x-0 top-20 z-20 px-4 pt-10 pb-4 text-center"
+          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
           style={{ background: '#FAFAF9' }}
         >
           <h2
@@ -100,18 +103,15 @@ export function ScrollVideo() {
           >
             Notre Processus
           </h2>
-          <p
-            className="text-xs sm:text-sm uppercase tracking-widest"
-            style={{ color: 'var(--color-base-slate)' }}
-          >
+          <p className="text-xs sm:text-sm uppercase tracking-widest" style={{ color: 'var(--color-base-slate)' }}>
             De la vision à la réalité
           </p>
         </div>
 
-        {/* Desktop overlay text */}
+        {/* Desktop centred label */}
         <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
-          <div className="text-center px-6 md:px-8 w-full max-w-5xl mx-auto">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 md:mb-6 tracking-tight uppercase leading-none">
+          <div className="text-center px-8 w-full max-w-5xl mx-auto">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 tracking-tight uppercase leading-none">
               Notre Processus
             </h2>
             <p className="text-base lg:text-xl text-white/70 uppercase tracking-widest">
@@ -124,7 +124,7 @@ export function ScrollVideo() {
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
-          style={{ aspectRatio: 'auto' }}
+          style={{ zIndex: 0 }}
           muted
           playsInline
           preload="auto"
@@ -132,7 +132,10 @@ export function ScrollVideo() {
         />
 
         {/* Desktop gradient */}
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none z-10" />
+        <div
+          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          style={{ zIndex: 10 }}
+        />
       </div>
     </section>
   );
