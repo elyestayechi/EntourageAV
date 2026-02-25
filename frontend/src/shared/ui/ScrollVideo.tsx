@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import videoSrc from '../../assets/vid.webm';
-import videoSrcMp4 from '../../assets/video.mp4';
+import videoSrcMp4 from '../../assets/vid.mp4';
 
 export function ScrollVideo() {
   const sectionRef   = useRef<HTMLDivElement>(null);
@@ -18,7 +18,6 @@ export function ScrollVideo() {
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
-    // Explicitly trigger load on mobile browsers
     video.load();
     video.pause();
     video.currentTime = 0;
@@ -87,11 +86,11 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* Pinned viewport container — uses 100svh so mobile browser chrome doesn't cause drift */}
+      {/* Pinned viewport container */}
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
-        style={{ height: '100svh', willChange: 'transform' }}
+        style={{ height: '100vh', willChange: 'transform' }}
       >
         {/* Mobile label */}
         <div
@@ -121,7 +120,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video — mp4 source added for iOS Safari which does not support webm */}
+        {/* Video */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
