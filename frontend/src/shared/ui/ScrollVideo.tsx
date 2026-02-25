@@ -25,7 +25,7 @@ export function ScrollVideo() {
     };
     document.addEventListener('touchstart', unlockVideo, { once: true });
 
-    video.load();        // re-triggers load on every mount, fixes iOS reload blank
+    video.load();
     video.pause();
     video.currentTime = 0;
 
@@ -41,6 +41,7 @@ export function ScrollVideo() {
       });
 
       const startScrub = () => {
+        video.style.opacity = '1'; // reveal only when GSAP is ready
         gsap.to(video, {
           currentTime: video.duration || 0,
           ease: 'none',
@@ -80,7 +81,7 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
+      className="relative bg-[#FAFAF9] lg:bg-[#2A2A2A]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
@@ -99,9 +100,9 @@ export function ScrollVideo() {
         className="relative w-full overflow-hidden"
         style={{ height: '100vh', willChange: 'transform' }}
       >
-        {/* Mobile label */}
+        {/* Mobile + Tablet label — white bg, dark text, sits above video */}
         <div
-          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
+          className="lg:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
           style={{ background: '#FAFAF9' }}
         >
           <h2
@@ -116,7 +117,7 @@ export function ScrollVideo() {
         </div>
 
         {/* Desktop centred label */}
-        <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
+        <div className="hidden lg:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
           <div className="text-center px-8 w-full max-w-5xl mx-auto">
             <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 tracking-tight uppercase leading-none">
               Notre Processus
@@ -127,11 +128,11 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video */}
+        {/* Video — hidden on mobile/tablet, shown on desktop */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
-          style={{ zIndex: 0 }}
+          style={{ zIndex: 0, opacity: 0 }}
           muted
           playsInline
           preload="auto"
@@ -142,7 +143,7 @@ export function ScrollVideo() {
 
         {/* Desktop gradient */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          className="hidden lg:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
           style={{ zIndex: 10 }}
         />
       </div>
