@@ -1,20 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from '../../shared/lib/gsap-init';
 import { FilmGrainTexture } from '../../shared/ui/FilmGrainTexture';
-// Import images from assets folder
 import logo from '../../assets/log.png';
 import heroImage from '../../assets/hero.png';
 
 export function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     if (!heroRef.current) return;
 
-    // Only scroll-triggered parallax
     const scrollCtx = gsap.context(() => {
-      // Parallax on scroll
       gsap.to(imageRef.current, {
         scrollTrigger: {
           trigger: heroRef.current,
@@ -45,46 +42,56 @@ export function Hero() {
       {/* Film grain texture */}
       <FilmGrainTexture />
 
-      {/* Hero Background Image - full bleed */}
-      <div
+      {/* 
+        Hero Background Image — real <img> element (not CSS background-image)
+        - fetchpriority="high" + loading="eager": load it first, no lazy-load
+        - Preload link should be added in index.html:
+            <link rel="preload" as="image" href="/src/assets/hero.png">
+        - For production: convert to hero.webp, add srcset for responsive sizes
+      */}
+      <img
         ref={imageRef}
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        src={heroImage}
+        alt="Rénovation résidentielle et commerciale haut de gamme — Entourage AV"
+        // @ts-ignore - fetchpriority is a valid HTML attribute
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ objectPosition: 'center' }}
       />
 
-      {/* Main Content Container - Centered */}
+      {/* Dark overlay for contrast */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Main Content Container */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 sm:px-12 text-center">
         
-        {/* Logo - centered at top */}
-        <div className="mb-12 sm:mb-16">
+        {/* Logo */}
+        <div className="mb-8 sm:mb-12">
           <img
             src={logo}
-            alt="Entourage AV"
-            className="w-72 sm:w-96 lg:w-[28rem] h-auto mx-auto"
+            alt="Logo Entourage AV"
+            className="w-56 sm:w-72 md:w-80 lg:w-[28rem] h-auto mx-auto"
             style={{ 
               filter: 'drop-shadow(0 4px 30px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.3))',
             }}
           />
         </div>
 
-        {/* Title - centered with increased height */}
-        <div className="max-w-4xl">
+        {/* Title */}
+        <div className="max-w-xs sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-4">
           <h1
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 sm:mb-8"
             style={{ 
               color: '#FFFFFF',
-              lineHeight: '1.2',
+              lineHeight: '1.15',
             }}
           >
             TRANSFORMEZ VOTRE ESPACE
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl font-light" style={{ color: '#FFFFFF' }}>
-            Découvrez l'excellence en rénovation résidentielle et commerciale.
-            <br />
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-light" style={{ color: '#FFFFFF' }}>
+            Découvrez l'excellence en rénovation résidentielle et commerciale.{' '}
             <span className="font-light" style={{ color: '#FFFFFF' }}>
               Où l'élégance rencontre la fonctionnalité.
             </span>
