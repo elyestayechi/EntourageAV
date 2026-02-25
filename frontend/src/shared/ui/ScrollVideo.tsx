@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap-init';
-import videoSrcWebm from '../../assets/vid.webm';
-import videoSrcMp4 from '../../assets/vid.mp4'; // ✅ MP4 fallback
+import videoSrc from '../../assets/vid.webm';
 
 export function ScrollVideo() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const videoRef     = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
@@ -13,14 +12,13 @@ export function ScrollVideo() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const video = videoRef.current;
-    const section = sectionRef.current;
+    const video     = videoRef.current;
+    const section   = sectionRef.current;
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
     video.pause();
     video.currentTime = 0;
-    video.load(); // ✅ Force load on mobile (important for iOS)
 
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
@@ -28,8 +26,8 @@ export function ScrollVideo() {
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false,
-        anticipatePin: 1,
+        pinSpacing: false,   // section's own 400vh height creates the scroll space
+        anticipatePin: 1,    // prevents pop-in on fast scroll
         refreshPriority: 2,
       });
 
@@ -46,6 +44,7 @@ export function ScrollVideo() {
           },
         });
 
+        // Delay refresh so layout is fully stable (fonts, images loaded)
         setTimeout(() => ScrollTrigger.refresh(true), 300);
       };
 
@@ -55,12 +54,12 @@ export function ScrollVideo() {
         video.addEventListener('loadedmetadata', startScrub, { once: true });
       }
 
+      // Re-measure on resize so pins don't drift
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
       };
-
       window.addEventListener('resize', onResize);
       return () => window.removeEventListener('resize', onResize);
     }, sectionRef);
@@ -78,18 +77,10 @@ export function ScrollVideo() {
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay"
-        style={{ zIndex: 1 }}
-      >
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 1 }}>
         <svg width="100%" height="100%">
           <filter id="svn">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.8"
-              numOctaves="4"
-              stitchTiles="stitch"
-            />
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
           </filter>
           <rect width="100%" height="100%" filter="url(#svn)" />
         </svg>
@@ -99,7 +90,7 @@ export function ScrollVideo() {
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
-        style={{ height: '100svh', willChange: 'transform' }} // ✅ mobile viewport fix
+        style={{ height: '100vh', willChange: 'transform' }}
       >
         {/* Mobile label */}
         <div
@@ -112,10 +103,7 @@ export function ScrollVideo() {
           >
             Notre Processus
           </h2>
-          <p
-            className="text-xs sm:text-sm uppercase tracking-widest"
-            style={{ color: 'var(--color-base-slate)' }}
-          >
+          <p className="text-xs sm:text-sm uppercase tracking-widest" style={{ color: 'var(--color-base-slate)' }}>
             De la vision à la réalité
           </p>
         </div>
@@ -140,10 +128,8 @@ export function ScrollVideo() {
           muted
           playsInline
           preload="auto"
-        >
-          <source src={videoSrcWebm} type="video/webm" />
-          <source src={videoSrcMp4} type="video/mp4" />
-        </video>
+          src={videoSrc}
+        />
 
         {/* Desktop gradient */}
         <div
