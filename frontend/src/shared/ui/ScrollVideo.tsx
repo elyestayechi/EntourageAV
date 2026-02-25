@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import videoSrc from '../../assets/vid.webm';
-import videoSrcMp4 from '../../assets/vid.mp4';
+import videoSrcMp4 from '../../assets/video.mp4';
 
 export function ScrollVideo() {
   const sectionRef   = useRef<HTMLDivElement>(null);
