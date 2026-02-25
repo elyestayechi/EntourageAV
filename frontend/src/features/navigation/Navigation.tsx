@@ -65,19 +65,21 @@ export function Navigation() {
           Desktop / Tablet nav pill — hidden on mobile when menu open
       ───────────────────────────────────────────────────────────── */}
       <nav
-        className="fixed top-6 sm:top-8 left-1/2 -translate-x-1/2 z-50 rounded-2xl transition-all duration-300 max-w-[95vw] sm:max-w-none overflow-hidden"
+        className="fixed top-6 sm:top-8 z-50 rounded-2xl transition-all duration-300 overflow-hidden"
         style={{
+          left: '50%',
+          width: 'max-content',
+          maxWidth: 'calc(100vw - 32px)',
           background: 'rgba(100, 100, 100, 0.25)',
           backdropFilter: 'blur(60px) saturate(200%)',
           WebkitBackdropFilter: 'blur(60px) saturate(200%)',
           boxShadow: '0 12px 48px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
           border: '1px solid rgba(150,150,150,0.3)',
-          // Hide the pill completely on mobile while menu is open
           opacity: mobileMenuOpen ? 0 : 1,
           pointerEvents: mobileMenuOpen ? 'none' : 'auto',
           transform: mobileMenuOpen
             ? 'translateX(-50%) translateY(-12px)'
-            : 'translateX(-50%) translateY(0)',
+            : 'translateX(-50%)',
         }}
       >
         {/* Main row */}
