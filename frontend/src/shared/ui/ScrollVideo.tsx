@@ -3,9 +3,9 @@ import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import videoSrc from '../../assets/vid.webm';
 
 export function ScrollVideo() {
-  const sectionRef     = useRef<HTMLDivElement>(null);
-  const videoRef       = useRef<HTMLVideoElement>(null);
-  const containerRef   = useRef<HTMLDivElement>(null);
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const videoRef     = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -26,8 +26,8 @@ export function ScrollVideo() {
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false,
-        anticipatePin: 1,
+        pinSpacing: false,   // section's own 400vh height creates the scroll space
+        anticipatePin: 1,    // prevents pop-in on fast scroll
         refreshPriority: 2,
       });
 
@@ -43,6 +43,8 @@ export function ScrollVideo() {
             refreshPriority: 2,
           },
         });
+
+        // Delay refresh so layout is fully stable (fonts, images loaded)
         setTimeout(() => ScrollTrigger.refresh(true), 300);
       };
 
@@ -52,6 +54,7 @@ export function ScrollVideo() {
         video.addEventListener('loadedmetadata', startScrub, { once: true });
       }
 
+      // Re-measure on resize so pins don't drift
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
         clearTimeout(resizeTimer);
@@ -70,19 +73,57 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#2A2A2A]"
+      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
+      {/* Noise overlay */}
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 1 }}>
+        <svg width="100%" height="100%">
+          <filter id="svn">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#svn)" />
+        </svg>
+      </div>
+
       {/* Pinned viewport container */}
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
         style={{ height: '100vh', willChange: 'transform' }}
       >
-        {/* Video — fills full container on ALL screen sizes */}
+        {/* Mobile label */}
+        <div
+          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
+          style={{ background: '#FAFAF9' }}
+        >
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight uppercase leading-none"
+            style={{ color: 'var(--color-navy-sky)' }}
+          >
+            Notre Processus
+          </h2>
+          <p className="text-xs sm:text-sm uppercase tracking-widest" style={{ color: 'var(--color-base-slate)' }}>
+            De la vision à la réalité
+          </p>
+        </div>
+
+        {/* Desktop centred label */}
+        <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
+          <div className="text-center px-8 w-full max-w-5xl mx-auto">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 tracking-tight uppercase leading-none">
+              Notre Processus
+            </h2>
+            <p className="text-base lg:text-xl text-white/70 uppercase tracking-widest">
+              De la vision à la réalité
+            </p>
+          </div>
+        </div>
+
+        {/* Video */}
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
           style={{ zIndex: 0 }}
           muted
           playsInline
@@ -90,36 +131,11 @@ export function ScrollVideo() {
           src={videoSrc}
         />
 
-        {/* Gradient overlay */}
+        {/* Desktop gradient */}
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            zIndex: 1,
-            background: 'linear-gradient(to top, rgba(42,42,42,0.7) 0%, rgba(42,42,42,0.2) 50%, rgba(42,42,42,0.5) 100%)',
-          }}
+          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          style={{ zIndex: 10 }}
         />
-
-        {/* Noise overlay */}
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 2 }}>
-          <svg width="100%" height="100%">
-            <filter id="svn">
-              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#svn)" />
-          </svg>
-        </div>
-
-        {/* Centered label — same on mobile and desktop */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-          <div className="text-center px-6 w-full max-w-5xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-3 tracking-tight uppercase leading-none">
-              Notre Processus
-            </h2>
-            <p className="text-sm sm:text-base lg:text-xl text-white/70 uppercase tracking-widest">
-              De la vision à la réalité
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
