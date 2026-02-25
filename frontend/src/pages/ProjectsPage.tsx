@@ -332,7 +332,7 @@ export function ProjectsPage() {
           {/* Title — same sizing scale as ServicesPage */}
           <PremiumTextReveal>
             <h1
-              className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-[0.9]"
+              className="text-3xl sm:text-5xl lg:text-7xl xl:text-8xl font-bold mb-6 leading-[1.0]"
               style={{ color: '#2A2522' }}
             >
               NOS TRANSFORMATIONS
