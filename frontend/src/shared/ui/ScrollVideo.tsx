@@ -27,7 +27,9 @@ export function ScrollVideo() {
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false,
+        // pinSpacing: true ensures the section pushes other elements down properly
+        // instead of false which can cause overlap with adjacent sections
+        pinSpacing: true,
         refreshPriority: 1,
       });
 
@@ -61,12 +63,17 @@ export function ScrollVideo() {
   }, []);
 
   return (
+    /*
+      isolation: isolate creates a new stacking context so this section
+      never bleeds into or overlaps adjacent sections.
+      position: relative + z-index: 0 resets the stack for children.
+    */
     <section
       ref={sectionRef}
-      /* Mobile: match site light bg. md+: original dark bg */
       className="relative bg-[#FAFAF9] md:bg-[#2A2A2A] overflow-hidden"
-      style={{ height: '400vh' }}
+      style={{ height: '400vh', isolation: 'isolate' }}
     >
+      {/* Noise overlay */}
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay z-10">
         <svg width="100%" height="100%">
           <filter id="scrollVideoNoise">
@@ -76,12 +83,15 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* GSAP owns the pin */}
-      <div ref={containerRef} className="relative h-screen w-full overflow-hidden">
-
-        {/* ── Mobile only: text sits above the video frame, dark colours ── */}
+      {/* GSAP-pinned container — willChange hints GPU */}
+      <div
+        ref={containerRef}
+        className="relative h-screen w-full overflow-hidden"
+        style={{ willChange: 'transform' }}
+      >
+        {/* Mobile text */}
         <div
-          className="md:hidden absolute inset-x-0 top-30 z-20 px-4 pt-10 pb-4 text-center"
+          className="md:hidden absolute inset-x-0 top-20 z-20 px-4 pt-10 pb-4 text-center"
           style={{ background: '#FAFAF9' }}
         >
           <h2
@@ -98,7 +108,7 @@ export function ScrollVideo() {
           </p>
         </div>
 
-        {/* ── Desktop only: white text centred over the video (original) ── */}
+        {/* Desktop overlay text */}
         <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
           <div className="text-center px-6 md:px-8 w-full max-w-5xl mx-auto">
             <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 md:mb-6 tracking-tight uppercase leading-none">
@@ -110,7 +120,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video — full width, vertically centred, natural aspect ratio */}
+        {/* Video */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
@@ -121,7 +131,7 @@ export function ScrollVideo() {
           src={videoSrc}
         />
 
-        {/* Desktop gradient overlay (original) */}
+        {/* Desktop gradient */}
         <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none z-10" />
       </div>
     </section>
