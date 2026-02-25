@@ -147,7 +147,7 @@ export function ScrollVideo() {
 
         {/* Desktop gradient */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A22]/50 pointer-events-none"
+          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
           style={{ zIndex: 10 }}
         />
       </div>
