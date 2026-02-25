@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap-init';
-import videoSrc from '../../assets/vid.webm';
+
+import videoMp4 from '../../assets/vid.mp4';   // NEW (convert to H.264)
+import videoWebm from '../../assets/vid.webm'; // Keep as fallback
 
 export function ScrollVideo() {
   const sectionRef   = useRef<HTMLDivElement>(null);
@@ -21,13 +23,15 @@ export function ScrollVideo() {
     video.currentTime = 0;
 
     const ctx = gsap.context(() => {
+
+      // Pin container
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false,   // section's own 400vh height creates the scroll space
-        anticipatePin: 1,    // prevents pop-in on fast scroll
+        pinSpacing: false,
+        anticipatePin: 1,
         refreshPriority: 2,
       });
 
@@ -44,7 +48,6 @@ export function ScrollVideo() {
           },
         });
 
-        // Delay refresh so layout is fully stable (fonts, images loaded)
         setTimeout(() => ScrollTrigger.refresh(true), 300);
       };
 
@@ -54,14 +57,15 @@ export function ScrollVideo() {
         video.addEventListener('loadedmetadata', startScrub, { once: true });
       }
 
-      // Re-measure on resize so pins don't drift
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
       };
+
       window.addEventListener('resize', onResize);
       return () => window.removeEventListener('resize', onResize);
+
     }, sectionRef);
 
     return () => {
@@ -74,7 +78,11 @@ export function ScrollVideo() {
     <section
       ref={sectionRef}
       className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
-      style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
+      style={{
+        height: '400vh',
+        isolation: 'isolate',
+        overflow: 'hidden',   // 🔥 FIXED (was overflow: clip)
+      }}
     >
       {/* Noise overlay */}
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 1 }}>
@@ -92,6 +100,7 @@ export function ScrollVideo() {
         className="relative w-full overflow-hidden"
         style={{ height: '100vh', willChange: 'transform' }}
       >
+
         {/* Mobile label */}
         <div
           className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
@@ -103,7 +112,10 @@ export function ScrollVideo() {
           >
             Notre Processus
           </h2>
-          <p className="text-xs sm:text-sm uppercase tracking-widest" style={{ color: 'var(--color-base-slate)' }}>
+          <p
+            className="text-xs sm:text-sm uppercase tracking-widest"
+            style={{ color: 'var(--color-base-slate)' }}
+          >
             De la vision à la réalité
           </p>
         </div>
@@ -120,16 +132,19 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video */}
+        {/* VIDEO (Stable Cross-Browser Version) */}
         <video
           ref={videoRef}
-          className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
-          style={{ zIndex: 0 }}
+          className="absolute inset-0 w-full h-full object-cover"
           muted
           playsInline
+          autoPlay
           preload="auto"
-          src={videoSrc}
-        />
+          webkit-playsinline="true"
+        >
+          <source src={videoMp4} type="video/mp4" />
+          <source src={videoWebm} type="video/webm" />
+        </video>
 
         {/* Desktop gradient */}
         <div
