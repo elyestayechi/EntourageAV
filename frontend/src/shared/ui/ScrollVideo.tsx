@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap-init';
 import videoSrc from '../../assets/vid.webm';
+import videoSrcMp4 from '../../assets/vid.mp4';
 
 export function ScrollVideo() {
   const sectionRef   = useRef<HTMLDivElement>(null);
@@ -26,8 +27,8 @@ export function ScrollVideo() {
         start: 'top top',
         end: 'bottom bottom',
         pin: container,
-        pinSpacing: false,   // section's own 400vh height creates the scroll space
-        anticipatePin: 1,    // prevents pop-in on fast scroll
+        pinSpacing: false,
+        anticipatePin: 1,
         refreshPriority: 2,
       });
 
@@ -44,7 +45,6 @@ export function ScrollVideo() {
           },
         });
 
-        // Delay refresh so layout is fully stable (fonts, images loaded)
         setTimeout(() => ScrollTrigger.refresh(true), 300);
       };
 
@@ -54,7 +54,6 @@ export function ScrollVideo() {
         video.addEventListener('loadedmetadata', startScrub, { once: true });
       }
 
-      // Re-measure on resize so pins don't drift
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
         clearTimeout(resizeTimer);
@@ -120,7 +119,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video */}
+        {/* Video — source tags let iOS Safari pick mp4, others get webm */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
@@ -128,8 +127,10 @@ export function ScrollVideo() {
           muted
           playsInline
           preload="auto"
-          src={videoSrc}
-        />
+        >
+          <source src={videoSrc} type="video/webm" />
+          <source src={videoSrcMp4} type="video/mp4" />
+        </video>
 
         {/* Desktop gradient */}
         <div
