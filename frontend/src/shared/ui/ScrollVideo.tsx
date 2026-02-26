@@ -22,13 +22,19 @@ export function ScrollVideo() {
     const isAndroid = /Android/.test(navigator.userAgent);
     const isMobile  = isIOS || isAndroid;
 
-    // iOS needs a touch gesture to unlock currentTime scrubbing
-    // We do NOT wait for it — we just register it passively
     if (isIOS) {
       const unlockVideo = () => {
         video.play().then(() => video.pause()).catch(() => {});
       };
       document.addEventListener('touchstart', unlockVideo, { once: true });
+    }
+
+    // Android needs autoplay unlocked too
+    if (isAndroid) {
+      const unlockAndroid = () => {
+        video.play().then(() => video.pause()).catch(() => {});
+      };
+      document.addEventListener('touchstart', unlockAndroid, { once: true });
     }
 
     video.load();
@@ -47,29 +53,45 @@ export function ScrollVideo() {
       });
 
       const startScrub = () => {
-        // Only hide/reveal video itself, never the container
-        // This prevents desktop title jumping
         video.style.opacity = '1';
 
-        // Android needs scrub: 0 (instant) to avoid jumpy frames
-        // iOS and desktop get scrub: 1.5 for smooth feel
-        const scrubValue = isAndroid ? 0 : 1.5;
-
-        gsap.to(video, {
-          currentTime: video.duration || 0,
-          ease: 'none',
-          scrollTrigger: {
+        if (isAndroid) {
+          // Android: use playbackRate control instead of currentTime seeking
+          // This is far smoother on Android's video decoder
+          ScrollTrigger.create({
             trigger: section,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: scrubValue,
+            scrub: false,
             refreshPriority: 2,
-          },
-        });
+            onUpdate: (self) => {
+              const target = self.progress * (video.duration || 0);
+              const diff = target - video.currentTime;
+              if (Math.abs(diff) > 0.05) {
+                video.playbackRate = Math.min(Math.max(diff * 10, -4), 4);
+                video.play().catch(() => {});
+              } else {
+                video.pause();
+              }
+            },
+          });
+        } else {
+          // iOS and desktop: normal currentTime scrub
+          gsap.to(video, {
+            currentTime: video.duration || 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 1.5,
+              refreshPriority: 2,
+            },
+          });
+        }
 
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
-        // ResizeObserver catches late-painting components above this section
         let roTimer: ReturnType<typeof setTimeout>;
         const ro = new ResizeObserver(() => {
           clearTimeout(roTimer);
@@ -90,8 +112,6 @@ export function ScrollVideo() {
         }
       };
 
-      // On mobile, wait for full page load to get correct measurements
-      // On desktop, a short delay is enough since layout is more stable
       const init = () => {
         const delay = isMobile ? 300 : 100;
         setTimeout(tryStartScrub, delay);
@@ -134,7 +154,7 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* Pinned viewport container — always visible, no opacity trick */}
+      {/* Pinned viewport container */}
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
@@ -168,7 +188,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video — only the video starts hidden, not the container */}
+        {/* Video */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
