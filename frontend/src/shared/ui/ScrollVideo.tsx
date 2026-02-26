@@ -4,9 +4,9 @@ import videoSrc from '../../assets/vid.webm';
 import videoSrcMp4 from '../../assets/vid.mp4';
 
 export function ScrollVideo() {
-  const sectionRef   = useRef<HTMLDivElement>(null);
-  const videoRef     = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef     = useRef<HTMLDivElement>(null);
+  const videoRef       = useRef<HTMLVideoElement>(null);
+  const containerRef   = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -18,12 +18,15 @@ export function ScrollVideo() {
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
-    // Only iOS needs a touch gesture to unlock currentTime scrubbing
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isMobile  = isIOS || isAndroid;
+
+    // iOS needs a touch gesture to unlock currentTime scrubbing
+    // We do NOT wait for it — we just register it passively
     if (isIOS) {
       const unlockVideo = () => {
         video.play().then(() => video.pause()).catch(() => {});
-        document.removeEventListener('touchstart', unlockVideo);
       };
       document.addEventListener('touchstart', unlockVideo, { once: true });
     }
@@ -44,8 +47,14 @@ export function ScrollVideo() {
       });
 
       const startScrub = () => {
-        container.style.opacity = '1';
+        // Only hide/reveal video itself, never the container
+        // This prevents desktop title jumping
         video.style.opacity = '1';
+
+        // Android needs scrub: 0 (instant) to avoid jumpy frames
+        // iOS and desktop get scrub: 1.5 for smooth feel
+        const scrubValue = isAndroid ? 0 : 1.5;
+
         gsap.to(video, {
           currentTime: video.duration || 0,
           ease: 'none',
@@ -53,20 +62,20 @@ export function ScrollVideo() {
             trigger: section,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 1.5,
+            scrub: scrubValue,
             refreshPriority: 2,
           },
         });
 
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
+        // ResizeObserver catches late-painting components above this section
         let roTimer: ReturnType<typeof setTimeout>;
         const ro = new ResizeObserver(() => {
           clearTimeout(roTimer);
           roTimer = setTimeout(() => ScrollTrigger.refresh(true), 200);
         });
         ro.observe(document.body);
-
         setTimeout(() => ro.disconnect(), 10000);
       };
 
@@ -81,8 +90,11 @@ export function ScrollVideo() {
         }
       };
 
+      // On mobile, wait for full page load to get correct measurements
+      // On desktop, a short delay is enough since layout is more stable
       const init = () => {
-        setTimeout(tryStartScrub, 300);
+        const delay = isMobile ? 300 : 100;
+        setTimeout(tryStartScrub, delay);
       };
 
       if (document.readyState === 'complete') {
@@ -122,11 +134,11 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* Pinned viewport container — hidden until GSAP is fully initialized */}
+      {/* Pinned viewport container — always visible, no opacity trick */}
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
-        style={{ height: '100vh', willChange: 'transform', opacity: 0 }}
+        style={{ height: '100vh', willChange: 'transform' }}
       >
         {/* Mobile label */}
         <div
@@ -156,7 +168,7 @@ export function ScrollVideo() {
           </div>
         </div>
 
-        {/* Video */}
+        {/* Video — only the video starts hidden, not the container */}
         <video
           ref={videoRef}
           className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
