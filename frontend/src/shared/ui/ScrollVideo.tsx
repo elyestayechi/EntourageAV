@@ -18,12 +18,15 @@ export function ScrollVideo() {
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
-    // iOS requires a user gesture to unlock video scrubbing via currentTime
-    const unlockVideo = () => {
-      video.play().then(() => video.pause()).catch(() => {});
-      document.removeEventListener('touchstart', unlockVideo);
-    };
-    document.addEventListener('touchstart', unlockVideo, { once: true });
+    // Only iOS needs a touch gesture to unlock currentTime scrubbing
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      const unlockVideo = () => {
+        video.play().then(() => video.pause()).catch(() => {});
+        document.removeEventListener('touchstart', unlockVideo);
+      };
+      document.addEventListener('touchstart', unlockVideo, { once: true });
+    }
 
     video.load();
     video.pause();
@@ -57,7 +60,6 @@ export function ScrollVideo() {
 
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
-        // Watch the entire document for layout shifts and re-measure each time
         let roTimer: ReturnType<typeof setTimeout>;
         const ro = new ResizeObserver(() => {
           clearTimeout(roTimer);
@@ -65,7 +67,6 @@ export function ScrollVideo() {
         });
         ro.observe(document.body);
 
-        // Stop watching after 10s — everything will be settled by then
         setTimeout(() => ro.disconnect(), 10000);
       };
 
@@ -80,8 +81,6 @@ export function ScrollVideo() {
         }
       };
 
-      // Wait for the full page to finish loading before initializing
-      // so ScrollTrigger always measures correct positions
       const init = () => {
         setTimeout(tryStartScrub, 300);
       };
