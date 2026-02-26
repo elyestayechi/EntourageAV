@@ -18,6 +18,7 @@ export function ScrollVideo() {
     const container = containerRef.current;
     if (!video || !section || !container) return;
 
+    // iOS requires a user gesture to unlock video scrubbing via currentTime
     const unlockVideo = () => {
       video.play().then(() => video.pause()).catch(() => {});
       document.removeEventListener('touchstart', unlockVideo);
@@ -53,12 +54,21 @@ export function ScrollVideo() {
           },
         });
 
+        // Initial refresh after scrub is set up
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
-        // Re-refresh once everything on the page is fully loaded
-        window.addEventListener('load', () => {
-          setTimeout(() => ScrollTrigger.refresh(true), 300);
-        }, { once: true });
+        // Watch the entire document for layout shifts (images loading,
+        // fonts settling, lazy components painting) and re-measure each time.
+        // This is the most reliable way to keep pins stable on mobile.
+        let roTimer: ReturnType<typeof setTimeout>;
+        const ro = new ResizeObserver(() => {
+          clearTimeout(roTimer);
+          roTimer = setTimeout(() => ScrollTrigger.refresh(true), 200);
+        });
+        ro.observe(document.body);
+
+        // Stop watching after 10s — by then everything is settled
+        setTimeout(() => ro.disconnect(), 10000);
       };
 
       const tryStartScrub = () => {
