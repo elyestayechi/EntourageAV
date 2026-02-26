@@ -141,7 +141,7 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
+      className="relative bg-[#FAFAF9] lg:bg-[#2A2A2A]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
@@ -203,7 +203,7 @@ export function ScrollVideo() {
 
         {/* Desktop gradient */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          className="hidden lg:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
           style={{ zIndex: 10 }}
         />
       </div>
