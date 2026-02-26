@@ -41,6 +41,7 @@ export function ScrollVideo() {
       });
 
       const startScrub = () => {
+        container.style.opacity = '1';
         video.style.opacity = '1';
         gsap.to(video, {
           currentTime: video.duration || 0,
@@ -54,12 +55,9 @@ export function ScrollVideo() {
           },
         });
 
-        // Initial refresh after scrub is set up
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
-        // Watch the entire document for layout shifts (images loading,
-        // fonts settling, lazy components painting) and re-measure each time.
-        // This is the most reliable way to keep pins stable on mobile.
+        // Watch the entire document for layout shifts and re-measure each time
         let roTimer: ReturnType<typeof setTimeout>;
         const ro = new ResizeObserver(() => {
           clearTimeout(roTimer);
@@ -67,7 +65,7 @@ export function ScrollVideo() {
         });
         ro.observe(document.body);
 
-        // Stop watching after 10s — by then everything is settled
+        // Stop watching after 10s — everything will be settled by then
         setTimeout(() => ro.disconnect(), 10000);
       };
 
@@ -82,7 +80,17 @@ export function ScrollVideo() {
         }
       };
 
-      setTimeout(tryStartScrub, 100);
+      // Wait for the full page to finish loading before initializing
+      // so ScrollTrigger always measures correct positions
+      const init = () => {
+        setTimeout(tryStartScrub, 300);
+      };
+
+      if (document.readyState === 'complete') {
+        init();
+      } else {
+        window.addEventListener('load', init, { once: true });
+      }
 
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
@@ -115,11 +123,11 @@ export function ScrollVideo() {
         </svg>
       </div>
 
-      {/* Pinned viewport container */}
+      {/* Pinned viewport container — hidden until GSAP is fully initialized */}
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden"
-        style={{ height: '100vh', willChange: 'transform' }}
+        style={{ height: '100vh', willChange: 'transform', opacity: 0 }}
       >
         {/* Mobile label */}
         <div
