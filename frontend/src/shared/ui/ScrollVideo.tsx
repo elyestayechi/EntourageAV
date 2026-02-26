@@ -53,14 +53,26 @@ export function ScrollVideo() {
           },
         });
 
-        setTimeout(() => ScrollTrigger.refresh(true), 300);
+        setTimeout(() => ScrollTrigger.refresh(true), 500);
+
+        // Re-refresh once everything on the page is fully loaded
+        window.addEventListener('load', () => {
+          setTimeout(() => ScrollTrigger.refresh(true), 300);
+        }, { once: true });
       };
 
-      if (video.readyState >= 1) {
-        startScrub();
-      } else {
-        video.addEventListener('loadedmetadata', startScrub, { once: true });
-      }
+      const tryStartScrub = () => {
+        if (video.readyState >= 2) {
+          startScrub();
+        } else {
+          video.addEventListener('loadeddata', startScrub, { once: true });
+          video.addEventListener('loadedmetadata', () => {
+            if (video.readyState >= 2) startScrub();
+          }, { once: true });
+        }
+      };
+
+      setTimeout(tryStartScrub, 100);
 
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
