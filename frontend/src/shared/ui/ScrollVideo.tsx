@@ -123,7 +123,7 @@ export function ScrollVideo() {
       >
         {/* Mobile label */}
         <div
-          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-24 pb-6 text-center"
+          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-32 pb-6 text-center"
           style={{ background: '#FAFAF9' }}
         >
           <h2
