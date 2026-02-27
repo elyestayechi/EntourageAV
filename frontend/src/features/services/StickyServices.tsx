@@ -110,7 +110,6 @@ export function StickyServices() {
 
     // Set responsive section height
     const isMobile = window.innerWidth < 768;
-    
     if (sectionRef.current) {
       sectionRef.current.style.height = isMobile
         ? `${servicePairs.length * 60}vh`
@@ -170,6 +169,20 @@ export function StickyServices() {
       <FilmGrainTexture />
 
       <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
+
+        {/* ── Mobile-only chapter header — lives inside the pinned panel
+            so "Nos Services" and the service list are always in view together ── */}
+        <div className="md:hidden px-4 pt-2 pb-5 text-left">
+          <p className="text-[10px] uppercase tracking-[0.3em] mb-1" style={{ color: 'var(--color-base-slate)' }}>
+            Chapitre 01
+          </p>
+          <h2 className="text-4xl font-bold uppercase tracking-tight leading-none mb-2" style={{ color: 'var(--color-navy-sky)' }}>
+            Nos Services
+          </h2>
+          <p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--color-base-slate)' }}>
+            Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité.
+          </p>
+        </div>
 
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
 

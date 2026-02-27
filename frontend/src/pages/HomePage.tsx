@@ -29,9 +29,9 @@ export function HomePage() {
       </div>
 
       {/* ── Chapter 1: Services ──
-          On mobile: shown but with no bottom padding so it sits flush into StickyServices.
-          On desktop: normal spacing. */}
-      <div className="[&>*]:pb-0 md:[&>*]:pb-[unset]">
+          Hidden on mobile — rendered inside the sticky panel so title
+          and services are always in view together. */}
+      <div className="hidden md:block">
         <StorytellingTransition
           themeColor="premium"
           chapter={1}
