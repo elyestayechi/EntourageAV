@@ -37,7 +37,7 @@ export function SlotMachineCounter({ number, isActive }: SlotMachineCounterProps
   const renderCylinder = (ref: React.RefObject<HTMLDivElement>, initialDigit: string) => (
     <div
       className="relative overflow-hidden"
-      style={{ width: '2.5em', height: '3.5em', perspective: '800px' }}
+      style={{ width: '2em', height: '3.5em', perspective: '800px' }}
     >
       <div
         ref={ref}
@@ -74,7 +74,7 @@ export function SlotMachineCounter({ number, isActive }: SlotMachineCounterProps
   );
 
   return (
-    <div className="flex items-center gap-0" style={{ perspective: '800px' }}>
+    <div className="flex items-center" style={{ perspective: '800px' }}>
       {renderCylinder(tensRef, number[0])}
       {renderCylinder(onesRef, number[1])}
     </div>

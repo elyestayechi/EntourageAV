@@ -161,173 +161,164 @@ export function StickyServices() {
     >
       <FilmGrainTexture />
 
-      <div ref={stickyRef} className="h-screen flex items-center" style={{ background: '#FAFAF9' }}>
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px]">
+      <div ref={stickyRef} className="h-screen" style={{ background: '#FAFAF9' }}>
 
-          <div
-            className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 lg:gap-24 items-center"
-            style={{ perspective: '2000px' }}
-          >
-
-            {/* ── Text side ── */}
-            <div
-              className="col-span-1 md:col-span-5 relative"
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              {/* Counter */}
-              <div className="mb-4 sm:mb-6 lg:mb-10">
-                <SlotMachineCounter
-                  number={`0${currentPairIndex + 1}`}
-                  isActive={true}
-                />
-              </div>
-
-              {/* Services list — natural height on mobile, fixed on desktop */}
-              <div className="relative">
-                <div
-                  className="relative md:overflow-hidden"
-                  style={{ height: 'auto' }}
-                >
-                  {/* Mobile: show current pair naturally, no fixed height */}
-                  <div className="md:hidden">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex" style={{ perspective: '800px' }}>
-                        <FlipCounter value={servicePairs[currentPairIndex].id} />
-                      </div>
-                      <div className="w-10 h-px" style={{ background: 'var(--color-navy-sky)' }} />
-                    </div>
-                    <div className="space-y-4">
-                      {servicePairs[currentPairIndex].services.map((service, serviceIndex) => (
-                        <ServiceItem
-                          key={serviceIndex}
-                          service={service}
-                          index={currentPairIndex * 2 + serviceIndex}
-                          isActive={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Desktop: absolute stacked panels with fixed height */}
-                  <div
-                    className="hidden md:block relative"
-                    style={{ height: '380px' }}
-                  >
-                    {servicePairs.map((pair, index) => (
-                      <div
-                        key={index}
-                        className={`absolute inset-0 transition-all duration-500 ${
-                          index === currentPairIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 mb-6 md:mb-10">
-                          <div className="flex" style={{ perspective: '800px' }}>
-                            <FlipCounter value={pair.id} />
-                          </div>
-                          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
-                        </div>
-
-                        <div className="space-y-6 md:space-y-8">
-                          {pair.services.map((service, serviceIndex) => (
-                            <ServiceItem
-                              key={serviceIndex}
-                              service={service}
-                              index={index * 2 + serviceIndex}
-                              isActive={index === currentPairIndex}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Image panel — tablet gets padding to push off edge ── */}
-            <div
-              ref={imageContainerRef}
-              className="hidden md:block md:col-span-7 relative md:pl-8 lg:pl-0"
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50" style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
-
-              <div
-                className="relative w-full mx-auto"
-                style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-              >
-                <div
-                  ref={clipPathRef}
-                  className="glass-warm-glow-intense relative w-full h-full overflow-hidden"
-                  style={{
-                    '--dent-position': '15%',
-                    clipPath: `polygon(
-                      0 0.5rem,
-                      0.5rem 0,
-                      100% 0,
-                      100% calc(100% - 0.5rem),
-                      calc(100% - 0.5rem) 100%,
-                      0 100%,
-                      0% calc(var(--dent-position) + ${DENT_LARGE_SIDE_HEIGHT}rem),
-                      ${DENT_WIDTH}% calc(var(--dent-position) + ${DENT_SMALL_SIDE_HEIGHT}rem),
-                      ${DENT_WIDTH}% calc(var(--dent-position) - ${DENT_SMALL_SIDE_HEIGHT}rem),
-                      0% calc(var(--dent-position) - ${DENT_LARGE_SIDE_HEIGHT}rem)
-                    )`,
-                  } as React.CSSProperties}
-                >
-                  {servicePairs.map((pair, index) => (
-                    <img
-                      key={index}
-                      src={pair.imageUrl}
-                      alt={pair.services[0].title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{
-                        opacity: index === currentPairIndex ? 1 : 0,
-                        transition: 'opacity 0.5s ease-in-out',
-                        willChange: 'opacity',
-                      }}
-                    />
-                  ))}
-
-                  <div
-                    className="absolute inset-0 pointer-events-none z-10"
-                    style={{
-                      backgroundImage: `linear-gradient(0deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%),
-                                       linear-gradient(90deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%)`,
-                      backgroundSize: '40px 40px',
-                      opacity: 0.3,
-                      mixBlendMode: 'multiply',
-                      animation: 'blueprintFade 3s ease-in-out infinite alternate',
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none z-20"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%)',
-                      mixBlendMode: 'soft-light',
-                    }}
-                  />
-                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-screen z-30">
-                    <svg width="100%" height="100%">
-                      <filter id="dustNoise">
-                        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" seed="2" />
-                        <feColorMatrix type="saturate" values="0" />
-                      </filter>
-                      <rect width="100%" height="100%" filter="url(#dustNoise)" />
-                    </svg>
-                  </div>
-                  <FilmGrainTexture />
-                </div>
-              </div>
-            </div>
-
+        {/* ── MOBILE layout (hidden on md+) ── */}
+        <div className="md:hidden h-full flex flex-col justify-center px-6 pt-20 pb-8">
+          <div className="mb-3">
+            <SlotMachineCounter
+              number={`0${currentPairIndex + 1}`}
+              isActive={true}
+            />
+          </div>
+          <div className="flex items-center gap-3 mb-5">
+            <FlipCounter value={servicePairs[currentPairIndex].id} />
+            <div className="w-10 h-px" style={{ background: 'var(--color-navy-sky)' }} />
+          </div>
+          <div className="space-y-4">
+            {servicePairs[currentPairIndex].services.map((service, serviceIndex) => (
+              <ServiceItem
+                key={serviceIndex}
+                service={service}
+                index={currentPairIndex * 2 + serviceIndex}
+                isActive={true}
+              />
+            ))}
           </div>
         </div>
+
+        {/* ── TABLET + DESKTOP layout (hidden on mobile) ── */}
+        <div className="hidden md:flex h-full items-center">
+          <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px]">
+            <div
+              className="grid grid-cols-12 gap-8 lg:gap-24 items-center"
+              style={{ perspective: '2000px' }}
+            >
+
+              {/* Text side */}
+              <div className="col-span-5 relative" style={{ transformStyle: 'preserve-3d' }}>
+                <div className="mb-6 lg:mb-10">
+                  <SlotMachineCounter
+                    number={`0${currentPairIndex + 1}`}
+                    isActive={true}
+                  />
+                </div>
+
+                <div className="relative" style={{ height: '380px' }}>
+                  {servicePairs.map((pair, index) => (
+                    <div
+                      key={index}
+                      className={`absolute inset-0 transition-all duration-500 ${
+                        index === currentPairIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-8 md:mb-10">
+                        <div className="flex" style={{ perspective: '800px' }}>
+                          <FlipCounter value={pair.id} />
+                        </div>
+                        <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
+                      </div>
+                      <div className="space-y-6 md:space-y-8">
+                        {pair.services.map((service, serviceIndex) => (
+                          <ServiceItem
+                            key={serviceIndex}
+                            service={service}
+                            index={index * 2 + serviceIndex}
+                            isActive={index === currentPairIndex}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Image panel — tablet gets right edge bleed, desktop stays contained */}
+              <div
+                ref={imageContainerRef}
+                className="col-span-7 relative"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
+                <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
+                <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
+                <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
+                <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
+                <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50" style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
+
+                <div
+                  className="relative w-full"
+                  style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d', maxHeight: '75vh' }}
+                >
+                  <div
+                    ref={clipPathRef}
+                    className="glass-warm-glow-intense relative w-full h-full overflow-hidden"
+                    style={{
+                      '--dent-position': '15%',
+                      clipPath: `polygon(
+                        0 0.5rem,
+                        0.5rem 0,
+                        100% 0,
+                        100% calc(100% - 0.5rem),
+                        calc(100% - 0.5rem) 100%,
+                        0 100%,
+                        0% calc(var(--dent-position) + ${DENT_LARGE_SIDE_HEIGHT}rem),
+                        ${DENT_WIDTH}% calc(var(--dent-position) + ${DENT_SMALL_SIDE_HEIGHT}rem),
+                        ${DENT_WIDTH}% calc(var(--dent-position) - ${DENT_SMALL_SIDE_HEIGHT}rem),
+                        0% calc(var(--dent-position) - ${DENT_LARGE_SIDE_HEIGHT}rem)
+                      )`,
+                    } as React.CSSProperties}
+                  >
+                    {servicePairs.map((pair, index) => (
+                      <img
+                        key={index}
+                        src={pair.imageUrl}
+                        alt={pair.services[0].title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{
+                          opacity: index === currentPairIndex ? 1 : 0,
+                          transition: 'opacity 0.5s ease-in-out',
+                          willChange: 'opacity',
+                        }}
+                      />
+                    ))}
+
+                    <div
+                      className="absolute inset-0 pointer-events-none z-10"
+                      style={{
+                        backgroundImage: `linear-gradient(0deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%),
+                                         linear-gradient(90deg, transparent 49%, rgba(74,74,74,0.15) 50%, transparent 51%)`,
+                        backgroundSize: '40px 40px',
+                        opacity: 0.3,
+                        mixBlendMode: 'multiply',
+                        animation: 'blueprintFade 3s ease-in-out infinite alternate',
+                      }}
+                    />
+                    <div
+                      className="absolute inset-0 pointer-events-none z-20"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%)',
+                        mixBlendMode: 'soft-light',
+                      }}
+                    />
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-screen z-30">
+                      <svg width="100%" height="100%">
+                        <filter id="dustNoise">
+                          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" seed="2" />
+                          <feColorMatrix type="saturate" values="0" />
+                        </filter>
+                        <rect width="100%" height="100%" filter="url(#dustNoise)" />
+                      </svg>
+                    </div>
+                    <FilmGrainTexture />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
