@@ -110,7 +110,6 @@ export function StickyServices() {
 
     // Set responsive section height
     const isMobile = window.innerWidth < 768;
-    const stepVh = isMobile ? 60 : 100;
     if (sectionRef.current) {
       sectionRef.current.style.height = isMobile
         ? `${servicePairs.length * 60}vh`
