@@ -77,24 +77,14 @@ function ServiceItem({
   }, [isActive, index]);
 
   return (
-    <div className="mb-10 last:mb-0">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="leading-[1.15] flex-1">
-          <div
-            ref={titleRef}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-1"
-            style={{ color: 'var(--color-navy-sky)' }}
-          >
-            {service.title}
-          </div>
-        </div>
+    <div className="mb-6 last:mb-0">
+      <div ref={titleRef} className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-1" style={{ color: 'var(--color-navy-sky)' }}>
+        {service.title}
       </div>
-      <div className="overflow-hidden">
-        <div ref={descriptionRef} className="transition-all duration-700">
-          <p className="text-sm sm:text-base md:text-lg max-w-2xl" style={{ color: 'var(--color-base-slate)' }}>
-            {service.description}
-          </p>
-        </div>
+      <div ref={descriptionRef}>
+        <p className="text-xs sm:text-sm md:text-lg max-w-2xl" style={{ color: 'var(--color-base-slate)' }}>
+          {service.description}
+        </p>
       </div>
     </div>
   );
@@ -103,7 +93,6 @@ function ServiceItem({
 export function StickyServices() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
-  const servicesContainerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const clipPathRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
@@ -130,7 +119,6 @@ export function StickyServices() {
         refreshPriority: 0,
       });
 
-      // Dent animation — only if the image panel is mounted (md+)
       if (clipPathRef.current) {
         gsap.set(clipPathRef.current, { '--dent-position': '20%' });
         gsap.to(clipPathRef.current, {
@@ -173,38 +161,58 @@ export function StickyServices() {
     >
       <FilmGrainTexture />
 
-      {/* GSAP pins this div */}
       <div ref={stickyRef} className="h-screen flex items-center" style={{ background: '#FAFAF9' }}>
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px]">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px]">
 
-          {/* Mobile: single column. md+: 12-col grid with image panel */}
           <div
-            className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-24 items-center"
+            className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 lg:gap-24 items-center"
             style={{ perspective: '2000px' }}
           >
 
-            {/* ── Text side ── full width on mobile, 5 cols on md+ */}
+            {/* ── Text side ── */}
             <div
               className="col-span-1 md:col-span-5 relative"
               style={{ transformStyle: 'preserve-3d' }}
             >
-              <div className="mb-6 sm:mb-8 lg:mb-12">
+              {/* Counter */}
+              <div className="mb-4 sm:mb-6 lg:mb-10">
                 <SlotMachineCounter
                   number={`0${currentPairIndex + 1}`}
                   isActive={true}
                 />
               </div>
 
-              <div
-                className="relative"
-                style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-              >
-                {/* On mobile keep a fixed height that fits without overflow */}
+              {/* Services list — natural height on mobile, fixed on desktop */}
+              <div className="relative">
                 <div
-                  className="overflow-hidden relative"
-                  style={{ height: '420px', maxHeight: '55vh' }}
+                  className="relative md:overflow-hidden"
+                  style={{ height: 'auto' }}
                 >
-                  <div ref={servicesContainerRef} className="absolute inset-0">
+                  {/* Mobile: show current pair naturally, no fixed height */}
+                  <div className="md:hidden">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex" style={{ perspective: '800px' }}>
+                        <FlipCounter value={servicePairs[currentPairIndex].id} />
+                      </div>
+                      <div className="w-10 h-px" style={{ background: 'var(--color-navy-sky)' }} />
+                    </div>
+                    <div className="space-y-4">
+                      {servicePairs[currentPairIndex].services.map((service, serviceIndex) => (
+                        <ServiceItem
+                          key={serviceIndex}
+                          service={service}
+                          index={currentPairIndex * 2 + serviceIndex}
+                          isActive={true}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Desktop: absolute stacked panels with fixed height */}
+                  <div
+                    className="hidden md:block relative"
+                    style={{ height: '380px' }}
+                  >
                     {servicePairs.map((pair, index) => (
                       <div
                         key={index}
@@ -212,14 +220,14 @@ export function StickyServices() {
                           index === currentPairIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
                         }`}
                       >
-                        <div className="flex items-center gap-3 mb-6 sm:mb-8 md:mb-12">
+                        <div className="flex items-center gap-3 mb-6 md:mb-10">
                           <div className="flex" style={{ perspective: '800px' }}>
                             <FlipCounter value={pair.id} />
                           </div>
                           <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
                         </div>
 
-                        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                        <div className="space-y-6 md:space-y-8">
                           {pair.services.map((service, serviceIndex) => (
                             <ServiceItem
                               key={serviceIndex}
@@ -236,13 +244,12 @@ export function StickyServices() {
               </div>
             </div>
 
-            {/* ── Image panel ── hidden on mobile (<md), shown on tablet/desktop */}
+            {/* ── Image panel — tablet gets padding to push off edge ── */}
             <div
               ref={imageContainerRef}
-              className="hidden md:block md:col-span-7 relative"
+              className="hidden md:block md:col-span-7 relative md:pl-8 lg:pl-0"
               style={{ transformStyle: 'preserve-3d' }}
             >
-              {/* Layered depth overlays */}
               <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
