@@ -45,7 +45,7 @@ export function HomePage() {
       </div>
 
       {/* Services CTA spacer */}
-      <div className="flex flex-col items-center px-4 sm:px-6 pt-4 pb-8 sm:py-12 md:py-16">
+      <div className="flex flex-col items-center px-4 sm:px-6 pt-2 pb-6 sm:py-12 md:py-16">
         <div className="flex flex-col items-center gap-5 sm:gap-8 w-full max-w-4xl mx-auto text-center">
           <p className="text-[#5A5A5A] text-sm sm:text-base md:text-xl leading-relaxed max-w-xs sm:max-w-none px-2">
             Chaque projet est une opportunité de créer quelque chose d'exceptionnel.
