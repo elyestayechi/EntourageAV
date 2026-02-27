@@ -170,19 +170,6 @@ export function StickyServices() {
 
       <div ref={stickyRef} className="h-screen flex flex-col md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
 
-        {/* ── Mobile-only embedded chapter header (seamless with StorytellingTransition) ── */}
-        <div className="md:hidden px-6 pt-10 pb-6 text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] mb-2" style={{ color: 'var(--color-base-slate)' }}>
-            Chapitre 01
-          </p>
-          <h2 className="text-3xl font-bold uppercase tracking-tight leading-none mb-3" style={{ color: 'var(--color-navy-sky)' }}>
-            Nos Services
-          </h2>
-          <p className="text-xs leading-relaxed max-w-xs mx-auto" style={{ color: 'var(--color-base-slate)' }}>
-            Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité.
-          </p>
-        </div>
-
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
 
           <div
