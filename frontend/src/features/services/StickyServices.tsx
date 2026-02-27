@@ -170,18 +170,33 @@ export function StickyServices() {
 
       <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
 
-        {/* ── Mobile-only chapter header — lives inside the pinned panel
-            so "Nos Services" and the service list are always in view together ── */}
-        <div className="md:hidden px-4 pt-2 pb-5 text-left">
-          <p className="text-[10px] uppercase tracking-[0.3em] mb-1" style={{ color: 'var(--color-base-slate)' }}>
-            Chapitre 01
-          </p>
-          <h2 className="text-4xl font-bold uppercase tracking-tight leading-none mb-2" style={{ color: 'var(--color-navy-sky)' }}>
-            Nos Services
-          </h2>
-          <p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--color-base-slate)' }}>
-            Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité.
-          </p>
+        {/* ── Mobile-only chapter header — mirrors StorytellingTransition layout exactly ── */}
+        <div className="md:hidden relative overflow-hidden pb-4"
+          style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
+        >
+          <div className="container mx-auto px-4 sm:px-8 relative z-10">
+            <div className="flex items-center gap-4">
+              {/* Large chapter number */}
+              <div
+                className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
+                style={{ color: 'var(--color-navy-blue)', opacity: 0.1 }}
+              >
+                01
+              </div>
+              {/* Title + subtitle */}
+              <div className="flex-1 min-w-0">
+                <h3
+                  className="text-xl sm:text-2xl font-bold leading-tight"
+                  style={{ color: 'var(--color-navy-blue)' }}
+                >
+                  Nos Services
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed max-w-xl" style={{ color: '#5A5A5A' }}>
+                  Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
