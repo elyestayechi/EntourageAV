@@ -92,20 +92,7 @@ export function ScrollVideo() {
 
         setTimeout(() => ScrollTrigger.refresh(true), 500);
 
-        let roTimer: ReturnType<typeof setTimeout>;
-let lastHeight = document.body.scrollHeight;
-const ro = new ResizeObserver(() => {
-  const newHeight = document.body.scrollHeight;
-  // Only refresh if the page height actually changed significantly (50px+)
-  // Ignores small repaints from counters, animations, etc.
-  if (Math.abs(newHeight - lastHeight) > 50) {
-    lastHeight = newHeight;
-    clearTimeout(roTimer);
-    roTimer = setTimeout(() => ScrollTrigger.refresh(true), 200);
-  }
-});
-ro.observe(document.body);
-setTimeout(() => ro.disconnect(), 10000);
+        
       };
 
       const tryStartScrub = () => {
