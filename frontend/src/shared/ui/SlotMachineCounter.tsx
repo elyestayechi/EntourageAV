@@ -36,7 +36,7 @@ export function SlotMachineCounter({ number, isActive }: SlotMachineCounterProps
 
   // Only tighten the gap on mobile, leave desktop/tablet untouched
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const cylinderWidth = isMobile ? '1.4em' : '2em';
+  const cylinderWidth = isMobile ? '1.6em' : '2.5em';
 
   const renderCylinder = (ref: React.RefObject<HTMLDivElement>, initialDigit: string) => (
     <div
