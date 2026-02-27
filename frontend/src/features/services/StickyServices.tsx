@@ -108,14 +108,6 @@ export function StickyServices() {
 
     if (!sectionRef.current || !stickyRef.current) return;
 
-    // Set responsive section height
-    const isMobile = window.innerWidth < 768;
-    if (sectionRef.current) {
-      sectionRef.current.style.height = isMobile
-        ? `${servicePairs.length * 60}vh`
-        : `${servicePairs.length * 100 + 60}vh`;
-    }
-
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: sectionRef.current,
@@ -145,8 +137,8 @@ export function StickyServices() {
       servicePairs.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: () => `top+=${index * window.innerHeight * (window.innerWidth < 768 ? 0.6 : 1)} top`,
-          end: () => `top+=${(index + 1) * window.innerHeight * (window.innerWidth < 768 ? 0.6 : 1)} top`,
+          start: () => `top+=${index * window.innerHeight} top`,
+          end: () => `top+=${(index + 1) * window.innerHeight} top`,
           onEnter: () => setCurrentPairIndex(index),
           onEnterBack: () => setCurrentPairIndex(index),
           refreshPriority: 0,
@@ -165,25 +157,12 @@ export function StickyServices() {
       ref={sectionRef}
       className="bg-[#FAFAF9] relative"
       data-section="services"
+      style={{ height: `${servicePairs.length * 100 + 60}vh` }}
     >
       <FilmGrainTexture />
 
-      <div ref={stickyRef} className="h-screen flex flex-col md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
-
-        {/* ── Mobile-only embedded chapter header (seamless with StorytellingTransition) ── */}
-        <div className="md:hidden px-6 pt-10 pb-6 text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] mb-2" style={{ color: 'var(--color-base-slate)' }}>
-            Chapitre 01
-          </p>
-          <h2 className="text-3xl font-bold uppercase tracking-tight leading-none mb-3" style={{ color: 'var(--color-navy-sky)' }}>
-            Nos Services
-          </h2>
-          <p className="text-xs leading-relaxed max-w-xs mx-auto" style={{ color: 'var(--color-base-slate)' }}>
-            Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité.
-          </p>
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
+      <div ref={stickyRef} className="h-screen flex items-center" style={{ background: '#FAFAF9' }}>
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px]">
 
           <div
             className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 lg:gap-24 items-center"
