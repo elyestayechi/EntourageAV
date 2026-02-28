@@ -156,13 +156,15 @@ export function BlueprintSection() {
           scrollTrigger: {
             trigger: stickyContainerRef.current,
             start: 'top top',
-            end: `+=${(processSteps.length - 1) * 100}%`,
+            // +1 so the dent finishes animating over all steps including the buffer
+            end: `+=${processSteps.length * 100}%`,
             scrub: 1.5,
             refreshPriority: -1,
           },
         });
       }
 
+      // Per-step triggers — now covers all 6 steps with a full vh each
       processSteps.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: stickyContainerRef.current,
@@ -174,10 +176,11 @@ export function BlueprintSection() {
         });
       });
 
+      // Pin — extended by one extra vh so step 06 has a full dwell before unpinning
       ScrollTrigger.create({
         trigger: stickyContainerRef.current,
         start: 'top top',
-        end: `+=${(processSteps.length - 1) * 100}%`,
+        end: `+=${processSteps.length * 100}%`,
         pin: true,
         pinSpacing: true,
         refreshPriority: -1,
@@ -209,11 +212,42 @@ export function BlueprintSection() {
       </div>
 
       <div ref={stickyContainerRef} className="h-screen relative">
+
+        {/* ── Mobile-only chapter header — same structure as StickyServices ── */}
+        <div
+          className="md:hidden absolute top-0 inset-x-0 z-10 overflow-hidden pb-6"
+          style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
+        >
+          <div className="container mx-auto px-4 sm:px-8 relative z-10">
+            <div className="flex items-center gap-4">
+              {/* Large chapter number — solid black */}
+              <div
+                className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
+                style={{ color: '#000000', opacity: 1 }}
+              >
+                05
+              </div>
+              {/* Title + subtitle */}
+              <div className="flex-1 min-w-0">
+                <h3
+                  className="text-xl sm:text-2xl font-bold leading-tight"
+                  style={{ color: 'var(--color-navy-blue)' }}
+                >
+                  Notre Méthode
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed max-w-xl" style={{ color: '#5A5A5A' }}>
+                  Un processus structuré et transparent, de la consultation à la livraison finale.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] h-full">
           <div className="h-full flex items-center justify-center">
             <div className="w-full max-w-6xl">
 
-              {/* ── Dented image panel ── hidden on mobile, shown on md+ ── */}
+              {/* ── Dented image panel — hidden on mobile, shown on md+ ── */}
               <div className="hidden md:block mb-12">
                 <div
                   ref={clipPathRef}
@@ -250,7 +284,7 @@ export function BlueprintSection() {
                 </div>
               </div>
 
-              {/* ── Step text content ── always visible ── */}
+              {/* ── Step text content — always visible ── */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
                 <StepItem
                   step={processSteps[currentStepIndex]}
