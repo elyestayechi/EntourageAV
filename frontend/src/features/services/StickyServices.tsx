@@ -171,7 +171,7 @@ export function StickyServices() {
       <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
 
         {/* ── Mobile-only chapter header — mirrors StorytellingTransition layout exactly ── */}
-        <div className="md:hidden relative overflow-hidden pb-4"
+        <div className="md:hidden relative overflow-hidden pb-8"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
@@ -179,7 +179,7 @@ export function StickyServices() {
               {/* Large chapter number */}
               <div
                 className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
-                style={{ color: 'var(--color-navy-blue)', opacity: 0.1 }}
+                style={{ color: '#000000', opacity: 1 }}
               >
                 01
               </div>
