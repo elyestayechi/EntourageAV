@@ -29,7 +29,6 @@ export function ScrollVideo() {
       document.addEventListener('touchstart', unlockVideo, { once: true });
     }
 
-    // Android needs autoplay unlocked too
     if (isAndroid) {
       const unlockAndroid = () => {
         video.play().then(() => video.pause()).catch(() => {});
@@ -56,8 +55,6 @@ export function ScrollVideo() {
         video.style.opacity = '1';
 
         if (isAndroid) {
-          // Android: use playbackRate control instead of currentTime seeking
-          // This is far smoother on Android's video decoder
           ScrollTrigger.create({
             trigger: section,
             start: 'top top',
@@ -76,7 +73,6 @@ export function ScrollVideo() {
             },
           });
         } else {
-          // iOS and desktop: normal currentTime scrub
           gsap.to(video, {
             currentTime: video.duration || 0,
             ease: 'none',
@@ -91,8 +87,6 @@ export function ScrollVideo() {
         }
 
         setTimeout(() => ScrollTrigger.refresh(true), 500);
-
-        
       };
 
       const tryStartScrub = () => {
@@ -109,6 +103,12 @@ export function ScrollVideo() {
       const init = () => {
         const delay = isMobile ? 300 : 100;
         setTimeout(tryStartScrub, delay);
+
+        // Staggered refreshes after full page settle — fixes pin miscalculation
+        // on first load caused by dynamic heights from StickyServices & BlueprintSection
+        // setting their heights in useEffect (after paint).
+        setTimeout(() => ScrollTrigger.refresh(true), 800);
+        setTimeout(() => ScrollTrigger.refresh(true), 1800);
       };
 
       if (document.readyState === 'complete') {
@@ -135,7 +135,7 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FAFAF9] lg:bg-[#2A2A2A]"
+      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
@@ -197,7 +197,7 @@ export function ScrollVideo() {
 
         {/* Desktop gradient */}
         <div
-          className="hidden lg:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
           style={{ zIndex: 10 }}
         />
       </div>
