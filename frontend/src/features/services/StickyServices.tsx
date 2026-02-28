@@ -98,6 +98,10 @@ export function StickyServices() {
   const initializedRef = useRef(false);
   const [currentPairIndex, setCurrentPairIndex] = useState(0);
 
+  // ─── Tweak this to push the image panel left (negative) or right (positive)
+  // on tablet (md) only — resets to 0 on desktop (lg+)
+  const TABLET_IMAGE_OFFSET = '-48px';
+
   const DENT_WIDTH = 3;
   const DENT_SMALL_SIDE_HEIGHT = 6;
   const DENT_LARGE_SIDE_HEIGHT = 8;
@@ -108,11 +112,11 @@ export function StickyServices() {
 
     if (!sectionRef.current || !stickyRef.current) return;
 
-    // Set responsive section height
     const isMobile = window.innerWidth < 768;
     if (sectionRef.current) {
       sectionRef.current.style.height = isMobile
-        ? `${servicePairs.length * 60}vh`
+        // +60vh buffer so the last service has a full dwell before unpinning
+        ? `${servicePairs.length * 60 + 60}vh`
         : `${servicePairs.length * 100 + 60}vh`;
     }
 
@@ -170,13 +174,14 @@ export function StickyServices() {
 
       <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
 
-        {/* ── Mobile-only chapter header — mirrors StorytellingTransition layout exactly ── */}
-        <div className="md:hidden relative overflow-hidden pb-14"
+        {/* ── Mobile-only chapter header ── */}
+        <div
+          className="md:hidden relative overflow-hidden pb-14"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
             <div className="flex items-center gap-4">
-              {/* Large chapter number */}
+              {/* Large chapter number — solid black */}
               <div
                 className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
                 style={{ color: '#000000', opacity: 1 }}
@@ -281,11 +286,20 @@ export function StickyServices() {
               </div>
             </div>
 
-            {/* ── Image panel — tablet gets padding to push off edge ── */}
+            {/* ── Image panel ──
+                TABLET_IMAGE_OFFSET shifts the entire panel left/right on md screens only.
+                Change the const at the top of this component to adjust. ── */}
             <div
               ref={imageContainerRef}
-              className="hidden md:block md:col-span-7 relative md:pl-8 lg:pl-0"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="hidden md:block md:col-span-7 relative"
+              style={{
+                transformStyle: 'preserve-3d',
+                // Apply offset only on tablet (md), reset on desktop (lg+)
+                // We use a runtime check because Tailwind can't interpolate JS vars into translate utilities
+                transform: typeof window !== 'undefined' && window.innerWidth < 1024
+                  ? `translateX(${TABLET_IMAGE_OFFSET})`
+                  : undefined,
+              }}
             >
               <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
