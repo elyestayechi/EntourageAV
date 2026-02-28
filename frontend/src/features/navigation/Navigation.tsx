@@ -222,13 +222,12 @@ export function Navigation() {
       </nav>
 
       {/* ─────────────────────────────────────────────────────────────
-          Mobile full-screen overlay — completely separate from the pill
-          so there's zero overlap / double-button issue
+          Mobile full-screen overlay
       ───────────────────────────────────────────────────────────── */}
       <div
         className="fixed inset-0 z-50 md:hidden flex flex-col"
         style={{
-          background: 'rgba(18, 18, 18, 0.7)',
+          background: 'rgba(18, 18, 18, 0.75)',
           backdropFilter: 'blur(48px) saturate(180%)',
           WebkitBackdropFilter: 'blur(48px) saturate(180%)',
           opacity: mobileMenuOpen ? 1 : 0,
@@ -236,30 +235,27 @@ export function Navigation() {
           transition: 'opacity 0.35s ease',
         }}
       >
-        {/* Header row */}
+        {/* Header row — logo + close */}
         <div className="flex items-center justify-between px-6 pt-12 pb-6">
           <Link
             to="/"
             onClick={closeMobileMenu}
-            className="font-bold text-lg tracking-tight text-white"
+            className="font-bold text-base tracking-tight text-white"
           >
             ENTOURAGE AV
           </Link>
           <button
             onClick={closeMobileMenu}
-            className="flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}
+            className="flex items-center justify-center w-9 h-9 rounded-xl transition-colors"
+            style={{ background: 'rgba(255,255,255,0.1)' }}
             aria-label="Fermer le menu"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-4 h-4 text-white" />
           </button>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0 24px' }} />
-
-        {/* Nav links */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-1">
+        {/* Nav links — centered, no frames */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-1 px-6">
           {mobileMenuItems.map((item, i) => {
             const active = isActive(item.path);
             return (
@@ -267,24 +263,18 @@ export function Navigation() {
                 key={item.path}
                 to={item.path}
                 onClick={closeMobileMenu}
-                className="flex items-center justify-between py-4 px-4 rounded-2xl transition-all duration-200 group"
+                className="w-full text-center py-3 transition-all duration-200"
                 style={{
-                  background: active ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  border: active ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
                   animation: mobileMenuOpen ? `mobileNavIn 0.4s ease forwards ${i * 0.04 + 0.1}s` : 'none',
                   opacity: 0,
                 }}
               >
                 <span
-                  className="text-lg font-semibold uppercase tracking-wider"
-                  style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+                  className="text-sm font-semibold uppercase tracking-widest"
+                  style={{ color: active ? '#ffffff' : 'rgba(255,255,255,0.5)' }}
                 >
                   {item.label}
                 </span>
-                <ChevronRight
-                  className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
-                  style={{ color: active ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)' }}
-                />
               </Link>
             );
           })}
