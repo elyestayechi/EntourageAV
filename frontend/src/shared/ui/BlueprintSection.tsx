@@ -156,7 +156,6 @@ export function BlueprintSection() {
           scrollTrigger: {
             trigger: stickyContainerRef.current,
             start: 'top top',
-            // +1 so the dent finishes animating over all steps including the buffer
             end: `+=${processSteps.length * 100}%`,
             scrub: 1.5,
             refreshPriority: -1,
@@ -164,7 +163,7 @@ export function BlueprintSection() {
         });
       }
 
-      // Per-step triggers — now covers all 6 steps with a full vh each
+      // Per-step triggers — covers all 6 steps with a full vh each
       processSteps.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: stickyContainerRef.current,
@@ -211,11 +210,16 @@ export function BlueprintSection() {
         </div>
       </div>
 
-      <div ref={stickyContainerRef} className="h-screen relative">
+      {/* ── stickyContainerRef: same flex layout as StickyServices' stickyRef ── */}
+      <div
+        ref={stickyContainerRef}
+        className="h-screen flex flex-col justify-center md:items-center md:justify-center"
+        style={{ background: '#FAFAF9' }}
+      >
 
-        {/* ── Mobile-only chapter header — same structure as StickyServices ── */}
+        {/* ── Mobile-only chapter header — exact same structure & classes as StickyServices ── */}
         <div
-          className="md:hidden absolute top-0 inset-x-0 z-10 overflow-hidden pb-6"
+          className="md:hidden relative overflow-hidden pb-14"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
@@ -243,57 +247,56 @@ export function BlueprintSection() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] h-full">
-          <div className="h-full flex items-center justify-center">
-            <div className="w-full max-w-6xl">
+        {/* ── Main content ── */}
+        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
+          <div className="w-full max-w-6xl mx-auto">
 
-              {/* ── Dented image panel — hidden on mobile, shown on md+ ── */}
-              <div className="hidden md:block mb-12">
-                <div
-                  ref={clipPathRef}
-                  className="relative w-full overflow-hidden shadow-2xl rounded-lg"
-                  style={{
-                    aspectRatio: '21/9',
-                    '--dent-position': '20%',
-                    background: 'rgba(250, 250, 249, 0.5)',
-                    clipPath: `polygon(
-                      0.5rem 0,
-                      calc(100% - 0.5rem) 0,
-                      100% 0.5rem,
-                      100% calc(100% - 0.5rem),
-                      calc(100% - 0.5rem) 100%,
-                      calc(var(--dent-position) + ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
-                      calc(var(--dent-position) + ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
-                      calc(var(--dent-position) - ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
-                      calc(var(--dent-position) - ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
-                      0.5rem 100%,
-                      0 calc(100% - 0.5rem),
-                      0 0.5rem
-                    )`,
-                  } as React.CSSProperties}
-                >
-                  <img
-                    src={processSteps[currentStepIndex].image}
-                    alt={processSteps[currentStepIndex].title}
-                    className="w-full h-full object-cover"
-                    style={{ transition: 'opacity 0.6s ease-in-out' }}
-                    key={currentStepIndex}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-                  <FilmGrainTexture />
-                </div>
-              </div>
-
-              {/* ── Step text content — always visible ── */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
-                <StepItem
-                  step={processSteps[currentStepIndex]}
-                  index={currentStepIndex}
-                  isActive={true}
+            {/* ── Dented image panel — hidden on mobile, shown on md+ ── */}
+            <div className="hidden md:block mb-12">
+              <div
+                ref={clipPathRef}
+                className="relative w-full overflow-hidden shadow-2xl rounded-lg"
+                style={{
+                  aspectRatio: '21/9',
+                  '--dent-position': '20%',
+                  background: 'rgba(250, 250, 249, 0.5)',
+                  clipPath: `polygon(
+                    0.5rem 0,
+                    calc(100% - 0.5rem) 0,
+                    100% 0.5rem,
+                    100% calc(100% - 0.5rem),
+                    calc(100% - 0.5rem) 100%,
+                    calc(var(--dent-position) + ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
+                    calc(var(--dent-position) + ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
+                    calc(var(--dent-position) - ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
+                    calc(var(--dent-position) - ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
+                    0.5rem 100%,
+                    0 calc(100% - 0.5rem),
+                    0 0.5rem
+                  )`,
+                } as React.CSSProperties}
+              >
+                <img
+                  src={processSteps[currentStepIndex].image}
+                  alt={processSteps[currentStepIndex].title}
+                  className="w-full h-full object-cover"
+                  style={{ transition: 'opacity 0.6s ease-in-out' }}
+                  key={currentStepIndex}
                 />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+                <FilmGrainTexture />
               </div>
-
             </div>
+
+            {/* ── Step text content — always visible ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
+              <StepItem
+                step={processSteps[currentStepIndex]}
+                index={currentStepIndex}
+                isActive={true}
+              />
+            </div>
+
           </div>
         </div>
       </div>

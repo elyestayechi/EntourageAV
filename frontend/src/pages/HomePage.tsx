@@ -106,13 +106,17 @@ export function HomePage() {
         <ScrollVideo />
       </div>
 
-      {/* ── Chapter 5: Blueprint / Méthode ── */}
-      <StorytellingTransition
-        themeColor="premium"
-        chapter={5}
-        title="Notre Méthode"
-        subtitle="Un processus structuré et transparent, de la consultation à la livraison finale."
-      />
+      {/* ── Chapter 5: Blueprint / Méthode ──
+          Hidden on mobile — rendered inside the sticky panel so title
+          and steps are always in view together. */}
+      <div className="hidden md:block">
+        <StorytellingTransition
+          themeColor="premium"
+          chapter={5}
+          title="Notre Méthode"
+          subtitle="Un processus structuré et transparent, de la consultation à la livraison finale."
+        />
+      </div>
 
       <div id="methode">
         <BlueprintSection />
