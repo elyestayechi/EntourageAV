@@ -195,12 +195,12 @@ export function BlueprintSection() {
   return (
     <div
       ref={sectionRef}
-      className="bg-[#FAFAF9] relative py-16 md:py-24 pb-32"
+      className="bg-[#FAFAF9] relative pt-4 md:py-24 pb-32"
       data-section="blueprint"
     >
       <FilmGrainTexture />
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] mb-16 md:mb-24">
+      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] mb-4 md:mb-24">
         <div
           className="uppercase text-xs mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
           style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}
