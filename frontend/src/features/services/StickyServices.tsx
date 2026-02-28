@@ -171,7 +171,7 @@ export function StickyServices() {
       <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
 
         {/* ── Mobile-only chapter header — mirrors StorytellingTransition layout exactly ── */}
-        <div className="md:hidden relative overflow-hidden pb-8"
+        <div className="md:hidden relative overflow-hidden pb-14"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
