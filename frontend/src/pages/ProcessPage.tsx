@@ -410,7 +410,6 @@ export function ProcessPage() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }

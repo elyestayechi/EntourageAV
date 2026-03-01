@@ -11,7 +11,7 @@ const servicePairs = [
       { number: '01', title: 'Rénovations Intérieures', description: "Transformations complètes d'espaces résidentiels et commerciaux avec finitions de qualité." },
       { number: '02', title: "Design d'Intérieur", description: "Conception et aménagement d'espaces personnalisés alliant esthétique et fonctionnalité." },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ const servicePairs = [
       { number: '03', title: 'Portes Intérieures & Coupe-Feu', description: 'Large catalogue de portes sur mesure, portes intérieures et portes coupe-feu certifiées.' },
       { number: '04', title: 'Fenêtres & Menuiseries', description: 'Installation de fenêtres et menuiseries en aluminium et PVC de haute qualité.' },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1502005097973-6a7082348e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1502005097973-6a7082348e28?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
   {
     id: 3,
@@ -27,7 +27,7 @@ const servicePairs = [
       { number: '05', title: 'Électricité Intérieure & Extérieure', description: 'Installation électrique complète pour tous types de bâtiments résidentiels et commerciaux.' },
       { number: '06', title: 'Travaux Sanitaires & Plomberie', description: 'Systèmes de plomberie et installations sanitaires performants et durables.' },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
   {
     id: 4,
@@ -35,7 +35,7 @@ const servicePairs = [
       { number: '07', title: 'VMC & Ventilation', description: 'Systèmes de ventilation mécanique contrôlée pour un air sain et une efficacité énergétique.' },
       { number: '08', title: 'Carrelage & Gresie', description: 'Pose de carrelage et revêtements en gresie pour sols et murs, finitions impeccables.' },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
   {
     id: 5,
@@ -43,14 +43,14 @@ const servicePairs = [
       { number: '09', title: 'Placo & Plâtre', description: 'Installation de plaques de plâtre et travaux de placo pour cloisons et finitions murales.' },
       { number: '10', title: 'Finitions Complètes', description: 'Peintures, revêtements et touches décoratives finales pour un résultat parfait.' },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
   {
     id: 6,
     services: [
       { number: '11', title: 'Rénovation Énergétique', description: 'Modernisation énergétique de bâtiments publics et privés pour performance optimale.' },
     ],
-    imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400',
+    imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=2400',
   },
 ];
 
@@ -91,18 +91,17 @@ function ServiceItem({
 }
 
 export function StickyServices() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
+  const sectionRef        = useRef<HTMLDivElement>(null);
+  const stickyRef         = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
-  const clipPathRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
+  const clipPathRef       = useRef<HTMLDivElement>(null);
+  const initializedRef    = useRef(false);
   const [currentPairIndex, setCurrentPairIndex] = useState(0);
 
-  // ─── Tweak this to push the image panel left (negative) or right (positive)
-  // on tablet (md) only — resets to 0 on desktop (lg+)
+  // Shift image panel left on tablet (md) only — set to '0px' to disable
   const TABLET_IMAGE_OFFSET = '-48px';
 
-  const DENT_WIDTH = 3;
+  const DENT_WIDTH            = 3;
   const DENT_SMALL_SIDE_HEIGHT = 6;
   const DENT_LARGE_SIDE_HEIGHT = 8;
 
@@ -112,15 +111,16 @@ export function StickyServices() {
 
     if (!sectionRef.current || !stickyRef.current) return;
 
+    // ── Responsive section height ──────────────────────────────────────────────
+    // CRITICAL: must be set in useEffect (not as a JSX style prop) so ScrollVideo
+    // reads the correct page height after all sections have settled.
     const isMobile = window.innerWidth < 768;
-    if (sectionRef.current) {
-      sectionRef.current.style.height = isMobile
-        // +60vh buffer so the last service has a full dwell before unpinning
-        ? `${servicePairs.length * 60 + 60}vh`
-        : `${servicePairs.length * 100 + 60}vh`;
-    }
+    sectionRef.current.style.height = isMobile
+      ? `${servicePairs.length * 60 + 60}vh`   // mobile: 6×60 + 60 buffer = 420vh
+      : `${servicePairs.length * 100 + 60}vh`;  // desktop: 6×100 + 60 buffer = 660vh
 
     const ctx = gsap.context(() => {
+      // Pin the sticky viewport
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
@@ -131,6 +131,7 @@ export function StickyServices() {
         refreshPriority: 0,
       });
 
+      // Dent animation on image panel (desktop only — clipPathRef is null on mobile)
       if (clipPathRef.current) {
         gsap.set(clipPathRef.current, { '--dent-position': '20%' });
         gsap.to(clipPathRef.current, {
@@ -146,12 +147,13 @@ export function StickyServices() {
         });
       }
 
+      // Per-pair step triggers — step size is 60vh on mobile, 100vh on desktop
       servicePairs.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: sectionRef.current,
           start: () => `top+=${index * window.innerHeight * (window.innerWidth < 768 ? 0.6 : 1)} top`,
-          end: () => `top+=${(index + 1) * window.innerHeight * (window.innerWidth < 768 ? 0.6 : 1)} top`,
-          onEnter: () => setCurrentPairIndex(index),
+          end:   () => `top+=${(index + 1) * window.innerHeight * (window.innerWidth < 768 ? 0.6 : 1)} top`,
+          onEnter:     () => setCurrentPairIndex(index),
           onEnterBack: () => setCurrentPairIndex(index),
           refreshPriority: 0,
         });
@@ -169,31 +171,30 @@ export function StickyServices() {
       ref={sectionRef}
       className="bg-[#FAFAF9] relative"
       data-section="services"
+      // NO height style prop here — height is set in useEffect above
     >
       <FilmGrainTexture />
 
-      <div ref={stickyRef} className="h-screen flex flex-col justify-center md:items-center md:justify-center" style={{ background: '#FAFAF9' }}>
-
-        {/* ── Mobile-only chapter header ── */}
+      <div
+        ref={stickyRef}
+        className="h-screen flex flex-col justify-center md:items-center md:justify-center"
+        style={{ background: '#FAFAF9' }}
+      >
+        {/* ── Mobile-only chapter header — same structure as StorytellingTransition ── */}
         <div
-          className="md:hidden relative overflow-hidden pb-14"
+          className="md:hidden relative overflow-hidden pb-4"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
             <div className="flex items-center gap-4">
-              {/* Large chapter number — solid black */}
               <div
                 className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
-                style={{ color: '#000000', opacity: 1 }}
+                style={{ color: 'var(--color-navy-blue)', opacity: 0.1 }}
               >
                 01
               </div>
-              {/* Title + subtitle */}
               <div className="flex-1 min-w-0">
-                <h3
-                  className="text-xl sm:text-2xl font-bold leading-tight"
-                  style={{ color: 'var(--color-navy-blue)' }}
-                >
+                <h3 className="text-xl sm:text-2xl font-bold leading-tight" style={{ color: 'var(--color-navy-blue)' }}>
                   Nos Services
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed max-w-xl" style={{ color: '#5A5A5A' }}>
@@ -205,32 +206,19 @@ export function StickyServices() {
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
-
           <div
             className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 lg:gap-24 items-center"
             style={{ perspective: '2000px' }}
           >
-
             {/* ── Text side ── */}
-            <div
-              className="col-span-1 md:col-span-5 relative"
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              {/* Counter */}
+            <div className="col-span-1 md:col-span-5 relative" style={{ transformStyle: 'preserve-3d' }}>
               <div className="mb-4 sm:mb-6 lg:mb-10">
-                <SlotMachineCounter
-                  number={`0${currentPairIndex + 1}`}
-                  isActive={true}
-                />
+                <SlotMachineCounter number={`0${currentPairIndex + 1}`} isActive={true} />
               </div>
 
-              {/* Services list — natural height on mobile, fixed on desktop */}
               <div className="relative">
-                <div
-                  className="relative md:overflow-hidden"
-                  style={{ height: 'auto' }}
-                >
-                  {/* Mobile: show current pair naturally, no fixed height */}
+                <div className="relative md:overflow-hidden" style={{ height: 'auto' }}>
+                  {/* Mobile */}
                   <div className="md:hidden">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex" style={{ perspective: '800px' }}>
@@ -250,11 +238,8 @@ export function StickyServices() {
                     </div>
                   </div>
 
-                  {/* Desktop: absolute stacked panels with fixed height */}
-                  <div
-                    className="hidden md:block relative"
-                    style={{ height: '380px' }}
-                  >
+                  {/* Desktop */}
+                  <div className="hidden md:block relative" style={{ height: '380px' }}>
                     {servicePairs.map((pair, index) => (
                       <div
                         key={index}
@@ -268,7 +253,6 @@ export function StickyServices() {
                           </div>
                           <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)' }} />
                         </div>
-
                         <div className="space-y-6 md:space-y-8">
                           {pair.services.map((service, serviceIndex) => (
                             <ServiceItem
@@ -286,16 +270,12 @@ export function StickyServices() {
               </div>
             </div>
 
-            {/* ── Image panel ──
-                TABLET_IMAGE_OFFSET shifts the entire panel left/right on md screens only.
-                Change the const at the top of this component to adjust. ── */}
+            {/* ── Image panel (desktop/tablet only) ── */}
             <div
               ref={imageContainerRef}
               className="hidden md:block md:col-span-7 relative"
               style={{
                 transformStyle: 'preserve-3d',
-                // Apply offset only on tablet (md), reset on desktop (lg+)
-                // We use a runtime check because Tailwind can't interpolate JS vars into translate utilities
                 transform: typeof window !== 'undefined' && window.innerWidth < 1024
                   ? `translateX(${TABLET_IMAGE_OFFSET})`
                   : undefined,
@@ -303,15 +283,12 @@ export function StickyServices() {
             >
               <div className="glass-warm-panel-overlay absolute -inset-12 rounded-[2.5rem] opacity-15" style={{ aspectRatio: '4/5', transform: 'translateZ(-100px) scale(1.08) rotateY(2deg)', transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25" style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25"   style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)',   transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50" style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)',                transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50"       style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)',                transformStyle: 'preserve-3d' }} />
 
-              <div
-                className="relative w-full mx-auto"
-                style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-              >
+              <div className="relative w-full mx-auto" style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}>
                 <div
                   ref={clipPathRef}
                   className="glass-warm-glow-intense relative w-full h-full overflow-hidden"
@@ -344,7 +321,6 @@ export function StickyServices() {
                       }}
                     />
                   ))}
-
                   <div
                     className="absolute inset-0 pointer-events-none z-10"
                     style={{
@@ -376,7 +352,6 @@ export function StickyServices() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
