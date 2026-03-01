@@ -40,6 +40,18 @@ export function ScrollVideo() {
     video.pause();
     video.currentTime = 0;
 
+    // ── ResizeObserver on document.body ────────────────────────────────────────
+    // Watches the total page height. Any time StickyServices or BlueprintSection
+    // finish setting their dynamic heights (in their own useEffects), this fires
+    // and refreshes ScrollTrigger with the correct page dimensions.
+    // This is far more reliable than setTimeout guesses.
+    let refreshTimer: ReturnType<typeof setTimeout>;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => ScrollTrigger.refresh(true), 50);
+    });
+    ro.observe(document.body);
+
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: section,
@@ -85,8 +97,6 @@ export function ScrollVideo() {
             },
           });
         }
-
-        setTimeout(() => ScrollTrigger.refresh(true), 500);
       };
 
       const tryStartScrub = () => {
@@ -103,12 +113,6 @@ export function ScrollVideo() {
       const init = () => {
         const delay = isMobile ? 300 : 100;
         setTimeout(tryStartScrub, delay);
-
-        // Staggered refreshes after full page settle — fixes pin miscalculation
-        // on first load caused by dynamic heights from StickyServices & BlueprintSection
-        // setting their heights in useEffect (after paint).
-        setTimeout(() => ScrollTrigger.refresh(true), 800);
-        setTimeout(() => ScrollTrigger.refresh(true), 1800);
       };
 
       if (document.readyState === 'complete') {
@@ -123,11 +127,16 @@ export function ScrollVideo() {
         resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
       };
       window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
+
+      return () => {
+        window.removeEventListener('resize', onResize);
+      };
     }, sectionRef);
 
     return () => {
       initializedRef.current = false;
+      ro.disconnect();
+      clearTimeout(refreshTimer);
       ctx.revert();
     };
   }, []);
