@@ -17,7 +17,7 @@ const processSteps = [
       'Estimation préliminaire gratuite',
       'Réponse sous 24h ouvrées',
     ],
-    image: 'https://images.unsplash.com/photo-1423666639041-f56000c27a9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwaG9uZSUyMGNhbGwlMjBidXNpbmVzc3xlbnwxfHx8fDE3Njg5OTk1MDN8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1423666639041-f56000c27a9a?crop=entropy&cs=tinysrgb&fit=crop&fm=webp&q=80&w=1080&h=720',
   },
   {
     number: 2,
@@ -29,9 +29,9 @@ const processSteps = [
       'Prise de mesures précises',
       'Analyse technique complète',
       'Identification des contraintes',
-      'Conseils d\'optimisation',
+      "Conseils d'optimisation",
     ],
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwaW5zcGVjdGlvbnxlbnwxfHx8fDE3Njg5OTk1MDR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=crop&fm=webp&q=80&w=1080&h=720',
   },
   {
     number: 3,
@@ -45,13 +45,13 @@ const processSteps = [
       'Choix des matériaux et finitions',
       'Garanties et assurances incluses',
     ],
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMHBsYW5uaW5nfGVufDF8fHx8MTc2ODk5OTUwNHww&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?crop=entropy&cs=tinysrgb&fit=crop&fm=webp&q=80&w=1080&h=720',
   },
   {
     number: 4,
     icon: ArrowRight,
     title: 'Réalisation des travaux',
-    subtitle: 'L\'excellence en action',
+    subtitle: "L'excellence en action",
     description: 'Nos équipes interviennent avec professionnalisme et respect de votre quotidien. Chantier propre, suivi régulier et communication transparente tout au long du projet.',
     details: [
       'Chantier propre et organisé',
@@ -59,7 +59,7 @@ const processSteps = [
       'Suivi hebdomadaire par SMS/email',
       'Artisans qualifiés et assurés',
     ],
-    image: 'https://images.unsplash.com/photo-1768321903885-d0a6798485d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMHJlbm92YXRpb24lMjBjb25zdHJ1Y3Rpb258ZW58MXx8fHwxNzY4OTk1MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1768321903885-d0a6798485d2?crop=entropy&cs=tinysrgb&fit=crop&fm=webp&q=80&w=1080&h=720',
   },
   {
     number: 5,
@@ -70,10 +70,10 @@ const processSteps = [
     details: [
       'Visite de réception détaillée',
       'Remise de toutes les garanties',
-      'Guide d\'entretien personnalisé',
+      "Guide d'entretien personnalisé",
       'Service après-vente réactif',
     ],
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvdXRkb29yJTIwdGVycmFjZXxlbnwxfHx8fDE3Njg5OTk1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?crop=entropy&cs=tinysrgb&fit=crop&fm=webp&q=80&w=1080&h=720',
   },
 ];
 
@@ -82,92 +82,58 @@ export function ProcessPage() {
   const stepsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Hero animation
     if (heroRef.current) {
       gsap.fromTo(
         heroRef.current.querySelectorAll('.animate-in'),
         { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-        }
+        { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' }
       );
     }
 
-    // Steps animation with parallax
     if (stepsRef.current) {
       const steps = stepsRef.current.querySelectorAll('.process-step');
-      
+
       steps.forEach((step, index) => {
-        // Number animation
         const number = step.querySelector('.step-number');
         if (number) {
           gsap.fromTo(
             number,
             { scale: 0, rotation: -180 },
             {
-              scale: 1,
-              rotation: 0,
-              duration: 1,
-              ease: 'back.out(1.7)',
-              scrollTrigger: {
-                trigger: step,
-                start: 'top 80%',
-              },
+              scale: 1, rotation: 0, duration: 1, ease: 'back.out(1.7)',
+              scrollTrigger: { trigger: step, start: 'top 80%' },
             }
           );
         }
 
-        // Content animation
         const content = step.querySelector('.step-content');
         if (content) {
           gsap.fromTo(
             content,
             { opacity: 0, x: index % 2 === 0 ? -50 : 50 },
             {
-              opacity: 1,
-              x: 0,
-              duration: 1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: step,
-                start: 'top 75%',
-              },
+              opacity: 1, x: 0, duration: 1, ease: 'power3.out',
+              scrollTrigger: { trigger: step, start: 'top 75%' },
             }
           );
         }
 
-        // Image animation with parallax
         const image = step.querySelector('.step-image');
         if (image) {
           gsap.fromTo(
             image,
             { opacity: 0, scale: 0.8 },
             {
-              opacity: 1,
-              scale: 1,
-              duration: 1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: step,
-                start: 'top 75%',
-              },
+              opacity: 1, scale: 1, duration: 1, ease: 'power3.out',
+              scrollTrigger: { trigger: step, start: 'top 75%' },
             }
           );
         }
 
-        // Subtle parallax for entire step
         gsap.to(step, {
-          y: -40,
-          ease: 'none',
+          y: -40, ease: 'none',
           scrollTrigger: {
-            trigger: step,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 2,
+            trigger: step, start: 'top bottom', end: 'bottom top', scrub: 2,
           },
         });
       });
@@ -176,12 +142,11 @@ export function ProcessPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      {/* Hero Section - Updated to match Contact page */}
+
+      {/* Hero */}
       <section ref={heroRef} className="relative min-h-[50vh] flex items-center justify-center px-4 pt-32 pb-20">
-        
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Number badge */}
-          <div 
+          <div
             className="inline-flex px-6 py-3 mb-6"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -194,17 +159,17 @@ export function ProcessPage() {
           >
             <span className="text-sm font-medium" style={{ color: '#2A2522' }}>PROCESSUS</span>
           </div>
-          
+
           <PremiumTextReveal>
             <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-[0.9]" style={{ color: '#2A2522' }}>
               NOTRE MÉTHODE<br />D'EXCELLENCE
             </h1>
           </PremiumTextReveal>
-          
+
           <p className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: '#5A5A5A' }}>
             De votre premier appel à la livraison finale, découvrez comment nous transformons vos projets en réalité avec méthode et transparence.
           </p>
-          
+
           <div className="animate-in flex items-center justify-center gap-3 mt-6">
             <Check className="w-5 h-5" style={{ color: '#2A2522' }} />
             <span className="text-sm font-medium" style={{ color: '#5A5A5A' }}>Délais respectés à 98% sur nos projets 2024</span>
@@ -212,11 +177,11 @@ export function ProcessPage() {
         </div>
       </section>
 
-      {/* Process Steps - Updated styling with side-by-side layout and timeline */}
+      {/* Process Steps */}
       <section ref={stepsRef} className="relative py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-7xl mx-auto">
-          {/* Intro Text */}
-          <div 
+
+          <div
             className="p-8 mb-16 text-center"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -235,16 +200,12 @@ export function ProcessPage() {
             </p>
           </div>
 
-          {/* Timeline connector - desktop only */}
           <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[#2A2522]/20 to-transparent -translate-x-1/2" />
 
           <div className="space-y-32 relative">
             {processSteps.map((step, index) => (
-              <div
-                key={step.number}
-                className="process-step relative"
-              >
-                {/* Connector line for mobile */}
+              <div key={step.number} className="process-step relative">
+
                 {index < processSteps.length - 1 && (
                   <div className="lg:hidden absolute left-8 top-full w-px h-8 bg-gradient-to-b from-[#2A2522]/20 to-transparent" />
                 )}
@@ -252,10 +213,11 @@ export function ProcessPage() {
                 <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center ${
                   index % 2 === 1 ? 'lg:flex-row-reverse' : ''
                 }`}>
-                  {/* Content - Left side for even, Right side for odd */}
+
+                  {/* Content */}
                   <div className={`step-content ${index % 2 === 1 ? 'lg:order-2 lg:ml-auto' : 'lg:mr-auto'} relative`}>
                     <div className="flex items-center gap-4 mb-6">
-                      <div 
+                      <div
                         className="step-number w-16 h-16 flex items-center justify-center text-2xl font-bold relative z-10"
                         style={{
                           background: 'rgba(255, 255, 255, 0.6)',
@@ -269,11 +231,10 @@ export function ProcessPage() {
                       >
                         {step.number}
                       </div>
-                      {/* Dot connector for desktop */}
                       <div className="hidden lg:block absolute left-1/2 top-8 w-4 h-4 rounded-full bg-[#2A2522] -translate-x-1/2 z-20" />
                     </div>
 
-                    <div 
+                    <div
                       className="p-8"
                       style={{
                         background: 'rgba(255, 255, 255, 0.4)',
@@ -287,12 +248,8 @@ export function ProcessPage() {
                       <h3 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#2A2522' }}>
                         {step.title}
                       </h3>
-                      <p className="text-lg mb-4" style={{ color: '#5A5A5A' }}>
-                        {step.subtitle}
-                      </p>
-                      <p className="leading-relaxed mb-6" style={{ color: '#5A5A5A' }}>
-                        {step.description}
-                      </p>
+                      <p className="text-lg mb-4" style={{ color: '#5A5A5A' }}>{step.subtitle}</p>
+                      <p className="leading-relaxed mb-6" style={{ color: '#5A5A5A' }}>{step.description}</p>
 
                       <div className="space-y-3">
                         {step.details.map((detail, idx) => (
@@ -305,11 +262,12 @@ export function ProcessPage() {
                     </div>
                   </div>
 
-                  {/* Image - Right side for even, Left side for odd */}
-                  <div className={`step-image ${index % 2 === 1 ? 'lg:order-1 lg:mr-auto' : 'lg:ml-auto'}`}>
-                    <div 
-                      className="relative h-64 sm:h-80 overflow-hidden"
+                  {/* Image — consistent 3/2 aspect ratio, no fixed height */}
+                  <div className={`step-image ${index % 2 === 1 ? 'lg:order-1 lg:mr-auto' : 'lg:ml-auto'} w-full`}>
+                    <div
+                      className="relative w-full overflow-hidden"
                       style={{
+                        aspectRatio: '3 / 2',
                         background: 'rgba(255, 255, 255, 0.4)',
                         backdropFilter: 'blur(40px) saturate(180%)',
                         WebkitBackdropFilter: 'blur(40px) saturate(180%)',
@@ -321,10 +279,11 @@ export function ProcessPage() {
                       <img
                         src={step.image}
                         alt={step.title}
-                        className="w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover"
                       />
                     </div>
                   </div>
+
                 </div>
               </div>
             ))}
@@ -332,10 +291,10 @@ export function ProcessPage() {
         </div>
       </section>
 
-      {/* Why Choose Us - Updated styling */}
+      {/* Why Choose Us */}
       <section className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-7xl mx-auto">
-          <div 
+          <div
             className="p-8 mb-16 text-center"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -359,20 +318,20 @@ export function ProcessPage() {
               {
                 icon: CheckCircle2,
                 title: 'Garantie qualité',
-                description: 'Toutes nos réalisations sont couvertes par une garantie décennale et biennale.'
+                description: 'Toutes nos réalisations sont couvertes par une garantie décennale et biennale.',
               },
               {
                 icon: Clock,
                 title: 'Respect des délais',
-                description: '98% de nos projets sont livrés dans les délais annoncés ou avant.'
+                description: '98% de nos projets sont livrés dans les délais annoncés ou avant.',
               },
               {
                 icon: Phone,
                 title: 'Suivi personnalisé',
-                description: 'Un interlocuteur dédié vous accompagne du début à la fin de votre projet.'
-              }
+                description: 'Un interlocuteur dédié vous accompagne du début à la fin de votre projet.',
+              },
             ].map((item, index) => (
-              <div 
+              <div
                 key={index}
                 className="p-8 text-center"
                 style={{
@@ -395,10 +354,10 @@ export function ProcessPage() {
         </div>
       </section>
 
-      {/* CTA Section - Updated to match Contact page */}
+      {/* CTA */}
       <section className="py-20 px-4 bg-[#FAFAF9]">
         <div className="max-w-7xl mx-auto">
-          <div 
+          <div
             className="p-12 text-center"
             style={{
               background: 'rgba(255, 255, 255, 0.4)',
@@ -451,6 +410,7 @@ export function ProcessPage() {
           </div>
         </div>
       </section>
+
     </div>
   );
 }
