@@ -23,36 +23,23 @@ export function ScrollVideo() {
     const isMobile  = isIOS || isAndroid;
 
     if (isIOS) {
-      const unlockVideo = () => {
+      document.addEventListener('touchstart', () => {
         video.play().then(() => video.pause()).catch(() => {});
-      };
-      document.addEventListener('touchstart', unlockVideo, { once: true });
+      }, { once: true });
     }
 
     if (isAndroid) {
-      const unlockAndroid = () => {
+      document.addEventListener('touchstart', () => {
         video.play().then(() => video.pause()).catch(() => {});
-      };
-      document.addEventListener('touchstart', unlockAndroid, { once: true });
+      }, { once: true });
     }
 
     video.load();
     video.pause();
     video.currentTime = 0;
 
-    // ── ResizeObserver on document.body ────────────────────────────────────────
-    // Watches the total page height. Any time StickyServices or BlueprintSection
-    // finish setting their dynamic heights (in their own useEffects), this fires
-    // and refreshes ScrollTrigger with the correct page dimensions.
-    // This is far more reliable than setTimeout guesses.
-    let refreshTimer: ReturnType<typeof setTimeout>;
-    const ro = new ResizeObserver(() => {
-      clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(() => ScrollTrigger.refresh(true), 50);
-    });
-    ro.observe(document.body);
-
     const ctx = gsap.context(() => {
+      // Pin the container for the full 400vh scroll
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
@@ -111,8 +98,7 @@ export function ScrollVideo() {
       };
 
       const init = () => {
-        const delay = isMobile ? 300 : 100;
-        setTimeout(tryStartScrub, delay);
+        setTimeout(tryStartScrub, isMobile ? 300 : 100);
       };
 
       if (document.readyState === 'complete') {
@@ -121,22 +107,18 @@ export function ScrollVideo() {
         window.addEventListener('load', init, { once: true });
       }
 
+      // Window resize only — no body ResizeObserver, no staggered refreshes
       let resizeTimer: ReturnType<typeof setTimeout>;
       const onResize = () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
       };
       window.addEventListener('resize', onResize);
-
-      return () => {
-        window.removeEventListener('resize', onResize);
-      };
+      return () => window.removeEventListener('resize', onResize);
     }, sectionRef);
 
     return () => {
       initializedRef.current = false;
-      ro.disconnect();
-      clearTimeout(refreshTimer);
       ctx.revert();
     };
   }, []);

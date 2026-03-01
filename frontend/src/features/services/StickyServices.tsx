@@ -54,6 +54,14 @@ const servicePairs = [
   },
 ];
 
+// ── Compute height at module level (runs once, before any component mounts) ──
+// This means the height is known synchronously at render time, so ScrollVideo
+// reads the correct page height on its very first ScrollTrigger calculation.
+const isMobileSSR = typeof window !== 'undefined' && window.innerWidth < 768;
+const SECTION_HEIGHT = isMobileSSR
+  ? `${servicePairs.length * 60 + 60}vh`
+  : `${servicePairs.length * 100 + 60}vh`;
+
 function ServiceItem({
   service,
   index,
@@ -68,10 +76,8 @@ function ServiceItem({
 
   useEffect(() => {
     if (!titleRef.current || !descriptionRef.current || !isActive) return;
-
     gsap.set(titleRef.current, { y: 30, opacity: 0 });
     gsap.set(descriptionRef.current, { y: 20, opacity: 0 });
-
     gsap.to(titleRef.current, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' });
     gsap.to(descriptionRef.current, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 });
   }, [isActive, index]);
@@ -98,9 +104,7 @@ export function StickyServices() {
   const initializedRef    = useRef(false);
   const [currentPairIndex, setCurrentPairIndex] = useState(0);
 
-  // Shift image panel left on tablet (md) only — set to '0px' to disable
-  const TABLET_IMAGE_OFFSET = '-48px';
-
+  const TABLET_IMAGE_OFFSET  = '-48px';
   const DENT_WIDTH            = 3;
   const DENT_SMALL_SIDE_HEIGHT = 6;
   const DENT_LARGE_SIDE_HEIGHT = 8;
@@ -108,19 +112,9 @@ export function StickyServices() {
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-
     if (!sectionRef.current || !stickyRef.current) return;
 
-    // ── Responsive section height ──────────────────────────────────────────────
-    // CRITICAL: must be set in useEffect (not as a JSX style prop) so ScrollVideo
-    // reads the correct page height after all sections have settled.
-    const isMobile = window.innerWidth < 768;
-    sectionRef.current.style.height = isMobile
-      ? `${servicePairs.length * 60 + 60}vh`   // mobile: 6×60 + 60 buffer = 420vh
-      : `${servicePairs.length * 100 + 60}vh`;  // desktop: 6×100 + 60 buffer = 660vh
-
     const ctx = gsap.context(() => {
-      // Pin the sticky viewport
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
@@ -131,7 +125,6 @@ export function StickyServices() {
         refreshPriority: 0,
       });
 
-      // Dent animation on image panel (desktop only — clipPathRef is null on mobile)
       if (clipPathRef.current) {
         gsap.set(clipPathRef.current, { '--dent-position': '20%' });
         gsap.to(clipPathRef.current, {
@@ -147,7 +140,6 @@ export function StickyServices() {
         });
       }
 
-      // Per-pair step triggers — step size is 60vh on mobile, 100vh on desktop
       servicePairs.forEach((_, index) => {
         ScrollTrigger.create({
           trigger: sectionRef.current,
@@ -171,7 +163,7 @@ export function StickyServices() {
       ref={sectionRef}
       className="bg-[#FAFAF9] relative"
       data-section="services"
-      // NO height style prop here — height is set in useEffect above
+      style={{ height: SECTION_HEIGHT }}
     >
       <FilmGrainTexture />
 
@@ -180,7 +172,7 @@ export function StickyServices() {
         className="h-screen flex flex-col justify-center md:items-center md:justify-center"
         style={{ background: '#FAFAF9' }}
       >
-        {/* ── Mobile-only chapter header — same structure as StorytellingTransition ── */}
+        {/* ── Mobile-only chapter header ── */}
         <div
           className="md:hidden relative overflow-hidden pb-4"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
@@ -215,7 +207,6 @@ export function StickyServices() {
               <div className="mb-4 sm:mb-6 lg:mb-10">
                 <SlotMachineCounter number={`0${currentPairIndex + 1}`} isActive={true} />
               </div>
-
               <div className="relative">
                 <div className="relative md:overflow-hidden" style={{ height: 'auto' }}>
                   {/* Mobile */}
@@ -237,7 +228,6 @@ export function StickyServices() {
                       ))}
                     </div>
                   </div>
-
                   {/* Desktop */}
                   <div className="hidden md:block relative" style={{ height: '380px' }}>
                     {servicePairs.map((pair, index) => (
@@ -270,7 +260,7 @@ export function StickyServices() {
               </div>
             </div>
 
-            {/* ── Image panel (desktop/tablet only) ── */}
+            {/* ── Image panel ── */}
             <div
               ref={imageContainerRef}
               className="hidden md:block md:col-span-7 relative"
@@ -285,9 +275,8 @@ export function StickyServices() {
               <div className="glass-warm-panel-overlay absolute -inset-10 rounded-[2.25rem] opacity-20" style={{ aspectRatio: '4/5', transform: 'translateZ(-80px) scale(1.06) rotateY(1.5deg)', transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-8 rounded-[2rem] opacity-25"   style={{ aspectRatio: '4/5', transform: 'translateZ(-60px) scale(1.05) rotateY(1deg)',   transformStyle: 'preserve-3d' }} />
               <div className="glass-warm-panel-overlay absolute -inset-6 rounded-[1.75rem] opacity-30" style={{ aspectRatio: '4/5', transform: 'translateZ(-40px) scale(1.03) rotateY(0.5deg)', transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)',                transformStyle: 'preserve-3d' }} />
-              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50"       style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)',                transformStyle: 'preserve-3d' }} />
-
+              <div className="glass-warm-panel-overlay absolute -inset-4 rounded-[1.5rem] opacity-40" style={{ aspectRatio: '4/5', transform: 'translateZ(-20px) scale(1.02)', transformStyle: 'preserve-3d' }} />
+              <div className="glass-warm-panel-overlay absolute -inset-2 rounded-xl opacity-50"       style={{ aspectRatio: '4/5', transform: 'translateZ(-10px) scale(1.01)', transformStyle: 'preserve-3d' }} />
               <div className="relative w-full mx-auto" style={{ aspectRatio: '4/5', transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}>
                 <div
                   ref={clipPathRef}
@@ -295,12 +284,8 @@ export function StickyServices() {
                   style={{
                     '--dent-position': '15%',
                     clipPath: `polygon(
-                      0 0.5rem,
-                      0.5rem 0,
-                      100% 0,
-                      100% calc(100% - 0.5rem),
-                      calc(100% - 0.5rem) 100%,
-                      0 100%,
+                      0 0.5rem, 0.5rem 0, 100% 0,
+                      100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0 100%,
                       0% calc(var(--dent-position) + ${DENT_LARGE_SIDE_HEIGHT}rem),
                       ${DENT_WIDTH}% calc(var(--dent-position) + ${DENT_SMALL_SIDE_HEIGHT}rem),
                       ${DENT_WIDTH}% calc(var(--dent-position) - ${DENT_SMALL_SIDE_HEIGHT}rem),

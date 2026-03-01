@@ -10,7 +10,7 @@ const processSteps = [
     subtitle: 'Consultation initiale',
     description: 'Nous écoutons vos besoins et vos idées pour comprendre votre vision et établir les premières bases du projet.',
     details: 'Visite sur site • Analyse des besoins • Budget préliminaire',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop&fm=webp',
   },
   {
     number: '02',
@@ -18,7 +18,7 @@ const processSteps = [
     subtitle: 'Plans et modélisation',
     description: "Élaboration de plans détaillés avec modélisation 3D, choix des matériaux et calendrier précis d'exécution.",
     details: 'Plans techniques • Devis détaillé • Planning prévisionnel',
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop&fm=webp',
   },
   {
     number: '03',
@@ -26,7 +26,7 @@ const processSteps = [
     subtitle: 'Organisation du chantier',
     description: 'Coordination des équipes, commande des matériaux et mise en place de toutes les mesures de sécurité nécessaires.',
     details: 'Approvisionnement • Permis • Coordination',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2076&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2076&auto=format&fit=crop&fm=webp',
   },
   {
     number: '04',
@@ -34,7 +34,7 @@ const processSteps = [
     subtitle: 'Exécution des travaux',
     description: 'Exécution méticuleuse de chaque phase du projet avec suivi quotidien et contrôle qualité à chaque étape.',
     details: 'Gros œuvre • Second œuvre • Contrôles qualité',
-    image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop&fm=webp',
   },
   {
     number: '05',
@@ -42,7 +42,7 @@ const processSteps = [
     subtitle: 'Perfectionnement',
     description: 'Perfectionnement de chaque détail, nettoyage complet et derniers ajustements pour un résultat impeccable.',
     details: 'Finitions soignées • Nettoyage • Ajustements finaux',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=2070&auto=format&fit=crop&fm=webp',
   },
   {
     number: '06',
@@ -50,9 +50,13 @@ const processSteps = [
     subtitle: 'Remise et garanties',
     description: 'Remise des clés, formation aux équipements installés et activation des garanties décennales et biennales.',
     details: 'Réception des travaux • Garanties • Service après-vente',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop&fm=webp',
   },
 ];
+
+// ── Static height computed at module level so the DOM has the right size
+// before any ScrollTrigger runs — prevents the "too high" pin miscalculation.
+const BLUEPRINT_HEIGHT = `${processSteps.length * 100 + 100}vh`;
 
 function StepItem({
   step,
@@ -63,11 +67,11 @@ function StepItem({
   index: number;
   isActive: boolean;
 }) {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLHeadingElement>(null);
+  const titleRef       = useRef<HTMLHeadingElement>(null);
+  const subtitleRef    = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
-  const numberRef = useRef<HTMLDivElement>(null);
+  const detailsRef     = useRef<HTMLDivElement>(null);
+  const numberRef      = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
@@ -96,14 +100,12 @@ function StepItem({
             </div>
           </div>
         </div>
-
         <div className="flex items-center gap-3 mb-4">
           <div className="flex" style={{ perspective: '800px' }}>
             <FlipCounter value={parseInt(step.number)} />
           </div>
           <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }} />
         </div>
-
         <h3 ref={titleRef} className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-navy-sky)' }}>
           {step.title}
         </h3>
@@ -111,7 +113,6 @@ function StepItem({
           {step.subtitle}
         </h4>
       </div>
-
       <div>
         <p ref={descriptionRef} className="text-sm sm:text-base md:text-lg mb-6 leading-relaxed" style={{ color: 'var(--color-base-slate)' }}>
           {step.description}
@@ -130,58 +131,56 @@ function StepItem({
 }
 
 export function BlueprintSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef         = useRef<HTMLDivElement>(null);
   const stickyContainerRef = useRef<HTMLDivElement>(null);
-  const clipPathRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
+  const clipPathRef        = useRef<HTMLDivElement>(null);
+  const initializedRef     = useRef(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  const DENT_HEIGHT = 3;
+  const DENT_HEIGHT          = 3;
   const DENT_SMALL_SIDE_WIDTH = 6;
   const DENT_LARGE_SIDE_WIDTH = 8;
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-
     if (!sectionRef.current || !stickyContainerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Dent animation — only if image panel is mounted (md+)
       if (clipPathRef.current) {
         gsap.set(clipPathRef.current, { '--dent-position': '20%' });
         gsap.to(clipPathRef.current, {
           '--dent-position': '75%',
           ease: 'power1.inOut',
           scrollTrigger: {
-            trigger: stickyContainerRef.current,
+            trigger: sectionRef.current,
             start: 'top top',
-            end: `+=${processSteps.length * 100}%`,
+            end: 'bottom bottom',
             scrub: 1.5,
             refreshPriority: -1,
           },
         });
       }
 
-      // Per-step triggers — covers all 6 steps with a full vh each
       processSteps.forEach((_, index) => {
         ScrollTrigger.create({
-          trigger: stickyContainerRef.current,
+          trigger: sectionRef.current,
           start: () => `top+=${index * window.innerHeight} top`,
-          end: () => `top+=${(index + 1) * window.innerHeight} top`,
-          onEnter: () => setCurrentStepIndex(index),
+          end:   () => `top+=${(index + 1) * window.innerHeight} top`,
+          onEnter:     () => setCurrentStepIndex(index),
           onEnterBack: () => setCurrentStepIndex(index),
           refreshPriority: -1,
         });
       });
 
-      // Pin — extended by one extra vh so step 06 has a full dwell before unpinning
+      // pinSpacing: false — section already has explicit height via BLUEPRINT_HEIGHT,
+      // so GSAP must NOT add extra space dynamically (that's what caused the jump).
       ScrollTrigger.create({
         trigger: stickyContainerRef.current,
         start: 'top top',
-        end: `+=${processSteps.length * 100}%`,
+        end: () => `+=${processSteps.length * window.innerHeight}`,
         pin: true,
-        pinSpacing: true,
+        pinSpacing: false,
         refreshPriority: -1,
       });
     }, sectionRef);
@@ -195,48 +194,32 @@ export function BlueprintSection() {
   return (
     <div
       ref={sectionRef}
-      className="bg-[#FAFAF9] relative pt-4 md:py-24 pb-32"
+      className="bg-[#FAFAF9] relative"
       data-section="blueprint"
+      style={{ height: BLUEPRINT_HEIGHT }}
     >
       <FilmGrainTexture />
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] mb-4 md:mb-24">
-        <div
-          className="uppercase text-xs mb-4 lg:mb-6 tracking-[0.3em] font-medium flex items-center gap-3"
-          style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}
-        >
-          <div className="w-8 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.6 }} />
-          PROCESSUS
-        </div>
-      </div>
-
-      {/* ── stickyContainerRef: same flex layout as StickyServices' stickyRef ── */}
       <div
         ref={stickyContainerRef}
         className="h-screen flex flex-col justify-center md:items-center md:justify-center"
         style={{ background: '#FAFAF9' }}
       >
-
-        {/* ── Mobile-only chapter header — exact same structure & classes as StickyServices ── */}
+        {/* ── Mobile-only chapter header ── */}
         <div
           className="md:hidden relative overflow-hidden pb-14"
           style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
         >
           <div className="container mx-auto px-4 sm:px-8 relative z-10">
             <div className="flex items-center gap-4">
-              {/* Large chapter number — solid black */}
               <div
                 className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
                 style={{ color: '#000000', opacity: 1 }}
               >
                 05
               </div>
-              {/* Title + subtitle */}
               <div className="flex-1 min-w-0">
-                <h3
-                  className="text-xl sm:text-2xl font-bold leading-tight"
-                  style={{ color: 'var(--color-navy-blue)' }}
-                >
+                <h3 className="text-xl sm:text-2xl font-bold leading-tight" style={{ color: 'var(--color-navy-blue)' }}>
                   Notre Méthode
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed max-w-xl" style={{ color: '#5A5A5A' }}>
@@ -251,7 +234,7 @@ export function BlueprintSection() {
         <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
           <div className="w-full max-w-6xl mx-auto">
 
-            {/* ── Dented image panel — hidden on mobile, shown on md+ ── */}
+            {/* Dented image panel — desktop only */}
             <div className="hidden md:block mb-12">
               <div
                 ref={clipPathRef}
@@ -288,7 +271,7 @@ export function BlueprintSection() {
               </div>
             </div>
 
-            {/* ── Step text content — always visible ── */}
+            {/* Step text content */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
               <StepItem
                 step={processSteps[currentStepIndex]}
@@ -296,7 +279,6 @@ export function BlueprintSection() {
                 isActive={true}
               />
             </div>
-
           </div>
         </div>
       </div>
