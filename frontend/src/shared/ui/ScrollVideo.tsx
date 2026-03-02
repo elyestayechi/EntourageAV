@@ -38,88 +38,107 @@ export function ScrollVideo() {
     video.pause();
     video.currentTime = 0;
 
-    const ctx = gsap.context(() => {
-      // Pin the container for the full 400vh scroll
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        pin: container,
-        pinSpacing: false,
-        anticipatePin: 1,
-        refreshPriority: 2,
-      });
+    const setup = () => {
+      const ctx = gsap.context(() => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: container,
+          pinSpacing: false,
+          anticipatePin: 1,
+          refreshPriority: 2,
+        });
 
-      const startScrub = () => {
-        video.style.opacity = '1';
+        const startScrub = () => {
+          video.style.opacity = '1';
 
-        if (isAndroid) {
-          ScrollTrigger.create({
-            trigger: section,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: false,
-            refreshPriority: 2,
-            onUpdate: (self) => {
-              const target = self.progress * (video.duration || 0);
-              const diff = target - video.currentTime;
-              if (Math.abs(diff) > 0.05) {
-                video.playbackRate = Math.min(Math.max(diff * 10, -4), 4);
-                video.play().catch(() => {});
-              } else {
-                video.pause();
-              }
-            },
-          });
-        } else {
-          gsap.to(video, {
-            currentTime: video.duration || 0,
-            ease: 'none',
-            scrollTrigger: {
+          if (isAndroid) {
+            ScrollTrigger.create({
               trigger: section,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: 1.5,
+              scrub: false,
               refreshPriority: 2,
-            },
-          });
-        }
-      };
+              onUpdate: (self) => {
+                const target = self.progress * (video.duration || 0);
+                const diff = target - video.currentTime;
+                if (Math.abs(diff) > 0.05) {
+                  video.playbackRate = Math.min(Math.max(diff * 10, -4), 4);
+                  video.play().catch(() => {});
+                } else {
+                  video.pause();
+                }
+              },
+            });
+          } else {
+            gsap.to(video, {
+              currentTime: video.duration || 0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: section,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.5,
+                refreshPriority: 2,
+              },
+            });
+          }
+        };
 
-      const tryStartScrub = () => {
-        if (video.readyState >= 2) {
-          startScrub();
-        } else {
-          video.addEventListener('loadeddata', startScrub, { once: true });
-          video.addEventListener('loadedmetadata', () => {
-            if (video.readyState >= 2) startScrub();
-          }, { once: true });
-        }
-      };
+        const tryStartScrub = () => {
+          if (video.readyState >= 2) {
+            startScrub();
+          } else {
+            video.addEventListener('loadeddata', startScrub, { once: true });
+            video.addEventListener('loadedmetadata', () => {
+              if (video.readyState >= 2) startScrub();
+            }, { once: true });
+          }
+        };
 
-      const init = () => {
         setTimeout(tryStartScrub, isMobile ? 300 : 100);
-      };
+      }, sectionRef);
 
-      if (document.readyState === 'complete') {
-        init();
-      } else {
-        window.addEventListener('load', init, { once: true });
-      }
+      return ctx;
+    };
 
-      // Window resize only — no body ResizeObserver, no staggered refreshes
-      let resizeTimer: ReturnType<typeof setTimeout>;
-      const onResize = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
-      };
-      window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
-    }, sectionRef);
+    // Double requestAnimationFrame ensures we run after the browser has
+    // fully painted the page — including all dynamic heights from StickyServices
+    // and other sections. This gives ScrollTrigger the correct page dimensions
+    // for its very first pin calculation, without any refresh needed.
+    let ctx: ReturnType<typeof gsap.context> | null = null;
+    let raf1: number, raf2: number;
+
+    const initAfterPaint = () => {
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          ScrollTrigger.refresh();
+          ctx = setup();
+        });
+      });
+    };
+
+    if (document.readyState === 'complete') {
+      initAfterPaint();
+    } else {
+      window.addEventListener('load', initAfterPaint, { once: true });
+    }
+
+    // Window resize
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => ScrollTrigger.refresh(true), 250);
+    };
+    window.addEventListener('resize', onResize);
 
     return () => {
       initializedRef.current = false;
-      ctx.revert();
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.removeEventListener('resize', onResize);
+      ctx?.revert();
     };
   }, []);
 
