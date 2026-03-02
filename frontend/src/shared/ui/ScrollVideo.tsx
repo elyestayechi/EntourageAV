@@ -22,13 +22,7 @@ export function ScrollVideo() {
     const isAndroid = /Android/.test(navigator.userAgent);
     const isMobile  = isIOS || isAndroid;
 
-    if (isIOS) {
-      document.addEventListener('touchstart', () => {
-        video.play().then(() => video.pause()).catch(() => {});
-      }, { once: true });
-    }
-
-    if (isAndroid) {
+    if (isIOS || isAndroid) {
       document.addEventListener('touchstart', () => {
         video.play().then(() => video.pause()).catch(() => {});
       }, { once: true });
@@ -38,8 +32,12 @@ export function ScrollVideo() {
     video.pause();
     video.currentTime = 0;
 
+    let ctx: ReturnType<typeof gsap.context> | null = null;
+
     const setup = () => {
-      const ctx = gsap.context(() => {
+      ctx?.revert();
+
+      ctx = gsap.context(() => {
         ScrollTrigger.create({
           trigger: section,
           start: 'top top',
@@ -62,7 +60,7 @@ export function ScrollVideo() {
               refreshPriority: 2,
               onUpdate: (self) => {
                 const target = self.progress * (video.duration || 0);
-                const diff = target - video.currentTime;
+                const diff   = target - video.currentTime;
                 if (Math.abs(diff) > 0.05) {
                   video.playbackRate = Math.min(Math.max(diff * 10, -4), 4);
                   video.play().catch(() => {});
@@ -86,35 +84,62 @@ export function ScrollVideo() {
           }
         };
 
-        const tryStartScrub = () => {
-          if (video.readyState >= 2) {
-            startScrub();
-          } else {
-            video.addEventListener('loadeddata', startScrub, { once: true });
-            video.addEventListener('loadedmetadata', () => {
-              if (video.readyState >= 2) startScrub();
-            }, { once: true });
-          }
-        };
-
-        setTimeout(tryStartScrub, isMobile ? 300 : 100);
+        if (video.readyState >= 2) {
+          startScrub();
+        } else {
+          video.addEventListener('loadeddata', startScrub, { once: true });
+          video.addEventListener('loadedmetadata', () => {
+            if (video.readyState >= 2) startScrub();
+          }, { once: true });
+          setTimeout(() => {
+            if (video.style.opacity !== '1') startScrub();
+          }, isMobile ? 400 : 150);
+        }
       }, sectionRef);
-
-      return ctx;
     };
 
-    // Double requestAnimationFrame ensures we run after the browser has
-    // fully painted the page — including all dynamic heights from StickyServices
-    // and other sections. This gives ScrollTrigger the correct page dimensions
-    // for its very first pin calculation, without any refresh needed.
-    let ctx: ReturnType<typeof gsap.context> | null = null;
     let raf1: number, raf2: number;
+    let bodyObserver: ResizeObserver | null = null;
+    let observerTimer: ReturnType<typeof setTimeout>;
 
     const initAfterPaint = () => {
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
-          ScrollTrigger.refresh();
-          ctx = setup();
+          // Flush any pending style / layout calculations
+          void document.body.offsetHeight;
+
+          // Hard refresh — recalculates ALL existing ScrollTrigger offsets.
+          // This must happen before we create our own pin so we read the
+          // correct top offset of our section.
+          ScrollTrigger.refresh(true);
+          setup();
+
+          // ── Key fix ──────────────────────────────────────────────────────
+          // RecentProjects loads project data asynchronously. When its cards
+          // appear, the section grows in height, pushing everything below it
+          // (including our pin) down by the same amount. ScrollTrigger has
+          // already calculated our pin offset — so it's now wrong.
+          //
+          // Solution: observe document.body height. Any time it changes
+          // (async content above us loaded), re-refresh all ScrollTriggers so
+          // our pin offset gets recalculated against the new page height.
+          let lastBodyHeight = document.body.scrollHeight;
+
+          bodyObserver = new ResizeObserver(() => {
+            const h = document.body.scrollHeight;
+            if (h !== lastBodyHeight) {
+              lastBodyHeight = h;
+              ScrollTrigger.refresh(true);
+            }
+          });
+
+          bodyObserver.observe(document.body);
+
+          // Stop observing after 10 s — all async data should be loaded by then
+          observerTimer = setTimeout(() => {
+            bodyObserver?.disconnect();
+            bodyObserver = null;
+          }, 10_000);
         });
       });
     };
@@ -125,7 +150,6 @@ export function ScrollVideo() {
       window.addEventListener('load', initAfterPaint, { once: true });
     }
 
-    // Window resize
     let resizeTimer: ReturnType<typeof setTimeout>;
     const onResize = () => {
       clearTimeout(resizeTimer);
@@ -137,6 +161,8 @@ export function ScrollVideo() {
       initializedRef.current = false;
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
+      clearTimeout(observerTimer);
+      bodyObserver?.disconnect();
       window.removeEventListener('resize', onResize);
       ctx?.revert();
     };
@@ -149,7 +175,10 @@ export function ScrollVideo() {
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ zIndex: 1 }}>
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay"
+        style={{ zIndex: 1 }}
+      >
         <svg width="100%" height="100%">
           <filter id="svn">
             <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
@@ -175,7 +204,10 @@ export function ScrollVideo() {
           >
             Notre Processus
           </h2>
-          <p className="text-xs sm:text-sm uppercase tracking-widest" style={{ color: 'var(--color-base-slate)' }}>
+          <p
+            className="text-xs sm:text-sm uppercase tracking-widest"
+            style={{ color: 'var(--color-base-slate)' }}
+          >
             De la vision à la réalité
           </p>
         </div>

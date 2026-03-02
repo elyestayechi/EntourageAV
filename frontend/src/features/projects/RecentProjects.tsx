@@ -17,7 +17,7 @@ const FALLBACK_PROJECTS = [
     images: [
       {
         before_image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        after_image:  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
       },
     ],
   },
@@ -31,7 +31,7 @@ const FALLBACK_PROJECTS = [
     images: [
       {
         before_image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        after_image:  'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
       },
     ],
   },
@@ -45,7 +45,7 @@ const FALLBACK_PROJECTS = [
     images: [
       {
         before_image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        after_image:  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
       },
     ],
   },
@@ -76,42 +76,45 @@ const overlayVignette = {
 
 export function RecentProjects() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const cardRefs = [
+  const cardRefs   = [
     useRef<HTMLDivElement>(null),
     useRef<HTMLDivElement>(null),
     useRef<HTMLDivElement>(null),
   ];
-  const [projects, setProjects] = useState<any[]>([]);
+
+  // Start with FALLBACK_PROJECTS so the section always renders at full height
+  // immediately. This prevents the page from reflowing after async data loads,
+  // which was causing ScrollVideo's pin offset to be calculated against the
+  // wrong (collapsed) page height.
+  const [projects, setProjects] = useState<any[]>(FALLBACK_PROJECTS);
+  const [, setLoaded]     = useState(false);
 
   useEffect(() => {
-    // First try to get featured projects
     getFeaturedProjects(3)
       .then((data) => {
         if (data && data.length > 0) {
           setProjects(data);
-        } else {
-          // If no featured projects, fall back to most recent ones
-          return getAllProjects();
+          setLoaded(true);
+          return;
         }
+        return getAllProjects();
       })
       .then((allData) => {
         if (allData && allData.length > 0) {
           setProjects(allData.slice(0, 3));
-        } else {
-          setProjects(FALLBACK_PROJECTS as any);
+          setLoaded(true);
         }
+        // else keep fallback — already showing
       })
       .catch(() => {
-        // On error, try to get any projects as fallback
         getAllProjects()
           .then((data) => {
             if (data && data.length > 0) {
               setProjects(data.slice(0, 3));
-            } else {
-              setProjects(FALLBACK_PROJECTS as any);
+              setLoaded(true);
             }
           })
-          .catch(() => setProjects(FALLBACK_PROJECTS as any));
+          .catch(() => {/* keep fallback */});
       });
   }, []);
 
@@ -141,7 +144,7 @@ export function RecentProjects() {
           scrollTrigger: {
             trigger: ref.current,
             start: 'top bottom',
-            end: 'bottom top',
+            end:   'bottom top',
             scrub: 1.5,
           },
         });
@@ -156,11 +159,9 @@ export function RecentProjects() {
     const pair = project.images?.[0];
     return {
       before: pair?.before_image || pair?.before || 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1080&q=80',
-      after: pair?.after_image || pair?.after || project.image || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1080&q=80',
+      after:  pair?.after_image  || pair?.after  || project.image || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1080&q=80',
     };
   };
-
-  const display = projects.length > 0 ? projects : FALLBACK_PROJECTS;
 
   return (
     <section
@@ -180,19 +181,19 @@ export function RecentProjects() {
                   <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
                   <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
                   <BeforeAfterSlider
-                    beforeImage={getImages(display[0]).before}
-                    afterImage={getImages(display[0]).after}
+                    beforeImage={getImages(projects[0]).before}
+                    afterImage={getImages(projects[0]).after}
                     className="w-full h-full"
                   />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                    {display[0]?.title}
+                    {projects[0]?.title}
                   </h3>
-                  <p className="leading-relaxed mb-4 text-[#5A5A5A]">{display[0]?.description}</p>
+                  <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[0]?.description}</p>
                   <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                    {display[0]?.location && <><span>{display[0].location}</span><span>•</span></>}
-                    {display[0]?.category && <span>{display[0].category}</span>}
+                    {projects[0]?.location && <><span>{projects[0].location}</span><span>•</span></>}
+                    {projects[0]?.category && <span>{projects[0].category}</span>}
                   </div>
                 </div>
               </div>
@@ -200,7 +201,7 @@ export function RecentProjects() {
           </div>
 
           {/* Medium card — second project */}
-          {display[1] && (
+          {projects[1] && (
             <div ref={cardRefs[1]} className="lg:col-span-6">
               <div className="group relative h-full">
                 <div className="p-6 h-full flex flex-col" style={cardStyle}>
@@ -208,19 +209,19 @@ export function RecentProjects() {
                     <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
                     <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
                     <BeforeAfterSlider
-                      beforeImage={getImages(display[1]).before}
-                      afterImage={getImages(display[1]).after}
+                      beforeImage={getImages(projects[1]).before}
+                      afterImage={getImages(projects[1]).after}
                       className="w-full h-full"
                     />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                      {display[1].title}
+                      {projects[1].title}
                     </h3>
-                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{display[1].description}</p>
+                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[1].description}</p>
                     <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                      {display[1].location && <><span>{display[1].location}</span><span>•</span></>}
-                      {display[1].category && <span>{display[1].category}</span>}
+                      {projects[1].location && <><span>{projects[1].location}</span><span>•</span></>}
+                      {projects[1].category && <span>{projects[1].category}</span>}
                     </div>
                   </div>
                 </div>
@@ -229,7 +230,7 @@ export function RecentProjects() {
           )}
 
           {/* Small card — third project */}
-          {display[2] && (
+          {projects[2] && (
             <div ref={cardRefs[2]} className="lg:col-span-6">
               <div className="group relative h-full">
                 <div className="p-6 h-full flex flex-col" style={cardStyle}>
@@ -237,19 +238,19 @@ export function RecentProjects() {
                     <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
                     <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
                     <BeforeAfterSlider
-                      beforeImage={getImages(display[2]).before}
-                      afterImage={getImages(display[2]).after}
+                      beforeImage={getImages(projects[2]).before}
+                      afterImage={getImages(projects[2]).after}
                       className="w-full h-full"
                     />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                      {display[2].title}
+                      {projects[2].title}
                     </h3>
-                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{display[2].description}</p>
+                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[2].description}</p>
                     <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                      {display[2].location && <><span>{display[2].location}</span><span>•</span></>}
-                      {display[2].category && <span>{display[2].category}</span>}
+                      {projects[2].location && <><span>{projects[2].location}</span><span>•</span></>}
+                      {projects[2].category && <span>{projects[2].category}</span>}
                     </div>
                   </div>
                 </div>
