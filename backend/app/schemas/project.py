@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 class ProjectImageBase(BaseModel):
-    """Base project image schema"""
     before_image: str = Field(..., max_length=500)
     after_image: str = Field(..., max_length=500)
     label: Optional[str] = Field(None, max_length=255)
@@ -12,22 +11,19 @@ class ProjectImageBase(BaseModel):
 
 
 class ProjectImageCreate(ProjectImageBase):
-    """Schema for creating a project image pair"""
     pass
 
 
 class ProjectImageResponse(ProjectImageBase):
-    """Schema for project image response"""
     id: int
     project_id: int
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
 
 class ProjectBase(BaseModel):
-    """Base project schema"""
     slug: str = Field(..., max_length=255)
     number: str = Field(..., max_length=10)
     title: str = Field(..., max_length=255)
@@ -36,17 +32,16 @@ class ProjectBase(BaseModel):
     description: str
     duration: Optional[str] = Field(None, max_length=100)
     surface: Optional[str] = Field(None, max_length=100)
-    image: Optional[str] = Field(None, max_length=500)  # ✅ Cover image URL
-    is_featured: Optional[bool] = Field(default=False)  # ✅ New field
+    image: Optional[str] = Field(None, max_length=500)          # cover / hero image
+    thumbnail_image: Optional[str] = Field(None, max_length=500)  # gallery card thumbnail
+    is_featured: Optional[bool] = Field(default=False)
 
 
 class ProjectCreate(ProjectBase):
-    """Schema for creating a project"""
     pass
 
 
 class ProjectUpdate(BaseModel):
-    """Schema for updating a project (all fields optional)"""
     slug: Optional[str] = Field(None, max_length=255)
     number: Optional[str] = Field(None, max_length=10)
     title: Optional[str] = Field(None, max_length=255)
@@ -56,15 +51,15 @@ class ProjectUpdate(BaseModel):
     duration: Optional[str] = Field(None, max_length=100)
     surface: Optional[str] = Field(None, max_length=100)
     image: Optional[str] = Field(None, max_length=500)
-    is_featured: Optional[bool] = None  # ✅ New field
+    thumbnail_image: Optional[str] = Field(None, max_length=500)
+    is_featured: Optional[bool] = None
 
 
 class ProjectResponse(ProjectBase):
-    """Schema for project response"""
     id: int
     images: List[ProjectImageResponse] = []
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
