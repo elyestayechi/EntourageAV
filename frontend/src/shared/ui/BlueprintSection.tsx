@@ -118,7 +118,9 @@ export function BlueprintSection() {
                   {/* Top row */}
                   <div className="relative z-10 flex items-center justify-between
                                   py-5 sm:py-[22px] gap-3 sm:gap-6">
-                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1
+                                    md:pl-6 lg:pl-10">
+                      {/* ↑ md:pl-6 lg:pl-10 — pushes number+title inward on tablet/desktop */}
                       <span
                         className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
                         style={{ color: isActive ? 'rgba(255,255,255,0.45)' : 'rgba(90,90,90,0.45)' }}
@@ -140,7 +142,8 @@ export function BlueprintSection() {
                                  flex-shrink-0 max-w-[320px] text-right
                                  transition-all duration-500"
                       style={{
-                        color: isActive ? 'rgba(246,242,232,0.78)' : 'rgba(90,90,90,0.0)',
+                        // ↓ same white as the title
+                        color: isActive ? '#F6F2E8' : 'rgba(90,90,90,0.0)',
                         transform: isActive ? 'translateX(0)' : 'translateX(16px)',
                         pointerEvents: 'none',
                       }}
@@ -155,6 +158,15 @@ export function BlueprintSection() {
                         : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
                       }
                     </div>
+
+                    {/* Desktop: arrow */}
+                    <ArrowRight
+                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
+                      style={{
+                        color: isActive ? '#F6F2E8' : 'transparent',
+                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                      }}
+                    />
                   </div>
 
                   {/* Mobile + tablet: description animates open */}
@@ -167,8 +179,9 @@ export function BlueprintSection() {
                       paddingBottom: isActive ? '20px' : '0px',
                     }}
                   >
-                    <p className="text-sm leading-relaxed pr-8"
-                       style={{ color: 'rgba(246,242,232,0.78)' }}>
+                    {/* ↓ same white as the title, indented on tablet */}
+                    <p className="text-sm leading-relaxed pr-8 md:pl-6"
+                       style={{ color: '#F6F2E8' }}>
                       {step.description}
                     </p>
                   </div>

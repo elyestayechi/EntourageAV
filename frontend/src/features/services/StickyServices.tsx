@@ -40,21 +40,17 @@ const SERVICES = [
   },
 ];
 
-// True when the primary input is touch (phones + tablets).
-// matchMedia('(pointer: coarse)') is true on all touch-only devices.
 const isTouchDevice = () =>
   typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
 export function StickyServices() {
   const [active, setActive] = useState<number | null>(null);
 
-  // Touch: toggle open/closed on tap
   const handleClick = useCallback((i: number) => {
-    if (!isTouchDevice()) return; // touch only — pointer devices use mouse events
+    if (!isTouchDevice()) return;
     setActive(prev => (prev === i ? null : i));
   }, []);
 
-  // Pointer (mouse): open on enter, close on leave
   const handleMouseEnter = useCallback((i: number) => {
     if (isTouchDevice()) return;
     setActive(i);
@@ -129,7 +125,9 @@ export function StickyServices() {
                   {/* Top row */}
                   <div className="relative z-10 flex items-center justify-between
                                   py-5 sm:py-[22px] gap-3 sm:gap-6">
-                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1
+                                    md:pl-6 lg:pl-10">
+                      {/* ↑ md:pl-6 lg:pl-10 — pushes number+title inward on tablet/desktop */}
                       <span
                         className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
                         style={{ color: isActive ? 'rgba(255,255,255,0.45)' : 'rgba(90,90,90,0.45)' }}
@@ -151,7 +149,8 @@ export function StickyServices() {
                                  flex-shrink-0 max-w-[320px] text-right
                                  transition-all duration-500"
                       style={{
-                        color: isActive ? 'rgba(246,242,232,0.78)' : 'rgba(90,90,90,0.0)',
+                        // ↓ same white as the title
+                        color: isActive ? '#F6F2E8' : 'rgba(90,90,90,0.0)',
                         transform: isActive ? 'translateX(0)' : 'translateX(16px)',
                         pointerEvents: 'none',
                       }}
@@ -166,8 +165,6 @@ export function StickyServices() {
                         : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
                       }
                     </div>
-
-                    
                   </div>
 
                   {/* Mobile + tablet: description animates open below title */}
@@ -180,8 +177,9 @@ export function StickyServices() {
                       paddingBottom: isActive ? '20px' : '0px',
                     }}
                   >
-                    <p className="text-sm leading-relaxed pr-8"
-                       style={{ color: 'rgba(246,242,232,0.78)' }}>
+                    {/* ↓ same white as the title */}
+                    <p className="text-sm leading-relaxed pr-8 md:pl-6 lg:pl-10"
+                       style={{ color: '#F6F2E8' }}>
                       {service.description}
                     </p>
                   </div>
@@ -193,7 +191,6 @@ export function StickyServices() {
           <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 
-        
       </div>
     </section>
   );
