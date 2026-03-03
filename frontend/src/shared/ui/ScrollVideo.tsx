@@ -171,12 +171,12 @@ export function ScrollVideo() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FAFAF9] md:bg-[#2A2A2A]"
+      className="relative bg-[#FAFAF9]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
       {/* Noise overlay */}
       <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay"
+        className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay"
         style={{ zIndex: 1 }}
       >
         <svg width="100%" height="100%">
@@ -195,8 +195,7 @@ export function ScrollVideo() {
       >
         {/* Mobile label */}
         <div
-          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-32 pb-6 text-center"
-          style={{ background: '#FAFAF9' }}
+          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-32 pb-6 text-center bg-gradient-to-b from-[#FAFAF9] via-[#FAFAF9] to-transparent"
         >
           <h2
             className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight uppercase leading-none"
@@ -237,9 +236,15 @@ export function ScrollVideo() {
           <source src={videoSrcMp4} type="video/mp4" />
         </video>
 
-        {/* Desktop gradient */}
+        {/* Desktop gradient overlay */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#2A2A2A] via-transparent to-[#2A2A2A]/50 pointer-events-none"
+          className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 pointer-events-none"
+          style={{ zIndex: 10 }}
+        />
+        
+        {/* Light overlay for tablets (md breakpoint) */}
+        <div
+          className="md:hidden absolute inset-0 bg-gradient-to-t from-[#FAFAF9] via-transparent to-[#FAFAF9]/30 pointer-events-none"
           style={{ zIndex: 10 }}
         />
       </div>
