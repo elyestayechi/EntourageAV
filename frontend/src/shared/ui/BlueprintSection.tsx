@@ -7,44 +7,40 @@ const STEPS = [
     title: 'Consultation & Design',
     description:
       "Nous débutons par une rencontre approfondie pour comprendre votre vision, vos besoins et votre budget. Nos designers élaborent ensuite des plans détaillés pour visualiser le résultat final avant le début des travaux.",
-    accent: '#D4AF76',
     image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '02',
     title: 'Planification & Approvisionnement',
     description:
-      "Une fois le design validé, nous établissons un calendrier précis et sélectionnons les matériaux avec soin. Nos partenaires fournisseurs garantissent des matériaux de qualité supérieure, livrés au bon moment.",
-    accent: '#8B7355',
+      "Une fois le design validé, nous établissons un calendrier précis et sélectionnons les matériaux avec soin. Nos partenaires garantissent des matériaux de qualité, livrés au bon moment pour respecter votre planning.",
     image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '03',
     title: 'Construction & Artisanat',
     description:
-      "Nos équipes d'artisans qualifiés exécutent les travaux avec précision. Électricité, plomberie, menuiseries, carrelage, finitions — tout est réalisé selon les standards les plus exigeants.",
-    accent: '#5A7A6B',
+      "Nos équipes d'artisans qualifiés exécutent les travaux avec précision. Électricité, plomberie, menuiseries, carrelage — tout est réalisé selon les standards les plus exigeants.",
     image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '04',
     title: 'Livraison & Remise des Clés',
     description:
-      "Avant la livraison, nous effectuons une inspection rigoureuse de chaque espace. Vous visitez votre projet avec notre équipe — nous ne considérons le travail terminé que lorsque vous êtes entièrement satisfait.",
-    accent: '#2A2522',
+      "Avant la livraison, nous effectuons une inspection rigoureuse de chaque espace. Nous ne considérons le travail terminé que lorsque vous êtes entièrement satisfait du résultat.",
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
 ];
 
-const glass: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.45)',
-  backdropFilter: 'blur(24px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-  border: '1px solid rgba(255, 255, 255, 0.35)',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.6)',
+const cardStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.4)',
+  backdropFilter: 'blur(40px) saturate(180%)',
+  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
 };
 
-const clip = (r: number) =>
+const clipPath = (r: number) =>
   `polygon(${r}px 0, calc(100% - ${r}px) 0, 100% ${r}px, 100% calc(100% - ${r}px), calc(100% - ${r}px) 100%, ${r}px 100%, 0 calc(100% - ${r}px), 0 ${r}px)`;
 
 export function BlueprintSection() {
@@ -52,57 +48,55 @@ export function BlueprintSection() {
     <section
       id="methode"
       data-section="methode"
-      className="relative bg-[#F4F1EC] py-20 sm:py-28 px-4 sm:px-6 lg:px-10 overflow-hidden"
+      className="relative bg-[#FAFAF9] py-16 sm:py-20 md:py-24 lg:py-28 px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden"
     >
-      {/* Subtle dot texture */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.04]"
-        style={{
-          backgroundImage: `radial-gradient(circle, rgba(42,37,34,1) 1px, transparent 1px)`,
-          backgroundSize: '28px 28px',
-        }}
-      />
-
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-[1400px] mx-auto">
 
         {/* Header */}
-        <div className="mb-14 sm:mb-20 text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-4 text-xs font-bold uppercase tracking-widest"
-            style={{ ...glass, clipPath: clip(6), color: '#2A2522' }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
-            Notre Méthode
-          </div>
-          <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.0] tracking-tight"
-            style={{ color: '#2A2522' }}
-          >
-            De la vision<br />
-            <span style={{ color: '#8B7355' }}>à la réalité</span>
-          </h2>
+        <div className="mb-10 sm:mb-12 md:mb-14 lg:mb-16">
           <p
-            className="mt-5 text-base sm:text-lg leading-relaxed max-w-xl mx-auto"
+            className="text-xs font-medium uppercase tracking-[0.2em] mb-3"
             style={{ color: '#5A5A5A' }}
           >
-            Un processus structuré et transparent — de la consultation à la livraison finale.
+            Notre Méthode
           </p>
+          <h2
+            className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight"
+            style={{ color: '#2A2522' }}
+          >
+            De la vision à la réalité
+          </h2>
         </div>
 
-        {/* Steps — alternating image/text on desktop, stacked on mobile */}
-        <div className="space-y-5">
+        {/* ── Steps
+              Mobile  (< 768):   fully stacked — image on top (fixed height),
+                                 text below. Simple and readable.
+              Tablet  (768–1023): side by side at md: — image 40% width,
+                                  text 60%. Alternating direction every other step.
+              Desktop (≥ 1024):  same side-by-side but wider image (38%) and
+                                 more generous text padding.
+        ── */}
+        <div className="space-y-4 sm:space-y-4 md:space-y-5">
           {STEPS.map((step, i) => {
             const isEven = i % 2 === 1;
             return (
               <div
                 key={step.number}
-                className={`flex flex-col ${isEven ? 'lg:flex-row-reverse' : 'lg:flex-row'} overflow-hidden`}
-                style={{ ...glass, clipPath: clip(20) }}
+                className={`
+                  flex flex-col overflow-hidden
+                  md:flex-row ${isEven ? 'md:flex-row-reverse' : ''}
+                `}
+                style={{ ...cardStyle, clipPath: clipPath(24) }}
               >
-                {/* Image */}
+
+                {/* ── Image panel ──
+                    Mobile:  fixed height 200px, full width, image fills it
+                    Tablet:  40% width, height stretches to match content
+                    Desktop: 38% width
+                ── */}
                 <div
-                  className="relative flex-shrink-0 lg:w-2/5"
-                  style={{ minHeight: '220px' }}
+                  className="relative flex-shrink-0 w-full md:w-[40%] lg:w-[38%]"
+                  style={{ minHeight: '200px' }}
                 >
                   <img
                     src={step.image}
@@ -110,61 +104,82 @@ export function BlueprintSection() {
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                  {/* Ghosted step number */}
+
+                  {/* Warm overlay */}
                   <div
-                    className="absolute inset-0 flex items-end p-6"
+                    className="absolute inset-0 pointer-events-none"
                     style={{
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.50) 0%, transparent 60%)',
+                      background: 'radial-gradient(ellipse 60% 40% at 50% -10%, rgba(212,175,119,0.10) 0%, transparent 70%)',
+                      mixBlendMode: 'soft-light',
                     }}
-                  >
+                  />
+                  {/* Vignette */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: 'radial-gradient(ellipse 75% 75% at 50% 50%, transparent 40%, rgba(42,37,34,0.15) 100%)',
+                      mixBlendMode: 'multiply',
+                    }}
+                  />
+
+                  {/* Ghost step number — bottom-right of image */}
+                  <div className="absolute bottom-3 right-4 md:bottom-4 md:right-5">
                     <span
-                      className="text-7xl sm:text-8xl font-bold leading-none select-none"
-                      style={{ color: 'rgba(255,255,255,0.13)', letterSpacing: '-0.04em' }}
+                      className="text-5xl sm:text-6xl md:text-7xl font-bold leading-none select-none"
+                      style={{ color: 'rgba(255,255,255,0.10)', letterSpacing: '-0.04em' }}
                     >
                       {step.number}
                     </span>
                   </div>
-                  {/* Accent stripe on the joining edge */}
+
+                  {/* Mobile: top accent bar */}
                   <div
-                    className={`absolute top-0 bottom-0 w-1 ${isEven ? 'right-0' : 'left-0'} hidden lg:block`}
-                    style={{ background: step.accent }}
+                    className="absolute top-0 left-0 right-0 h-0.5 md:hidden"
+                    style={{ background: 'rgba(212,175,119,0.5)' }}
                   />
-                  {/* Mobile accent stripe (top) */}
+                  {/* Tablet+: joining-edge accent line */}
                   <div
-                    className="absolute top-0 left-0 right-0 h-1 lg:hidden"
-                    style={{ background: step.accent }}
+                    className={`
+                      hidden md:block absolute top-0 bottom-0 w-px
+                      ${isEven ? 'left-0' : 'right-0'}
+                    `}
+                    style={{ background: 'rgba(212,175,119,0.35)' }}
                   />
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 p-7 sm:p-10 flex flex-col justify-center">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div
-                      className="w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ background: step.accent, clipPath: clip(5), color: '#fff' }}
-                    >
-                      {step.number}
-                    </div>
-                    <div
-                      className="h-px flex-1 max-w-[60px]"
-                      style={{ background: step.accent, opacity: 0.4 }}
-                    />
+                {/* ── Content panel ──
+                    Padding scales: tighter on mobile, generous on tablet+
+                ── */}
+                <div className="flex-1 p-6 sm:p-7 md:p-8 lg:p-12 flex flex-col justify-center">
+
+                  {/* Step label */}
+                  <div className="flex items-center gap-3 mb-4 md:mb-5">
                     <span
-                      className="text-xs font-bold uppercase tracking-widest"
-                      style={{ color: step.accent }}
+                      className="text-xs font-bold uppercase tracking-[0.2em]"
+                      style={{ color: '#5A5A5A' }}
                     >
                       Étape {i + 1}
+                    </span>
+                    <div
+                      className="h-px w-8"
+                      style={{ background: 'rgba(90,90,90,0.2)' }}
+                    />
+                    <span
+                      className="text-xs font-mono"
+                      style={{ color: 'rgba(90,90,90,0.45)' }}
+                    >
+                      {step.number}
                     </span>
                   </div>
 
                   <h3
-                    className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 leading-snug"
+                    className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 leading-snug"
                     style={{ color: '#2A2522' }}
                   >
                     {step.title}
                   </h3>
                   <p
-                    className="text-sm sm:text-base leading-relaxed"
+                    className="text-sm sm:text-sm md:text-base leading-relaxed"
                     style={{ color: '#5A5A5A' }}
                   >
                     {step.description}
@@ -176,17 +191,18 @@ export function BlueprintSection() {
         </div>
 
         {/* CTA */}
-        <div className="mt-14 sm:mt-16 text-center">
+        <div className="mt-10 sm:mt-12 md:mt-14 text-center">
           <Link
             to="/contact"
-            className="inline-flex items-center gap-3 px-8 py-4 text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4 font-medium uppercase tracking-wider text-sm transition-all duration-300 hover:scale-105"
             style={{
-              background: 'rgba(0,0,0,0.85)',
-              backdropFilter: 'blur(40px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-              border: '1px solid rgba(80,80,80,0.25)',
-              clipPath: clip(12),
-              color: '#F6F2E8',
+              background: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(80, 80, 80, 0.25)',
+              clipPath: clipPath(12),
+              color: 'var(--color-base-cream)',
             }}
           >
             <span>Démarrer mon projet</span>
