@@ -3,9 +3,7 @@ import { Link } from 'react-router';
 import { gsap } from '../../shared/lib/gsap-init';
 import { ArrowRight } from 'lucide-react';
 import { getFeaturedProjects, getAllProjects } from '../../services/projectsAPI';
-import { BeforeAfterSlider } from './BeforeAfterSlider';
 
-// Fallback projects shown when API returns nothing
 const FALLBACK_PROJECTS = [
   {
     id: -1,
@@ -14,26 +12,16 @@ const FALLBACK_PROJECTS = [
     category: 'Résidentiel',
     location: 'Paris',
     slug: '',
-    images: [
-      {
-        before_image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image:  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      },
-    ],
+    images: [{ after_image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400' }],
   },
   {
     id: -2,
     title: 'Cuisine Moderne',
-    description: 'Design contemporain avec finitions haut de gamme.',
+    description: 'Design contemporain avec finitions haut de gamme et îlot central.',
     category: 'Cuisine',
     location: 'Lyon',
     slug: '',
-    images: [
-      {
-        before_image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image:  'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      },
-    ],
+    images: [{ after_image: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400' }],
   },
   {
     id: -3,
@@ -42,236 +30,157 @@ const FALLBACK_PROJECTS = [
     category: 'Salle de Bain',
     location: 'Marseille',
     slug: '',
-    images: [
-      {
-        before_image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-        after_image:  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-      },
-    ],
+    images: [{ after_image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400' }],
+  },
+  {
+    id: -4,
+    title: 'Bureau Contemporain',
+    description: 'Aménagement de bureaux professionnels alliant sobriété et confort.',
+    category: 'Commercial',
+    location: 'Bordeaux',
+    slug: '',
+    images: [{ after_image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400' }],
   },
 ];
 
-const cardStyle = {
-  background: 'rgba(255, 255, 255, 0.4)',
-  backdropFilter: 'blur(40px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-  border: '1px solid rgba(255, 255, 255, 0.3)',
-  clipPath: 'polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px)',
-};
+// Desktop 12-col asymmetric layout — row1: 7+5, row2: 5+7
+// aspect: large slots get portrait (3/4), small slots get landscape (4/3)
+const LAYOUT = [
+  { colSpan: 'lg:col-span-7', aspect: 'aspect-[3/4]' },
+  { colSpan: 'lg:col-span-5', aspect: 'aspect-[4/3]' },
+  { colSpan: 'lg:col-span-5', aspect: 'aspect-[4/3]' },
+  { colSpan: 'lg:col-span-7', aspect: 'aspect-[3/4]' },
+];
 
-const imageClip = {
-  clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
-};
-
-const overlayWarm = {
-  background: 'radial-gradient(ellipse 60% 40% at 50% -10%, rgba(212, 175, 119, 0.15) 0%, transparent 70%)',
-  mixBlendMode: 'soft-light' as const,
-};
-
-const overlayVignette = {
-  background: 'radial-gradient(ellipse 75% 75% at 50% 50%, transparent 40%, rgba(42, 37, 34, 0.2) 100%)',
-  mixBlendMode: 'multiply' as const,
-};
+function getImage(project: any): string {
+  const pair = project.images?.[0];
+  return (
+    pair?.after_image  ||
+    pair?.after        ||
+    pair?.before_image ||
+    pair?.before       ||
+    project.image      ||
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1400&q=80'
+  );
+}
 
 export function RecentProjects() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const cardRefs   = [
-    useRef<HTMLDivElement>(null),
-    useRef<HTMLDivElement>(null),
-    useRef<HTMLDivElement>(null),
-  ];
-
-  // Start with FALLBACK_PROJECTS so the section always renders at full height
-  // immediately. This prevents the page from reflowing after async data loads,
-  // which was causing ScrollVideo's pin offset to be calculated against the
-  // wrong (collapsed) page height.
+  const itemRefs   = useRef<(HTMLDivElement | null)[]>([]);
   const [projects, setProjects] = useState<any[]>(FALLBACK_PROJECTS);
-  const [, setLoaded]     = useState(false);
 
+  // Data fetching
   useEffect(() => {
-    getFeaturedProjects(3)
+    getFeaturedProjects(4)
       .then((data) => {
-        if (data && data.length > 0) {
-          setProjects(data);
-          setLoaded(true);
-          return;
-        }
+        if (data?.length > 0) { setProjects(data.slice(0, 4)); return null; }
         return getAllProjects();
       })
-      .then((allData) => {
-        if (allData && allData.length > 0) {
-          setProjects(allData.slice(0, 3));
-          setLoaded(true);
-        }
-        // else keep fallback — already showing
-      })
+      .then((all) => { if (Array.isArray(all) && all.length > 0) setProjects(all.slice(0, 4)); })
       .catch(() => {
         getAllProjects()
-          .then((data) => {
-            if (data && data.length > 0) {
-              setProjects(data.slice(0, 3));
-              setLoaded(true);
-            }
-          })
-          .catch(() => {/* keep fallback */});
+          .then((d) => { if (Array.isArray(d) && d.length > 0) setProjects(d.slice(0, 4)); })
+          .catch(() => {});
       });
   }, []);
 
+  // Scroll-triggered staggered reveal
   useEffect(() => {
-    if (projects.length === 0) return;
-
+    if (!projects.length) return;
     const ctx = gsap.context(() => {
-      cardRefs.forEach((ref, index) => {
-        if (!ref.current) return;
-
+      itemRefs.current.forEach((el, i) => {
+        if (!el) return;
         gsap.fromTo(
-          ref.current,
-          { y: 100, opacity: 0, scale: 0.95 },
+          el,
+          { y: 60, opacity: 0 },
           {
-            y: 0, opacity: 1, scale: 1, duration: 1.2,
-            delay: index * 0.15, ease: 'power3.out',
+            y: 0, opacity: 1, duration: 1.1,
+            delay: (i % 2) * 0.12,
+            ease: 'power3.out',
             scrollTrigger: {
-              trigger: ref.current,
-              start: 'top 85%',
+              trigger: el,
+              start: 'top 88%',
               toggleActions: 'play none none none',
             },
           }
         );
-
-        gsap.to(ref.current, {
-          y: -40,
-          scrollTrigger: {
-            trigger: ref.current,
-            start: 'top bottom',
-            end:   'bottom top',
-            scrub: 1.5,
-          },
-        });
       });
     }, sectionRef);
-
     return () => ctx.revert();
   }, [projects]);
-
-  // Get first before/after pair from a project, with fallback
-  const getImages = (project: any) => {
-    const pair = project.images?.[0];
-    return {
-      before: pair?.before_image || pair?.before || 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1080&q=80',
-      after:  pair?.after_image  || pair?.after  || project.image || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1080&q=80',
-    };
-  };
 
   return (
     <section
       ref={sectionRef}
       id="projects"
-      className="relative overflow-hidden py-20 md:py-32 bg-[#FAFAF9]"
       data-section="projects"
+      className="relative bg-[#FAFAF9] py-16 sm:py-20 md:py-24 overflow-hidden"
     >
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10 max-w-[1400px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
 
-          {/* Large card — first project */}
-          <div ref={cardRefs[0]} className="lg:col-span-6 lg:row-span-2">
-            <div className="group relative h-full">
-              <div className="p-6 h-full flex flex-col" style={cardStyle}>
-                <div className="relative aspect-[4/5] lg:aspect-[3/4] overflow-hidden shadow-2xl mb-6" style={imageClip}>
-                  <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
-                  <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
-                  <BeforeAfterSlider
-                    beforeImage={getImages(projects[0]).before}
-                    afterImage={getImages(projects[0]).after}
-                    className="w-full h-full"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                    {projects[0]?.title}
-                  </h3>
-                  <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[0]?.description}</p>
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                    {projects[0]?.location && <><span>{projects[0].location}</span><span>•</span></>}
-                    {projects[0]?.category && <span>{projects[0].category}</span>}
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Header — hairline style matching StickyServices */}
+        <div className="flex items-end justify-between mb-10 md:mb-14 pb-5
+                        border-b border-[rgba(42,37,34,0.12)]">
+          <div>
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2"
+               style={{ color: '#5A5A5A' }}>
+              Nos Réalisations
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight"
+                style={{ color: '#2A2522' }}>
+              Projets récents
+            </h2>
           </div>
-
-          {/* Medium card — second project */}
-          {projects[1] && (
-            <div ref={cardRefs[1]} className="lg:col-span-6">
-              <div className="group relative h-full">
-                <div className="p-6 h-full flex flex-col" style={cardStyle}>
-                  <div className="relative aspect-[16/9] lg:aspect-[2/1] overflow-hidden shadow-2xl mb-6" style={imageClip}>
-                    <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
-                    <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
-                    <BeforeAfterSlider
-                      beforeImage={getImages(projects[1]).before}
-                      afterImage={getImages(projects[1]).after}
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                      {projects[1].title}
-                    </h3>
-                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[1].description}</p>
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                      {projects[1].location && <><span>{projects[1].location}</span><span>•</span></>}
-                      {projects[1].category && <span>{projects[1].category}</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Small card — third project */}
-          {projects[2] && (
-            <div ref={cardRefs[2]} className="lg:col-span-6">
-              <div className="group relative h-full">
-                <div className="p-6 h-full flex flex-col" style={cardStyle}>
-                  <div className="relative aspect-[16/9] lg:aspect-[2/1] overflow-hidden shadow-2xl mb-6" style={imageClip}>
-                    <div className="absolute inset-0 pointer-events-none z-30" style={overlayWarm} />
-                    <div className="absolute inset-0 pointer-events-none z-20" style={overlayVignette} />
-                    <BeforeAfterSlider
-                      beforeImage={getImages(projects[2]).before}
-                      afterImage={getImages(projects[2]).after}
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: '#2A2522' }}>
-                      {projects[2].title}
-                    </h3>
-                    <p className="leading-relaxed mb-4 text-[#5A5A5A]">{projects[2].description}</p>
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-wider" style={{ color: '#5A5A5A' }}>
-                      {projects[2].location && <><span>{projects[2].location}</span><span>•</span></>}
-                      {projects[2].category && <span>{projects[2].category}</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1"
+                style={{ color: 'rgba(90,90,90,0.4)' }}>
+            {String(projects.length).padStart(2, '0')} projets
+          </span>
         </div>
 
-        <div className="text-center mt-16">
+        {/* Grid
+            Mobile  : 1 column, full width
+            Tablet  : 2 equal columns
+            Desktop : 12-col asymmetric — LAYOUT defines each slot
+        */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5">
+          {projects.slice(0, 4).map((project, i) => {
+            const layout  = LAYOUT[i];
+            const image   = getImage(project);
+            const hasSlug = !!project.slug;
+
+            return (
+              <div
+                key={project.id ?? i}
+                ref={(el) => { itemRefs.current[i] = el; }}
+                className={`${layout.colSpan} group`}
+              >
+                {hasSlug ? (
+                  <Link to={`/realisations/${project.slug}`} className="block">
+                    <ProjectImage project={project} image={image} layout={layout} index={i} />
+                  </Link>
+                ) : (
+                  <ProjectImage project={project} image={image} layout={layout} index={i} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-10 sm:mt-12 flex justify-start">
           <Link
             to="/realisations"
-            className="inline-flex items-center gap-3 px-8 py-4 font-medium uppercase tracking-wider text-sm transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4
+                       font-medium uppercase tracking-wider text-sm
+                       transition-all duration-300 hover:scale-105"
             style={{
-              background: 'rgba(0, 0, 0, 0.85)',
+              background: 'rgba(0,0,0,0.85)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(80, 80, 80, 0.25)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+              border: '1px solid rgba(80,80,80,0.25)',
               clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
               color: 'var(--color-base-cream)',
-              textShadow: '0 2px 10px rgba(0, 0, 0, 0.4)',
             }}
           >
             <span>Voir toutes nos réalisations</span>
@@ -280,5 +189,111 @@ export function RecentProjects() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ── Extracted image block so it can live inside or outside a Link ──────────
+interface ProjectImageProps {
+  project: any;
+  image: string;
+  layout: { aspect: string };
+  index: number;
+}
+
+function ProjectImage({ project, image, layout, index }: ProjectImageProps) {
+  return (
+    <div className={`relative overflow-hidden ${layout.aspect} w-full`}>
+
+      {/* Photo */}
+      <img
+        src={image}
+        alt={project.title}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover
+                   transition-transform duration-700 ease-out
+                   group-hover:scale-[1.04]"
+      />
+
+      {/* Warm tint */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212,175,119,0.10) 0%, transparent 70%)',
+          mixBlendMode: 'soft-light',
+        }}
+      />
+
+      {/* Bottom scrim for text */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(20,16,14,0.70) 0%, transparent 100%)' }}
+      />
+
+      {/* Index — top left */}
+      <div className="absolute top-4 left-4 z-10">
+        <span className="text-[10px] font-mono tracking-widest"
+              style={{ color: 'rgba(246,242,232,0.50)' }}>
+          {String(index + 1).padStart(2, '0')}
+        </span>
+      </div>
+
+      {/* Category pill — top right */}
+      {project.category && (
+        <div className="absolute top-4 right-4 z-10">
+          <span
+            className="text-[10px] font-medium uppercase tracking-[0.18em] px-3 py-1"
+            style={{
+              background: 'rgba(255,255,255,0.10)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(246,242,232,0.80)',
+              clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)',
+            }}
+          >
+            {project.category}
+          </span>
+        </div>
+      )}
+
+      {/* Hover: frosted glass description — fades up from below the title */}
+      <div
+        className="absolute inset-x-4 z-10 pointer-events-none
+                   transition-all duration-500 ease-out
+                   opacity-0 group-hover:opacity-100
+                   translate-y-3 group-hover:translate-y-0"
+        style={{
+          bottom: 'calc(2.5rem + 36px)', // sits just above the title block
+          background: 'rgba(255,255,255,0.09)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.13)',
+          clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+          padding: '12px 14px',
+        }}
+      >
+        <p className="text-xs sm:text-sm leading-relaxed"
+           style={{ color: 'rgba(246,242,232,0.82)' }}>
+          {project.description}
+        </p>
+      </div>
+
+      {/* Title + location — always visible at bottom */}
+      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4">
+        <h3
+          className="text-base sm:text-lg md:text-xl font-bold leading-tight mb-1"
+          style={{ color: '#F6F2E8' }}
+        >
+          {project.title}
+        </h3>
+        {project.location && (
+          <p className="text-[10px] uppercase tracking-[0.18em]"
+             style={{ color: 'rgba(246,242,232,0.50)' }}>
+            {project.location}
+          </p>
+        )}
+      </div>
+
+    </div>
   );
 }

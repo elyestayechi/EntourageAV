@@ -142,7 +142,14 @@ export function Footer() {
             ))}
 
             <span className="w-px h-3 bg-black/15" />
-            <p className="text-xs text-black/30 tracking-wider">Made by Tee*</p>
+            <a 
+              href="https://elyestayechi-portfolio.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-black/30 hover:text-black/70 transition-colors duration-300 tracking-wider"
+            >
+              Made by Tee*
+            </a>
           </div>
         </div>
 
