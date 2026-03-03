@@ -105,26 +105,11 @@ export function ScrollVideo() {
     const initAfterPaint = () => {
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
-          // Flush any pending style / layout calculations
           void document.body.offsetHeight;
-
-          // Hard refresh — recalculates ALL existing ScrollTrigger offsets.
-          // This must happen before we create our own pin so we read the
-          // correct top offset of our section.
           ScrollTrigger.refresh(true);
           setup();
 
-          // ── Key fix ──────────────────────────────────────────────────────
-          // RecentProjects loads project data asynchronously. When its cards
-          // appear, the section grows in height, pushing everything below it
-          // (including our pin) down by the same amount. ScrollTrigger has
-          // already calculated our pin offset — so it's now wrong.
-          //
-          // Solution: observe document.body height. Any time it changes
-          // (async content above us loaded), re-refresh all ScrollTriggers so
-          // our pin offset gets recalculated against the new page height.
           let lastBodyHeight = document.body.scrollHeight;
-
           bodyObserver = new ResizeObserver(() => {
             const h = document.body.scrollHeight;
             if (h !== lastBodyHeight) {
@@ -132,10 +117,7 @@ export function ScrollVideo() {
               ScrollTrigger.refresh(true);
             }
           });
-
           bodyObserver.observe(document.body);
-
-          // Stop observing after 10 s — all async data should be loaded by then
           observerTimer = setTimeout(() => {
             bodyObserver?.disconnect();
             bodyObserver = null;
@@ -169,60 +151,75 @@ export function ScrollVideo() {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative bg-[#FAFAF9]"
-      style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
-    >
-      {/* Pinned viewport container */}
-      <div
-        ref={containerRef}
-        className="relative w-full overflow-hidden"
-        style={{ height: '100vh', willChange: 'transform' }}
-      >
-        {/* Mobile label */}
-        <div
-          className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-32 pb-6 text-center bg-gradient-to-b from-[#FAFAF9] via-[#FAFAF9] to-transparent"
-        >
-          <h2
-            className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight uppercase leading-none"
-            style={{ color: 'var(--color-navy-sky)' }}
-          >
-            Notre Processus
-          </h2>
-          <p
-            className="text-xs sm:text-sm uppercase tracking-widest"
-            style={{ color: 'var(--color-base-slate)' }}
-          >
-            De la vision à la réalité
-          </p>
-        </div>
+    <>
+      {/* ── Responsive scroll distance ──────────────────────────────────────
+          The section height = how long the user scrolls while the video plays.
+          400vh on desktop = cinematic, unhurried.
+          300vh on tablet  = still feels intentional, less exhausting.
+          200vh on mobile  = quick, doesn't overstay its welcome.
+      ─────────────────────────────────────────────────────────────────────── */}
+      <style>{`
+        #scroll-video-section { height: 200vh; }
+        @media (min-width: 768px)  { #scroll-video-section { height: 300vh; } }
+        @media (min-width: 1024px) { #scroll-video-section { height: 400vh; } }
+      `}</style>
 
-        {/* Desktop centred label */}
-        <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
-          <div className="text-center px-8 w-full max-w-5xl mx-auto">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 tracking-tight uppercase leading-none">
+      <section
+        ref={sectionRef}
+        id="scroll-video-section"
+        className="relative bg-[#FAFAF9]"
+        style={{ isolation: 'isolate', overflow: 'clip' }}
+      >
+        {/* Pinned viewport container */}
+        <div
+          ref={containerRef}
+          className="relative w-full overflow-hidden"
+          style={{ height: '100vh', willChange: 'transform' }}
+        >
+          {/* Mobile label */}
+          <div
+            className="md:hidden absolute inset-x-0 top-0 z-20 px-4 pt-32 pb-6 text-center bg-gradient-to-b from-[#FAFAF9] via-[#FAFAF9] to-transparent"
+          >
+            <h2
+              className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight uppercase leading-none"
+              style={{ color: 'var(--color-navy-sky)' }}
+            >
               Notre Processus
             </h2>
-            <p className="text-base lg:text-xl text-white/70 uppercase tracking-widest">
+            <p
+              className="text-xs sm:text-sm uppercase tracking-widest"
+              style={{ color: 'var(--color-base-slate)' }}
+            >
               De la vision à la réalité
             </p>
           </div>
-        </div>
 
-        {/* Video */}
-        <video
-          ref={videoRef}
-          className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
-          style={{ zIndex: 0, opacity: 0 }}
-          muted
-          playsInline
-          preload="auto"
-        >
-          <source src={videoSrc} type="video/webm" />
-          <source src={videoSrcMp4} type="video/mp4" />
-        </video>
-      </div>
-    </section>
+          {/* Desktop centred label */}
+          <div className="hidden md:flex absolute inset-0 z-20 pointer-events-none items-center justify-center">
+            <div className="text-center px-8 w-full max-w-5xl mx-auto">
+              <h2 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 tracking-tight uppercase leading-none">
+                Notre Processus
+              </h2>
+              <p className="text-base lg:text-xl text-white/70 uppercase tracking-widest">
+                De la vision à la réalité
+              </p>
+            </div>
+          </div>
+
+          {/* Video */}
+          <video
+            ref={videoRef}
+            className="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full"
+            style={{ zIndex: 0, opacity: 0 }}
+            muted
+            playsInline
+            preload="auto"
+          >
+            <source src={videoSrc} type="video/webm" />
+            <source src={videoSrcMp4} type="video/mp4" />
+          </video>
+        </div>
+      </section>
+    </>
   );
 }

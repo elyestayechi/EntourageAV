@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Plus, Minus } from 'lucide-react';
 
@@ -33,11 +33,26 @@ const STEPS = [
   },
 ];
 
+const isTouchDevice = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 export function BlueprintSection() {
   const [active, setActive] = useState<number | null>(null);
 
-  const toggle = (i: number) =>
+  const handleClick = useCallback((i: number) => {
+    if (!isTouchDevice()) return;
     setActive(prev => (prev === i ? null : i));
+  }, []);
+
+  const handleMouseEnter = useCallback((i: number) => {
+    if (isTouchDevice()) return;
+    setActive(i);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isTouchDevice()) return;
+    setActive(null);
+  }, []);
 
   return (
     <section
@@ -60,17 +75,12 @@ export function BlueprintSection() {
               De la vision à la réalité
             </h2>
           </div>
-          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1"
-                style={{ color: 'rgba(90,90,90,0.4)' }}>
-            04 étapes
-          </span>
         </div>
 
-        {/* Rows — identical pattern to StickyServices */}
+        {/* Rows */}
         <div>
           {STEPS.map((step, i) => {
             const isActive = active === i;
-
             return (
               <div key={step.number}>
                 {i > 0 && (
@@ -78,14 +88,12 @@ export function BlueprintSection() {
                 )}
 
                 <div
-                  onClick={() => toggle(i)}
-                  onMouseEnter={() => setActive(i)}
-                  onMouseLeave={() => setActive(null)}
+                  onClick={() => handleClick(i)}
+                  onMouseEnter={() => handleMouseEnter(i)}
+                  onMouseLeave={handleMouseLeave}
                   className="group relative overflow-hidden cursor-pointer
                              transition-[min-height] duration-500 ease-in-out"
-                  style={{
-                    minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px',
-                  }}
+                  style={{ minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px' }}
                 >
                   {/* Full-bleed image */}
                   <div
@@ -107,10 +115,9 @@ export function BlueprintSection() {
                     />
                   </div>
 
-                  {/* Top row: number + title + icon */}
+                  {/* Top row */}
                   <div className="relative z-10 flex items-center justify-between
                                   py-5 sm:py-[22px] gap-3 sm:gap-6">
-
                     <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
                       <span
                         className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
@@ -127,7 +134,7 @@ export function BlueprintSection() {
                       </h3>
                     </div>
 
-                    {/* Desktop: description slides in from right */}
+                    {/* Desktop: description slides in */}
                     <p
                       className="hidden lg:block text-sm leading-relaxed
                                  flex-shrink-0 max-w-[320px] text-right
@@ -141,25 +148,25 @@ export function BlueprintSection() {
                       {step.description}
                     </p>
 
-                    {/* Icon */}
-                    <div className="flex-shrink-0 transition-all duration-300">
-                      <div className="lg:hidden">
-                        {isActive
-                          ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
-                          : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
-                        }
-                      </div>
-                      <ArrowRight
-                        className="hidden lg:block w-5 h-5 transition-all duration-300"
-                        style={{
-                          color: isActive ? '#F6F2E8' : 'transparent',
-                          transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
-                        }}
-                      />
+                    {/* Touch: plus/minus */}
+                    <div className="lg:hidden flex-shrink-0">
+                      {isActive
+                        ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
+                        : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
+                      }
                     </div>
+
+                    {/* Desktop: arrow */}
+                    <ArrowRight
+                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
+                      style={{
+                        color: isActive ? '#F6F2E8' : 'transparent',
+                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                      }}
+                    />
                   </div>
 
-                  {/* Mobile/tablet: description animates open below title */}
+                  {/* Mobile + tablet: description animates open */}
                   <div
                     className="lg:hidden relative z-10 overflow-hidden
                                transition-all duration-500 ease-in-out"
@@ -169,10 +176,8 @@ export function BlueprintSection() {
                       paddingBottom: isActive ? '20px' : '0px',
                     }}
                   >
-                    <p
-                      className="text-sm leading-relaxed pr-8"
-                      style={{ color: 'rgba(246,242,232,0.78)' }}
-                    >
+                    <p className="text-sm leading-relaxed pr-8"
+                       style={{ color: 'rgba(246,242,232,0.78)' }}>
                       {step.description}
                     </p>
                   </div>
@@ -181,7 +186,6 @@ export function BlueprintSection() {
             );
           })}
 
-          {/* Final hairline */}
           <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 

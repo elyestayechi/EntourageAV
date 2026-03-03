@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { Link } from 'react-router';
 import { ArrowRight, Plus, Minus } from 'lucide-react';
 
 const SERVICES = [
@@ -40,12 +41,30 @@ const SERVICES = [
   },
 ];
 
+// True when the primary input is touch (phones + tablets).
+// matchMedia('(pointer: coarse)') is true on all touch-only devices.
+const isTouchDevice = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 export function StickyServices() {
-  // `active` handles both hover (desktop) and tap (mobile/tablet)
   const [active, setActive] = useState<number | null>(null);
 
-  const toggle = (i: number) =>
+  // Touch: toggle open/closed on tap
+  const handleClick = useCallback((i: number) => {
+    if (!isTouchDevice()) return; // touch only — pointer devices use mouse events
     setActive(prev => (prev === i ? null : i));
+  }, []);
+
+  // Pointer (mouse): open on enter, close on leave
+  const handleMouseEnter = useCallback((i: number) => {
+    if (isTouchDevice()) return;
+    setActive(i);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isTouchDevice()) return;
+    setActive(null);
+  }, []);
 
   return (
     <section
@@ -68,14 +87,12 @@ export function StickyServices() {
               Ce que nous faisons
             </h2>
           </div>
-          
         </div>
 
         {/* Rows */}
         <div>
           {SERVICES.map((service, i) => {
             const isActive = active === i;
-
             return (
               <div key={service.number}>
                 {i > 0 && (
@@ -83,18 +100,12 @@ export function StickyServices() {
                 )}
 
                 <div
-                  // onClick handles tap on touch devices
-                  // onMouseEnter/Leave handles hover on desktop
-                  onClick={() => toggle(i)}
-                  onMouseEnter={() => setActive(i)}
-                  onMouseLeave={() => setActive(null)}
+                  onClick={() => handleClick(i)}
+                  onMouseEnter={() => handleMouseEnter(i)}
+                  onMouseLeave={handleMouseLeave}
                   className="group relative overflow-hidden cursor-pointer
                              transition-[min-height] duration-500 ease-in-out"
-                  style={{
-                    // Mobile/tablet: needs more room when open so description fits
-                    // Desktop: 300px is enough since description is inline
-                    minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px',
-                  }}
+                  style={{ minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px' }}
                 >
                   {/* Full-bleed image */}
                   <div
@@ -108,7 +119,6 @@ export function StickyServices() {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                    {/* Left-heavy scrim — text is on the left */}
                     <div
                       className="absolute inset-0"
                       style={{
@@ -117,10 +127,9 @@ export function StickyServices() {
                     />
                   </div>
 
-                  {/* Top row: number + title + toggle icon */}
+                  {/* Top row */}
                   <div className="relative z-10 flex items-center justify-between
                                   py-5 sm:py-[22px] gap-3 sm:gap-6">
-
                     <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
                       <span
                         className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
@@ -129,7 +138,6 @@ export function StickyServices() {
                         {service.number}
                       </span>
                       <h3
-                        // No truncate — let it wrap on very small screens
                         className="text-base sm:text-xl md:text-2xl lg:text-3xl
                                    font-bold leading-tight transition-colors duration-300"
                         style={{ color: isActive ? '#F6F2E8' : '#2A2522' }}
@@ -152,28 +160,25 @@ export function StickyServices() {
                       {service.description}
                     </p>
 
-                    {/* Toggle icon — visible on mobile/tablet, arrow on desktop */}
-                    <div className="flex-shrink-0 transition-all duration-300">
-                      {/* Mobile/tablet: plus/minus */}
-                      <div className="lg:hidden">
-                        {isActive
-                          ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
-                          : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
-                        }
-                      </div>
-                      {/* Desktop: arrow */}
-                      <ArrowRight
-                        className="hidden lg:block w-5 h-5 transition-all duration-300"
-                        style={{
-                          color: isActive ? '#F6F2E8' : 'transparent',
-                          transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
-                        }}
-                      />
+                    {/* Touch (mobile + tablet): plus/minus toggle */}
+                    <div className="lg:hidden flex-shrink-0">
+                      {isActive
+                        ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
+                        : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
+                      }
                     </div>
+
+                    {/* Desktop: arrow */}
+                    <ArrowRight
+                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
+                      style={{
+                        color: isActive ? '#F6F2E8' : 'transparent',
+                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                      }}
+                    />
                   </div>
 
-                  {/* Description — mobile & tablet: rendered in flow below title */}
-                  {/* Uses max-height transition so it animates open/closed smoothly */}
+                  {/* Mobile + tablet: description animates open below title */}
                   <div
                     className="lg:hidden relative z-10 overflow-hidden
                                transition-all duration-500 ease-in-out"
@@ -183,10 +188,8 @@ export function StickyServices() {
                       paddingBottom: isActive ? '20px' : '0px',
                     }}
                   >
-                    <p
-                      className="text-sm leading-relaxed pr-8"
-                      style={{ color: 'rgba(246,242,232,0.78)' }}
-                    >
+                    <p className="text-sm leading-relaxed pr-8"
+                       style={{ color: 'rgba(246,242,232,0.78)' }}>
                       {service.description}
                     </p>
                   </div>
@@ -195,12 +198,30 @@ export function StickyServices() {
             );
           })}
 
-          {/* Final hairline */}
           <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 
         {/* CTA */}
-        
+        <div className="mt-10 sm:mt-12 flex justify-start">
+          <Link
+            to="/services"
+            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4
+                       font-medium uppercase tracking-wider text-sm
+                       transition-all duration-300 hover:scale-105"
+            style={{
+              background: 'rgba(0,0,0,0.85)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+              border: '1px solid rgba(80,80,80,0.25)',
+              clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+              color: 'var(--color-base-cream)',
+            }}
+          >
+            <span>Voir tous nos services</span>
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
       </div>
     </section>
   );
