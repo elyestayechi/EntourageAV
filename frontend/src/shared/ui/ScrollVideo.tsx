@@ -174,19 +174,6 @@ export function ScrollVideo() {
       className="relative bg-[#FAFAF9]"
       style={{ height: '400vh', isolation: 'isolate', overflow: 'clip' }}
     >
-      {/* Noise overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay"
-        style={{ zIndex: 1 }}
-      >
-        <svg width="100%" height="100%">
-          <filter id="svn">
-            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#svn)" />
-        </svg>
-      </div>
-
       {/* Pinned viewport container */}
       <div
         ref={containerRef}
@@ -235,18 +222,6 @@ export function ScrollVideo() {
           <source src={videoSrc} type="video/webm" />
           <source src={videoSrcMp4} type="video/mp4" />
         </video>
-
-        {/* Desktop gradient overlay */}
-        <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 pointer-events-none"
-          style={{ zIndex: 10 }}
-        />
-        
-        {/* Light overlay for tablets (md breakpoint) */}
-        <div
-          className="md:hidden absolute inset-0 bg-gradient-to-t from-[#FAFAF9] via-transparent to-[#FAFAF9]/30 pointer-events-none"
-          style={{ zIndex: 10 }}
-        />
       </div>
     </section>
   );
