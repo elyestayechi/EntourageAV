@@ -4,6 +4,8 @@ import { RecentProjects } from '../features/projects/RecentProjects';
 import { ScrollVideo } from '../shared/ui/ScrollVideo';
 import { BlueprintSection } from '../shared/ui/BlueprintSection';
 import { Testimonials } from '../features/testimonials/Testimonials';
+import { StorytellingTransition } from '../shared/ui/StorytellingTransition';
+import { ScrollNav } from '../shared/ui/Scrollnav';
 import { ArrowRight } from 'lucide-react';
 import footerImage from '../assets/footer.webp';
 
@@ -16,15 +18,74 @@ export function HomePage() {
         <Hero />
       </div>
 
+      {/* Scroll dots nav — desktop only */}
+      <div className="hidden sm:block">
+        <ScrollNav stopAfter="contact" />
+      </div>
+
+      {/* ── Chapter 1: Services ──
+          Hidden on mobile — rendered inside the sticky panel so title
+          and services are always in view together. */}
+      <div className="hidden md:block">
+        <StorytellingTransition
+          themeColor="premium"
+          chapter={1}
+          title="Nos Services"
+          subtitle="Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité."
+        />
+      </div>
+
       {/* ── 2. Services ── */}
       <div id="services">
         <StickyServices />
       </div>
 
+      {/* Services CTA spacer */}
+      <div className="flex flex-col items-center px-4 sm:px-6 pt-2 pb-6 sm:py-12 md:py-16">
+        <div className="flex flex-col items-center gap-5 sm:gap-8 w-full max-w-4xl mx-auto text-center">
+          <p className="text-[#5A5A5A] text-sm sm:text-base md:text-xl leading-relaxed max-w-xs sm:max-w-none px-2">
+            Chaque projet est une opportunité de créer quelque chose d'exceptionnel.
+            Découvrez comment nous pouvons transformer votre espace.
+          </p>
+          <a
+            href="/services"
+            className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-medium uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95"
+            style={{
+              background: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(80, 80, 80, 0.25)',
+              clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
+              color: 'var(--color-base-cream)',
+            }}
+          >
+            <span>Voir tous nos services</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </a>
+        </div>
+      </div>
+
+      {/* ── Chapter 2: Projects ── */}
+      <StorytellingTransition
+        themeColor="premium"
+        chapter={2}
+        title="Nos Projets"
+        subtitle="Découvrez nos réalisations récentes où chaque projet reflète notre engagement envers l'excellence."
+      />
+
       {/* ── 3. Projects Preview ── */}
       <div id="projets">
         <RecentProjects />
       </div>
+
+      {/* ── Chapter 3: Process & Methods ── */}
+      <StorytellingTransition
+        themeColor="premium"
+        chapter={3}
+        title="Savoir-Faire & Méthode"
+        subtitle="Une expertise artisanale au service de vos projets, guidée par un processus structuré et transparent."
+      />
 
       {/* ── 4. Process & Methods ──
           ScrollVideo (savoir-faire) followed immediately by BlueprintSection
@@ -38,10 +99,26 @@ export function HomePage() {
         <BlueprintSection />
       </div>
 
+      {/* ── Chapter 4: Testimonials ── */}
+      <StorytellingTransition
+        themeColor="premium"
+        chapter={4}
+        title="Témoignages & Actualités"
+        subtitle="Les voix de nos clients satisfaits et nos dernières réalisations."
+      />
+
       {/* ── 5. Testimonials ── */}
       <div id="temoignages">
         <Testimonials />
       </div>
+
+      {/* ── Chapter 5: Final CTA ── */}
+      <StorytellingTransition
+        themeColor="premium"
+        chapter={5}
+        title="Contactez-Nous"
+        subtitle="Prêt à transformer votre espace ? Discutons de votre projet."
+      />
 
       {/* ── 6. Final CTA ── */}
       <section
