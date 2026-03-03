@@ -13,7 +13,7 @@ const LAYOUT = [
 
 function getImage(project: any): string {
   const pair = project.images?.[0];
-  return pair?.after_image || pair?.after || pair?.before_image || pair?.before || project.image || '';
+  return project.hero_image || project.thumbnail || pair?.after_image || pair?.after || pair?.before_image || pair?.before || project.image || '';
 }
 
 export function RecentProjects() {
@@ -27,10 +27,10 @@ export function RecentProjects() {
         if (data?.length > 0) { setProjects(data.slice(0, 4)); return null; }
         return getAllProjects();
       })
-      .then((all) => { if (all && Array.isArray(all) && all.length > 0) setProjects(all.slice(0, 4)); })
+      .then((all) => { if (Array.isArray(all) && all.length > 0) setProjects(all.slice(0, 4)); })
       .catch(() => {
         getAllProjects()
-          .then((d) => { if (d && Array.isArray(d) && d.length > 0) setProjects(d.slice(0, 4)); })
+          .then((d) => { if (Array.isArray(d) && d.length > 0) setProjects(d.slice(0, 4)); })
           .catch(() => {});
       });
   }, []);
@@ -94,7 +94,7 @@ export function RecentProjects() {
           })}
         </div>
 
-        <div className="mt-10 sm:mt-12 flex justify-start">
+        <div className="mt-10 sm:mt-12 flex justify-center">
           <Link to="/realisations"
             className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4 font-medium uppercase tracking-wider text-sm transition-all duration-300 hover:scale-105"
             style={{
