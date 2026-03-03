@@ -7,12 +7,11 @@ interface ScrollNavItem {
 }
 
 const navItems: ScrollNavItem[] = [
-  { id: 'services',    chapter: 1, label: 'Services' },
-  { id: 'projets',     chapter: 2, label: 'Projets' },
-  { id: 'temoignages', chapter: 3, label: 'Témoignages' },
-  { id: 'savoir-faire',chapter: 4, label: 'Savoir-Faire' },
-  { id: 'methode',     chapter: 5, label: 'Notre Méthode' },
-  { id: 'contact',     chapter: 6, label: 'Contact' },
+  { id: 'services',     chapter: 1, label: 'Services' },
+  { id: 'projets',      chapter: 2, label: 'Projets' },
+  { id: 'savoir-faire', chapter: 3, label: 'Savoir-Faire & Méthode' },
+  { id: 'temoignages',  chapter: 4, label: 'Témoignages' },
+  { id: 'contact',      chapter: 5, label: 'Contact' },
 ];
 
 interface ScrollNavProps {
@@ -49,14 +48,17 @@ export function ScrollNav({ stopAfter }: ScrollNavProps) {
       }
 
       // White text when over dark sections
-      const savoirFaireEl = document.getElementById('savoir-faire');
-      const contactEl     = document.getElementById('contact');
+      const contactEl = document.getElementById('contact');
       let inWhiteTextSection = false;
-      if (savoirFaireEl) {
+      
+      // Savoir-faire has white text on desktop
+      const savoirFaireEl = document.getElementById('savoir-faire');
+      if (savoirFaireEl && window.innerWidth >= 768) {
         const top    = savoirFaireEl.getBoundingClientRect().top + window.scrollY;
         const bottom = top + savoirFaireEl.offsetHeight;
         inWhiteTextSection = scrollY >= top && scrollY <= bottom;
       }
+      
       if (!inWhiteTextSection && contactEl) {
         const top    = contactEl.getBoundingClientRect().top + window.scrollY;
         const bottom = top + contactEl.offsetHeight;

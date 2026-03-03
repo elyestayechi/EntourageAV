@@ -23,17 +23,13 @@ export function HomePage() {
         <ScrollNav stopAfter="contact" />
       </div>
 
-      {/* ── Chapter 1: Services ──
-          Hidden on mobile — rendered inside the sticky panel so title
-          and services are always in view together. */}
-      <div className="hidden md:block">
-        <StorytellingTransition
-          themeColor="premium"
-          chapter={1}
-          title="Nos Services"
-          subtitle="Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité."
-        />
-      </div>
+      {/* ── Chapter 1: Services ── */}
+      <StorytellingTransition
+        themeColor="premium"
+        chapter={1}
+        title="Nos Services"
+        subtitle="Découvrez notre gamme complète de services de rénovation, chacun conçu pour transformer votre vision en réalité."
+      />
 
       {/* ── 2. Services ── */}
       <div id="services">
