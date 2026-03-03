@@ -32,13 +32,12 @@ const STEPS = [
   },
 ];
 
-// The frosted glass panel — matches the site's navigation panel aesthetic
 const glassPanelStyle: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.12)',
+  background: 'rgba(255, 255, 255, 0.11)',
   backdropFilter: 'blur(32px) saturate(180%)',
   WebkitBackdropFilter: 'blur(32px) saturate(180%)',
   border: '1px solid rgba(255, 255, 255, 0.18)',
-  boxShadow: '0 8px 40px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25)',
+  boxShadow: '0 8px 40px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.22)',
 };
 
 const clipPath = (r: number) =>
@@ -53,38 +52,43 @@ export function BlueprintSection() {
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
 
-        {/* ── Section header ── */}
-        <div className="flex items-end justify-between mb-8 md:mb-10 pb-5 border-b border-[rgba(42,37,34,0.12)]">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-8 md:mb-10 pb-5
+                        border-b border-[rgba(42,37,34,0.12)]">
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2" style={{ color: '#5A5A5A' }}>
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2"
+               style={{ color: '#5A5A5A' }}>
               Notre Méthode
             </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight" style={{ color: '#2A2522' }}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight"
+                style={{ color: '#2A2522' }}>
               De la vision à la réalité
             </h2>
           </div>
-          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1" style={{ color: 'rgba(90,90,90,0.4)' }}>
+          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1"
+                style={{ color: 'rgba(90,90,90,0.4)' }}>
             04 étapes
           </span>
         </div>
 
-        {/* ── Steps ── */}
-        <div className="space-y-4 sm:space-y-5 md:space-y-6">
+        {/* Steps */}
+        <div className="space-y-4 sm:space-y-5">
           {STEPS.map((step, i) => {
             const isEven = i % 2 === 1;
+
             return (
               <div
                 key={step.number}
                 className="relative overflow-hidden"
                 style={{
-                  // Aspect ratio: taller on mobile, cinematic on desktop
-                  aspectRatio: undefined,
-                  minHeight: '280px',
-                  height: 'clamp(280px, 38vw, 480px)',
+                  // Mobile:  tall enough that the image shows above the glass panel.
+                  //          ~360px gives ~120px of visible image at top + panel below.
+                  // Tablet+: cinematic, scales with viewport up to 460px.
+                  height: 'clamp(360px, 45vw, 460px)',
                   clipPath: clipPath(20),
                 }}
               >
-                {/* ── Full-bleed background image ── */}
+                {/* Full-bleed image */}
                 <img
                   src={step.image}
                   alt={step.title}
@@ -92,7 +96,7 @@ export function BlueprintSection() {
                   className="absolute inset-0 w-full h-full object-cover"
                 />
 
-                {/* Warm overlay matching RecentProjects */}
+                {/* Warm overlay */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -100,46 +104,58 @@ export function BlueprintSection() {
                     mixBlendMode: 'soft-light',
                   }}
                 />
-                {/* Dark base so glass panel contrasts properly */}
+                {/* Dark base */}
                 <div
                   className="absolute inset-0"
-                  style={{ background: 'rgba(20,18,16,0.30)' }}
+                  style={{ background: 'rgba(20,18,16,0.32)' }}
                 />
 
-                {/* ── Floating glass panel ──
-                    Mobile:  bottom of the image, full width minus padding
-                    Tablet+: left or right side (alternating), 45% max width, vertically centred
-                ── */}
+                {/* ── Glass panel ──────────────────────────────────────────────
+                    Mobile  (< 768):
+                      — full width minus padding, anchored to the bottom.
+                      — `bottom-4 left-4 right-4` gives equal margin on all sides.
+
+                    Tablet  (768–1023):
+                      — fixed width (52%), vertically centred.
+                      — alternates left/right so the image shows on the other side.
+                      — `md:w-[52%]` is slightly wider than desktop so text fits
+                        at the narrower tablet viewport without truncation.
+
+                    Desktop (≥ 1024):
+                      — 44% width, capped at 420px, same alternating position.
+                ──────────────────────────────────────────────────────────────── */}
                 <div
                   className={`
                     absolute z-10
                     bottom-4 left-4 right-4
                     md:bottom-auto md:top-1/2 md:-translate-y-1/2
-                    md:w-[46%] md:max-w-[420px]
+                    md:right-auto md:left-auto
+                    md:w-[52%] lg:w-[44%] lg:max-w-[420px]
                     ${isEven
-                      ? 'md:left-auto md:right-6 lg:right-10'
-                      : 'md:left-6 lg:left-10 md:right-auto'}
+                      ? 'md:right-5 lg:right-8 md:left-auto'
+                      : 'md:left-5 lg:left-8 md:right-auto'}
                   `}
-                  style={{ ...glassPanelStyle, clipPath: clipPath(16) }}
+                  style={{ ...glassPanelStyle, clipPath: clipPath(14) }}
                 >
-                  <div className="p-5 sm:p-6 md:p-7 lg:p-8">
-                    {/* Step label */}
-                    <div className="flex items-center gap-3 mb-4">
+                  <div className="p-5 sm:p-6 md:p-6 lg:p-8">
+                    {/* Step label row */}
+                    <div className="flex items-center gap-3 mb-3 md:mb-4">
                       <span
-                        className="text-[10px] font-bold uppercase tracking-[0.25em]"
-                        style={{ color: 'rgba(246,242,232,0.55)' }}
+                        className="text-[10px] font-bold uppercase tracking-[0.25em] whitespace-nowrap"
+                        style={{ color: 'rgba(246,242,232,0.50)' }}
                       >
                         Étape {i + 1}
                       </span>
-                      <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.15)' }} />
-                      <span className="text-xs font-mono" style={{ color: 'rgba(246,242,232,0.35)' }}>
+                      <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.14)' }} />
+                      <span className="text-[10px] font-mono" style={{ color: 'rgba(246,242,232,0.30)' }}>
                         {step.number}
                       </span>
                     </div>
 
-                    {/* Title */}
+                    {/* Title — clamps so it never overflows the panel */}
                     <h3
-                      className="text-lg sm:text-xl md:text-xl lg:text-2xl font-bold mb-3 leading-snug"
+                      className="text-base sm:text-lg md:text-xl lg:text-2xl
+                                 font-bold mb-2 md:mb-3 leading-snug"
                       style={{ color: '#F6F2E8' }}
                     >
                       {step.title}
@@ -147,24 +163,26 @@ export function BlueprintSection() {
 
                     {/* Description */}
                     <p
-                      className="text-sm leading-relaxed"
-                      style={{ color: 'rgba(246,242,232,0.70)' }}
+                      className="text-xs sm:text-sm leading-relaxed"
+                      style={{ color: 'rgba(246,242,232,0.68)' }}
                     >
                       {step.description}
                     </p>
                   </div>
                 </div>
 
-                {/* Large ghost number — top corner opposite the panel */}
+                {/* Ghost number — hidden on mobile (too big, overlaps panel),
+                    visible on tablet+ in the corner opposite the panel */}
                 <div
                   className={`
-                    absolute top-4 z-0 select-none
+                    hidden md:block
+                    absolute top-4 z-0 select-none pointer-events-none
                     ${isEven ? 'left-6 md:left-8' : 'right-6 md:right-8'}
                   `}
                 >
                   <span
-                    className="text-[80px] sm:text-[100px] md:text-[120px] lg:text-[140px] font-bold leading-none"
-                    style={{ color: 'rgba(255,255,255,0.06)', letterSpacing: '-0.05em' }}
+                    className="text-[100px] md:text-[120px] lg:text-[150px] font-bold leading-none"
+                    style={{ color: 'rgba(255,255,255,0.055)', letterSpacing: '-0.05em' }}
                   >
                     {step.number}
                   </span>
@@ -174,7 +192,7 @@ export function BlueprintSection() {
           })}
         </div>
 
-        {/* ── CTA ── */}
+        {/* CTA */}
         <div className="mt-10 sm:mt-12 flex justify-start">
           <Link
             to="/contact"

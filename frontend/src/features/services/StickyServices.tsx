@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Plus, Minus } from 'lucide-react';
 
 const SERVICES = [
   {
@@ -30,7 +29,7 @@ const SERVICES = [
   {
     number: '05',
     title: 'VMC & Carrelage',
-    description: 'Ventilation mécanique contrôlée et pose de carrelage gresie — sols et murs, finitions impeccables.',
+    description: 'Ventilation mécanique contrôlée et pose de carrelage gresie — finitions impeccables.',
     image: 'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1600',
   },
   {
@@ -42,7 +41,11 @@ const SERVICES = [
 ];
 
 export function StickyServices() {
-  const [hovered, setHovered] = useState<number | null>(null);
+  // `active` handles both hover (desktop) and tap (mobile/tablet)
+  const [active, setActive] = useState<number | null>(null);
+
+  const toggle = (i: number) =>
+    setActive(prev => (prev === i ? null : i));
 
   return (
     <section
@@ -52,139 +55,155 @@ export function StickyServices() {
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
 
-        {/* ── Section header — editorial label style ── */}
-        <div className="flex items-end justify-between mb-8 md:mb-10 pb-5 border-b border-[rgba(42,37,34,0.12)]">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-8 md:mb-10 pb-5
+                        border-b border-[rgba(42,37,34,0.12)]">
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2" style={{ color: '#5A5A5A' }}>
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2"
+               style={{ color: '#5A5A5A' }}>
               Nos Services
             </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight" style={{ color: '#2A2522' }}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight"
+                style={{ color: '#2A2522' }}>
               Ce que nous faisons
             </h2>
           </div>
-          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1" style={{ color: 'rgba(90,90,90,0.4)' }}>
+          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1"
+                style={{ color: 'rgba(90,90,90,0.4)' }}>
             06 services
           </span>
         </div>
 
-        {/* ── Service rows — hairline separated, Exo Ape editorial style ── */}
+        {/* Rows */}
         <div>
-          {SERVICES.map((service, i) => (
-            <div key={service.number}>
-              {/* Hairline divider between items */}
-              {i > 0 && (
-                <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
-              )}
+          {SERVICES.map((service, i) => {
+            const isActive = active === i;
 
-              <div
-                className="group relative flex items-center gap-0 cursor-default
-                           py-0 overflow-hidden transition-all duration-500"
-                style={{ minHeight: hovered === i ? '280px' : '72px' }}
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {/* ── Full-bleed image (expands on hover) ── */}
+            return (
+              <div key={service.number}>
+                {i > 0 && (
+                  <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
+                )}
+
                 <div
-                  className="absolute inset-0 transition-opacity duration-500"
-                  style={{ opacity: hovered === i ? 1 : 0 }}
-                >
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  {/* Dark scrim so text stays readable */}
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.30) 60%, rgba(0,0,0,0.10) 100%)' }}
-                  />
-                </div>
-
-                {/* ── Row content ── */}
-                <div className="relative z-10 w-full flex items-center justify-between
-                                py-5 sm:py-6 px-0 sm:px-1 gap-4 sm:gap-8">
-
-                  {/* Number + Title */}
-                  <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0">
-                    <span
-                      className="text-xs font-mono flex-shrink-0 transition-colors duration-300"
-                      style={{ color: hovered === i ? 'rgba(255,255,255,0.5)' : 'rgba(90,90,90,0.45)' }}
-                    >
-                      {service.number}
-                    </span>
-                    <h3
-                      className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-none truncate
-                                 transition-colors duration-300"
-                      style={{ color: hovered === i ? '#F6F2E8' : '#2A2522' }}
-                    >
-                      {service.title}
-                    </h3>
-                  </div>
-
-                  {/* Description — glass pill, slides in on hover */}
-                  <p
-                    className="hidden md:block text-sm leading-relaxed flex-shrink-0 max-w-xs
-                               transition-all duration-500 text-right"
-                    style={{
-                      color: hovered === i ? 'rgba(246,242,232,0.80)' : 'rgba(90,90,90,0.0)',
-                      transform: hovered === i ? 'translateX(0)' : 'translateX(12px)',
-                    }}
-                  >
-                    {service.description}
-                  </p>
-
-                  {/* Arrow — only visible on hover */}
-                  <ArrowRight
-                    className="w-5 h-5 flex-shrink-0 transition-all duration-300"
-                    style={{
-                      color: hovered === i ? '#F6F2E8' : 'transparent',
-                      transform: hovered === i ? 'translateX(0)' : 'translateX(-8px)',
-                    }}
-                  />
-                </div>
-
-                {/* ── Mobile: description shown below title when expanded ── */}
-                <div
-                  className="md:hidden absolute bottom-0 left-0 right-0 z-10 px-1 transition-all duration-500"
+                  // onClick handles tap on touch devices
+                  // onMouseEnter/Leave handles hover on desktop
+                  onClick={() => toggle(i)}
+                  onMouseEnter={() => setActive(i)}
+                  onMouseLeave={() => setActive(null)}
+                  className="group relative overflow-hidden cursor-pointer
+                             transition-[min-height] duration-500 ease-in-out"
                   style={{
-                    opacity: hovered === i ? 1 : 0,
-                    paddingBottom: hovered === i ? '20px' : '0',
+                    // Mobile/tablet: needs more room when open so description fits
+                    // Desktop: 300px is enough since description is inline
+                    minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px',
                   }}
                 >
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(246,242,232,0.80)' }}>
-                    {service.description}
-                  </p>
+                  {/* Full-bleed image */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-500"
+                    style={{ opacity: isActive ? 1 : 0 }}
+                    aria-hidden="true"
+                  >
+                    <img
+                      src={service.image}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    {/* Left-heavy scrim — text is on the left */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)',
+                      }}
+                    />
+                  </div>
+
+                  {/* Top row: number + title + toggle icon */}
+                  <div className="relative z-10 flex items-center justify-between
+                                  py-5 sm:py-[22px] gap-3 sm:gap-6">
+
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
+                      <span
+                        className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
+                        style={{ color: isActive ? 'rgba(255,255,255,0.45)' : 'rgba(90,90,90,0.45)' }}
+                      >
+                        {service.number}
+                      </span>
+                      <h3
+                        // No truncate — let it wrap on very small screens
+                        className="text-base sm:text-xl md:text-2xl lg:text-3xl
+                                   font-bold leading-tight transition-colors duration-300"
+                        style={{ color: isActive ? '#F6F2E8' : '#2A2522' }}
+                      >
+                        {service.title}
+                      </h3>
+                    </div>
+
+                    {/* Desktop: description slides in from right */}
+                    <p
+                      className="hidden lg:block text-sm leading-relaxed
+                                 flex-shrink-0 max-w-[320px] text-right
+                                 transition-all duration-500"
+                      style={{
+                        color: isActive ? 'rgba(246,242,232,0.78)' : 'rgba(90,90,90,0.0)',
+                        transform: isActive ? 'translateX(0)' : 'translateX(16px)',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {service.description}
+                    </p>
+
+                    {/* Toggle icon — visible on mobile/tablet, arrow on desktop */}
+                    <div className="flex-shrink-0 transition-all duration-300">
+                      {/* Mobile/tablet: plus/minus */}
+                      <div className="lg:hidden">
+                        {isActive
+                          ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
+                          : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
+                        }
+                      </div>
+                      {/* Desktop: arrow */}
+                      <ArrowRight
+                        className="hidden lg:block w-5 h-5 transition-all duration-300"
+                        style={{
+                          color: isActive ? '#F6F2E8' : 'transparent',
+                          transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description — mobile & tablet: rendered in flow below title */}
+                  {/* Uses max-height transition so it animates open/closed smoothly */}
+                  <div
+                    className="lg:hidden relative z-10 overflow-hidden
+                               transition-all duration-500 ease-in-out"
+                    style={{
+                      maxHeight: isActive ? '120px' : '0px',
+                      opacity: isActive ? 1 : 0,
+                      paddingBottom: isActive ? '20px' : '0px',
+                    }}
+                  >
+                    <p
+                      className="text-sm leading-relaxed pr-8"
+                      style={{ color: 'rgba(246,242,232,0.78)' }}
+                    >
+                      {service.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Final hairline */}
           <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 
-        {/* ── CTA ── */}
-        <div className="mt-10 sm:mt-12 flex justify-start">
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4
-                       font-medium uppercase tracking-wider text-sm
-                       transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'rgba(0,0,0,0.85)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
-              border: '1px solid rgba(80,80,80,0.25)',
-              clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
-              color: 'var(--color-base-cream)',
-            }}
-          >
-            <span>Voir tous nos services</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
+        {/* CTA */}
+        
       </div>
     </section>
   );
