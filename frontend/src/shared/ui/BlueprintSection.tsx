@@ -167,14 +167,7 @@ export function BlueprintSection() {
                       }
                     </div>
 
-                    {/* Desktop only: arrow */}
-                    <ArrowRight
-                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
-                      style={{
-                        color: isActive ? '#F6F2E8' : 'transparent',
-                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
-                      }}
-                    />
+                    
                   </div>
 
                   {/* Mobile + tablet: description expands below, same indent as title */}
