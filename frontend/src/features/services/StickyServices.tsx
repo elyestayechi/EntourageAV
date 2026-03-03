@@ -1,5 +1,3 @@
-import { Link } from 'react-router';
-import { ArrowRight } from 'lucide-react';
 
 const SERVICES = [
   {
@@ -166,25 +164,8 @@ export function StickyServices() {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="mt-10 sm:mt-12 md:mt-14 text-center">
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4 font-medium uppercase tracking-wider text-sm transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(80, 80, 80, 0.25)',
-              clipPath: clipPath(12),
-              color: 'var(--color-base-cream)',
-            }}
-          >
-            <span>Voir tous nos services</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
+       
+        
       </div>
     </section>
   );
