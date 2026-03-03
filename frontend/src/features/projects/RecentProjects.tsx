@@ -13,7 +13,7 @@ const LAYOUT = [
 
 function getImage(project: any): string {
   const pair = project.images?.[0];
-  return project.hero_image || project.thumbnail || pair?.after_image || pair?.after || pair?.before_image || pair?.before || project.image || '';
+  return project.thumbnail_image || project.image || pair?.after_image || pair?.after || pair?.before_image || pair?.before || '';
 }
 
 export function RecentProjects() {
