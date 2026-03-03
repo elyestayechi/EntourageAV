@@ -1,287 +1,199 @@
-import { useRef, useEffect, useState } from 'react';
-import { gsap, ScrollTrigger } from '../lib/gsap-init';
-import { FilmGrainTexture } from './FilmGrainTexture';
-import { FlipCounter } from './FlipCounter';
+import { Link } from 'react-router';
+import { ArrowRight } from 'lucide-react';
 
-const processSteps = [
+const STEPS = [
   {
     number: '01',
-    title: 'Premier Contact',
-    subtitle: 'Consultation initiale',
-    description: 'Nous écoutons vos besoins et vos idées pour comprendre votre vision et établir les premières bases du projet.',
-    details: 'Visite sur site • Analyse des besoins • Budget préliminaire',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop&fm=webp',
+    title: 'Consultation & Design',
+    description:
+      "Nous débutons par une rencontre approfondie pour comprendre votre vision, vos besoins et votre budget. Nos designers élaborent ensuite des plans détaillés pour visualiser le résultat final avant le début des travaux.",
+    accent: '#D4AF76',
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '02',
-    title: 'Conception',
-    subtitle: 'Plans et modélisation',
-    description: "Élaboration de plans détaillés avec modélisation 3D, choix des matériaux et calendrier précis d'exécution.",
-    details: 'Plans techniques • Devis détaillé • Planning prévisionnel',
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop&fm=webp',
+    title: 'Planification & Approvisionnement',
+    description:
+      "Une fois le design validé, nous établissons un calendrier précis et sélectionnons les matériaux avec soin. Nos partenaires fournisseurs garantissent des matériaux de qualité supérieure, livrés au bon moment.",
+    accent: '#8B7355',
+    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '03',
-    title: 'Préparation',
-    subtitle: 'Organisation du chantier',
-    description: 'Coordination des équipes, commande des matériaux et mise en place de toutes les mesures de sécurité nécessaires.',
-    details: 'Approvisionnement • Permis • Coordination',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2076&auto=format&fit=crop&fm=webp',
+    title: 'Construction & Artisanat',
+    description:
+      "Nos équipes d'artisans qualifiés exécutent les travaux avec précision. Électricité, plomberie, menuiseries, carrelage, finitions — tout est réalisé selon les standards les plus exigeants.",
+    accent: '#5A7A6B',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
   {
     number: '04',
-    title: 'Réalisation',
-    subtitle: 'Exécution des travaux',
-    description: 'Exécution méticuleuse de chaque phase du projet avec suivi quotidien et contrôle qualité à chaque étape.',
-    details: 'Gros œuvre • Second œuvre • Contrôles qualité',
-    image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop&fm=webp',
-  },
-  {
-    number: '05',
-    title: 'Finitions',
-    subtitle: 'Perfectionnement',
-    description: 'Perfectionnement de chaque détail, nettoyage complet et derniers ajustements pour un résultat impeccable.',
-    details: 'Finitions soignées • Nettoyage • Ajustements finaux',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=2070&auto=format&fit=crop&fm=webp',
-  },
-  {
-    number: '06',
-    title: 'Livraison',
-    subtitle: 'Remise et garanties',
-    description: 'Remise des clés, formation aux équipements installés et activation des garanties décennales et biennales.',
-    details: 'Réception des travaux • Garanties • Service après-vente',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop&fm=webp',
+    title: 'Livraison & Remise des Clés',
+    description:
+      "Avant la livraison, nous effectuons une inspection rigoureuse de chaque espace. Vous visitez votre projet avec notre équipe — nous ne considérons le travail terminé que lorsque vous êtes entièrement satisfait.",
+    accent: '#2A2522',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=900',
   },
 ];
 
-// ── Static height computed at module level so the DOM has the right size
-// before any ScrollTrigger runs — prevents the "too high" pin miscalculation.
-const BLUEPRINT_HEIGHT = `${processSteps.length * 100 + 100}vh`;
+const glass: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.45)',
+  backdropFilter: 'blur(24px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+  border: '1px solid rgba(255, 255, 255, 0.35)',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.6)',
+};
 
-function StepItem({
-  step,
-  index,
-  isActive,
-}: {
-  step: typeof processSteps[number];
-  index: number;
-  isActive: boolean;
-}) {
-  const titleRef       = useRef<HTMLHeadingElement>(null);
-  const subtitleRef    = useRef<HTMLHeadingElement>(null);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const detailsRef     = useRef<HTMLDivElement>(null);
-  const numberRef      = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (
-      !titleRef.current || !subtitleRef.current || !descriptionRef.current ||
-      !detailsRef.current || !numberRef.current || !isActive
-    ) return;
-
-    gsap.set([numberRef.current, titleRef.current, subtitleRef.current], { x: -50, opacity: 0 });
-    gsap.set([descriptionRef.current, detailsRef.current], { x: -30, opacity: 0 });
-
-    gsap.to([numberRef.current, titleRef.current, subtitleRef.current], {
-      x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.05,
-    });
-    gsap.to([descriptionRef.current, detailsRef.current], {
-      x: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1, stagger: 0.05,
-    });
-  }, [isActive, index]);
-
-  return (
-    <>
-      <div>
-        <div className="mb-4 md:mb-6">
-          <div ref={numberRef}>
-            <div className="text-6xl sm:text-7xl md:text-8xl font-bold opacity-10" style={{ color: 'var(--color-navy-sky)' }}>
-              {step.number}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex" style={{ perspective: '800px' }}>
-            <FlipCounter value={parseInt(step.number)} />
-          </div>
-          <div className="w-12 sm:w-16 h-px" style={{ background: 'var(--color-navy-sky)', opacity: 0.5 }} />
-        </div>
-        <h3 ref={titleRef} className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-navy-sky)' }}>
-          {step.title}
-        </h3>
-        <h4 ref={subtitleRef} className="text-lg sm:text-xl md:text-2xl font-light" style={{ color: 'var(--color-base-slate)' }}>
-          {step.subtitle}
-        </h4>
-      </div>
-      <div>
-        <p ref={descriptionRef} className="text-sm sm:text-base md:text-lg mb-6 leading-relaxed" style={{ color: 'var(--color-base-slate)' }}>
-          {step.description}
-        </p>
-        <div ref={detailsRef} className="pt-4 md:pt-6 border-t" style={{ borderColor: 'rgba(42, 37, 34, 0.1)' }}>
-          <div className="text-xs uppercase tracking-wider mb-3" style={{ color: 'var(--color-navy-sky)', opacity: 0.6 }}>
-            Inclus
-          </div>
-          <p className="text-sm" style={{ color: 'var(--color-base-slate)', opacity: 0.8 }}>
-            {step.details}
-          </p>
-        </div>
-      </div>
-    </>
-  );
-}
+const clip = (r: number) =>
+  `polygon(${r}px 0, calc(100% - ${r}px) 0, 100% ${r}px, 100% calc(100% - ${r}px), calc(100% - ${r}px) 100%, ${r}px 100%, 0 calc(100% - ${r}px), 0 ${r}px)`;
 
 export function BlueprintSection() {
-  const sectionRef         = useRef<HTMLDivElement>(null);
-  const stickyContainerRef = useRef<HTMLDivElement>(null);
-  const clipPathRef        = useRef<HTMLDivElement>(null);
-  const initializedRef     = useRef(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-
-  const DENT_HEIGHT          = 3;
-  const DENT_SMALL_SIDE_WIDTH = 6;
-  const DENT_LARGE_SIDE_WIDTH = 8;
-
-  useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-    if (!sectionRef.current || !stickyContainerRef.current) return;
-
-    const ctx = gsap.context(() => {
-      if (clipPathRef.current) {
-        gsap.set(clipPathRef.current, { '--dent-position': '20%' });
-        gsap.to(clipPathRef.current, {
-          '--dent-position': '75%',
-          ease: 'power1.inOut',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 1.5,
-            refreshPriority: -1,
-          },
-        });
-      }
-
-      processSteps.forEach((_, index) => {
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: () => `top+=${index * window.innerHeight} top`,
-          end:   () => `top+=${(index + 1) * window.innerHeight} top`,
-          onEnter:     () => setCurrentStepIndex(index),
-          onEnterBack: () => setCurrentStepIndex(index),
-          refreshPriority: -1,
-        });
-      });
-
-      // pinSpacing: false — section already has explicit height via BLUEPRINT_HEIGHT,
-      // so GSAP must NOT add extra space dynamically (that's what caused the jump).
-      ScrollTrigger.create({
-        trigger: stickyContainerRef.current,
-        start: 'top top',
-        end: () => `+=${processSteps.length * window.innerHeight}`,
-        pin: true,
-        pinSpacing: false,
-        refreshPriority: -1,
-      });
-    }, sectionRef);
-
-    return () => {
-      initializedRef.current = false;
-      ctx.revert();
-    };
-  }, []);
-
   return (
-    <div
-      ref={sectionRef}
-      className="bg-[#FAFAF9] relative"
-      data-section="blueprint"
-      style={{ height: BLUEPRINT_HEIGHT }}
+    <section
+      id="methode"
+      data-section="methode"
+      className="relative bg-[#F4F1EC] py-20 sm:py-28 px-4 sm:px-6 lg:px-10 overflow-hidden"
     >
-      <FilmGrainTexture />
-
+      {/* Subtle dot texture */}
       <div
-        ref={stickyContainerRef}
-        className="h-screen flex flex-col justify-center md:items-center md:justify-center"
-        style={{ background: '#FAFAF9' }}
-      >
-        {/* ── Mobile-only chapter header ── */}
-        <div
-          className="md:hidden relative overflow-hidden pb-14"
-          style={{ background: `linear-gradient(180deg, transparent 0%, var(--color-navy-blue)08 50%, transparent 100%)` }}
-        >
-          <div className="container mx-auto px-4 sm:px-8 relative z-10">
-            <div className="flex items-center gap-4">
-              <div
-                className="text-[80px] sm:text-[120px] font-bold leading-none flex-shrink-0"
-                style={{ color: '#000000', opacity: 1 }}
-              >
-                05
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-xl sm:text-2xl font-bold leading-tight" style={{ color: 'var(--color-navy-blue)' }}>
-                  Notre Méthode
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed max-w-xl" style={{ color: '#5A5A5A' }}>
-                  Un processus structuré et transparent, de la consultation à la livraison finale.
-                </p>
-              </div>
-            </div>
+        className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        style={{
+          backgroundImage: `radial-gradient(circle, rgba(42,37,34,1) 1px, transparent 1px)`,
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+
+        {/* Header */}
+        <div className="mb-14 sm:mb-20 text-center">
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 mb-4 text-xs font-bold uppercase tracking-widest"
+            style={{ ...glass, clipPath: clip(6), color: '#2A2522' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+            Notre Méthode
           </div>
+          <h2
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.0] tracking-tight"
+            style={{ color: '#2A2522' }}
+          >
+            De la vision<br />
+            <span style={{ color: '#8B7355' }}>à la réalité</span>
+          </h2>
+          <p
+            className="mt-5 text-base sm:text-lg leading-relaxed max-w-xl mx-auto"
+            style={{ color: '#5A5A5A' }}
+          >
+            Un processus structuré et transparent — de la consultation à la livraison finale.
+          </p>
         </div>
 
-        {/* ── Main content ── */}
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 relative max-w-[1800px] w-full">
-          <div className="w-full max-w-6xl mx-auto">
-
-            {/* Dented image panel — desktop only */}
-            <div className="hidden md:block mb-12">
+        {/* Steps — alternating image/text on desktop, stacked on mobile */}
+        <div className="space-y-5">
+          {STEPS.map((step, i) => {
+            const isEven = i % 2 === 1;
+            return (
               <div
-                ref={clipPathRef}
-                className="relative w-full overflow-hidden shadow-2xl rounded-lg"
-                style={{
-                  aspectRatio: '21/9',
-                  '--dent-position': '20%',
-                  background: 'rgba(250, 250, 249, 0.5)',
-                  clipPath: `polygon(
-                    0.5rem 0,
-                    calc(100% - 0.5rem) 0,
-                    100% 0.5rem,
-                    100% calc(100% - 0.5rem),
-                    calc(100% - 0.5rem) 100%,
-                    calc(var(--dent-position) + ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
-                    calc(var(--dent-position) + ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
-                    calc(var(--dent-position) - ${DENT_SMALL_SIDE_WIDTH}rem) calc(100% - ${DENT_HEIGHT}%),
-                    calc(var(--dent-position) - ${DENT_LARGE_SIDE_WIDTH}rem) 100%,
-                    0.5rem 100%,
-                    0 calc(100% - 0.5rem),
-                    0 0.5rem
-                  )`,
-                } as React.CSSProperties}
+                key={step.number}
+                className={`flex flex-col ${isEven ? 'lg:flex-row-reverse' : 'lg:flex-row'} overflow-hidden`}
+                style={{ ...glass, clipPath: clip(20) }}
               >
-                <img
-                  src={processSteps[currentStepIndex].image}
-                  alt={processSteps[currentStepIndex].title}
-                  className="w-full h-full object-cover"
-                  style={{ transition: 'opacity 0.6s ease-in-out' }}
-                  key={currentStepIndex}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-                <FilmGrainTexture />
-              </div>
-            </div>
+                {/* Image */}
+                <div
+                  className="relative flex-shrink-0 lg:w-2/5"
+                  style={{ minHeight: '220px' }}
+                >
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Ghosted step number */}
+                  <div
+                    className="absolute inset-0 flex items-end p-6"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.50) 0%, transparent 60%)',
+                    }}
+                  >
+                    <span
+                      className="text-7xl sm:text-8xl font-bold leading-none select-none"
+                      style={{ color: 'rgba(255,255,255,0.13)', letterSpacing: '-0.04em' }}
+                    >
+                      {step.number}
+                    </span>
+                  </div>
+                  {/* Accent stripe on the joining edge */}
+                  <div
+                    className={`absolute top-0 bottom-0 w-1 ${isEven ? 'right-0' : 'left-0'} hidden lg:block`}
+                    style={{ background: step.accent }}
+                  />
+                  {/* Mobile accent stripe (top) */}
+                  <div
+                    className="absolute top-0 left-0 right-0 h-1 lg:hidden"
+                    style={{ background: step.accent }}
+                  />
+                </div>
 
-            {/* Step text content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
-              <StepItem
-                step={processSteps[currentStepIndex]}
-                index={currentStepIndex}
-                isActive={true}
-              />
-            </div>
-          </div>
+                {/* Content */}
+                <div className="flex-1 p-7 sm:p-10 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={{ background: step.accent, clipPath: clip(5), color: '#fff' }}
+                    >
+                      {step.number}
+                    </div>
+                    <div
+                      className="h-px flex-1 max-w-[60px]"
+                      style={{ background: step.accent, opacity: 0.4 }}
+                    />
+                    <span
+                      className="text-xs font-bold uppercase tracking-widest"
+                      style={{ color: step.accent }}
+                    >
+                      Étape {i + 1}
+                    </span>
+                  </div>
+
+                  <h3
+                    className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 leading-snug"
+                    style={{ color: '#2A2522' }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p
+                    className="text-sm sm:text-base leading-relaxed"
+                    style={{ color: '#5A5A5A' }}
+                  >
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-14 sm:mt-16 text-center">
+          <Link
+            to="/contact"
+            className="inline-flex items-center gap-3 px-8 py-4 text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95"
+            style={{
+              background: 'rgba(0,0,0,0.85)',
+              backdropFilter: 'blur(40px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+              border: '1px solid rgba(80,80,80,0.25)',
+              clipPath: clip(12),
+              color: '#F6F2E8',
+            }}
+          >
+            <span>Démarrer mon projet</span>
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
