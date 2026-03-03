@@ -155,15 +155,6 @@ export function BlueprintSection() {
                         : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
                       }
                     </div>
-
-                    {/* Desktop: arrow */}
-                    <ArrowRight
-                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
-                      style={{
-                        color: isActive ? '#F6F2E8' : 'transparent',
-                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
-                      }}
-                    />
                   </div>
 
                   {/* Mobile + tablet: description animates open */}

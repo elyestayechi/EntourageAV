@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Link } from 'react-router';
-import { ArrowRight, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 
 const SERVICES = [
   {
@@ -168,14 +167,7 @@ export function StickyServices() {
                       }
                     </div>
 
-                    {/* Desktop: arrow */}
-                    <ArrowRight
-                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
-                      style={{
-                        color: isActive ? '#F6F2E8' : 'transparent',
-                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
-                      }}
-                    />
+                    
                   </div>
 
                   {/* Mobile + tablet: description animates open below title */}
@@ -201,27 +193,7 @@ export function StickyServices() {
           <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 
-        {/* CTA */}
-        <div className="mt-10 sm:mt-12 flex justify-start">
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4
-                       font-medium uppercase tracking-wider text-sm
-                       transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'rgba(0,0,0,0.85)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
-              border: '1px solid rgba(80,80,80,0.25)',
-              clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
-              color: 'var(--color-base-cream)',
-            }}
-          >
-            <span>Voir tous nos services</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
+        
       </div>
     </section>
   );
