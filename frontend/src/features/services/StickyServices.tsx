@@ -68,10 +68,7 @@ export function StickyServices() {
               Ce que nous faisons
             </h2>
           </div>
-          <span className="hidden sm:block text-xs font-mono tracking-wider pb-1"
-                style={{ color: 'rgba(90,90,90,0.4)' }}>
-            06 services
-          </span>
+          
         </div>
 
         {/* Rows */}

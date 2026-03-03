@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Plus, Minus } from 'lucide-react';
 
 const STEPS = [
   {
@@ -7,43 +8,37 @@ const STEPS = [
     title: 'Consultation & Design',
     description:
       "Nous débutons par une rencontre approfondie pour comprendre votre vision, vos besoins et votre budget. Nos designers élaborent des plans détaillés pour visualiser le résultat final avant le début des travaux.",
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400',
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1600',
   },
   {
     number: '02',
     title: 'Planification & Approvisionnement',
     description:
       "Une fois le design validé, nous établissons un calendrier précis et sélectionnons les matériaux avec soin. Nos partenaires garantissent qualité et livraison au bon moment.",
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400',
+    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1600',
   },
   {
     number: '03',
     title: 'Construction & Artisanat',
     description:
       "Nos artisans qualifiés exécutent les travaux avec précision — électricité, plomberie, menuiseries, carrelage. Chaque détail est soigné selon les standards les plus exigeants.",
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1600',
   },
   {
     number: '04',
     title: 'Livraison & Remise des Clés',
     description:
       "Une inspection rigoureuse précède chaque livraison. Nous ne considérons le travail terminé que lorsque vous êtes entièrement satisfait du résultat.",
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1400',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?crop=entropy&cs=tinysrgb&fit=max&fm=webp&q=80&w=1600',
   },
 ];
 
-const glassPanelStyle: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.11)',
-  backdropFilter: 'blur(32px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-  border: '1px solid rgba(255, 255, 255, 0.18)',
-  boxShadow: '0 8px 40px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.22)',
-};
-
-const clipPath = (r: number) =>
-  `polygon(${r}px 0, calc(100% - ${r}px) 0, 100% ${r}px, 100% calc(100% - ${r}px), calc(100% - ${r}px) 100%, ${r}px 100%, 0 calc(100% - ${r}px), 0 ${r}px)`;
-
 export function BlueprintSection() {
+  const [active, setActive] = useState<number | null>(null);
+
+  const toggle = (i: number) =>
+    setActive(prev => (prev === i ? null : i));
+
   return (
     <section
       id="methode"
@@ -71,129 +66,127 @@ export function BlueprintSection() {
           </span>
         </div>
 
-        {/* Steps */}
-        <div className="space-y-4 sm:space-y-5">
+        {/* Rows — identical pattern to StickyServices */}
+        <div>
           {STEPS.map((step, i) => {
-            const isEven = i % 2 === 1;
+            const isActive = active === i;
 
             return (
-              <div
-                key={step.number}
-                className="relative overflow-hidden"
-                style={{
-                  // Mobile:  tall enough that the image shows above the glass panel.
-                  //          ~360px gives ~120px of visible image at top + panel below.
-                  // Tablet+: cinematic, scales with viewport up to 460px.
-                  height: 'clamp(360px, 45vw, 460px)',
-                  clipPath: clipPath(20),
-                }}
-              >
-                {/* Full-bleed image */}
-                <img
-                  src={step.image}
-                  alt={step.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+              <div key={step.number}>
+                {i > 0 && (
+                  <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
+                )}
 
-                {/* Warm overlay */}
                 <div
-                  className="absolute inset-0 pointer-events-none"
+                  onClick={() => toggle(i)}
+                  onMouseEnter={() => setActive(i)}
+                  onMouseLeave={() => setActive(null)}
+                  className="group relative overflow-hidden cursor-pointer
+                             transition-[min-height] duration-500 ease-in-out"
                   style={{
-                    background: 'radial-gradient(ellipse 60% 40% at 50% -10%, rgba(212,175,119,0.18) 0%, transparent 70%)',
-                    mixBlendMode: 'soft-light',
+                    minHeight: isActive ? 'clamp(220px, 35vw, 320px)' : '68px',
                   }}
-                />
-                {/* Dark base */}
-                <div
-                  className="absolute inset-0"
-                  style={{ background: 'rgba(20,18,16,0.32)' }}
-                />
-
-                {/* ── Glass panel ──────────────────────────────────────────────
-                    Mobile  (< 768):
-                      — full width minus padding, anchored to the bottom.
-                      — `bottom-4 left-4 right-4` gives equal margin on all sides.
-
-                    Tablet  (768–1023):
-                      — fixed width (52%), vertically centred.
-                      — alternates left/right so the image shows on the other side.
-                      — `md:w-[52%]` is slightly wider than desktop so text fits
-                        at the narrower tablet viewport without truncation.
-
-                    Desktop (≥ 1024):
-                      — 44% width, capped at 420px, same alternating position.
-                ──────────────────────────────────────────────────────────────── */}
-                <div
-                  className={`
-                    absolute z-10
-                    bottom-4 left-4 right-4
-                    md:bottom-auto md:top-1/2 md:-translate-y-1/2
-                    md:right-auto md:left-auto
-                    md:w-[52%] lg:w-[44%] lg:max-w-[420px]
-                    ${isEven
-                      ? 'md:right-5 lg:right-8 md:left-auto'
-                      : 'md:left-5 lg:left-8 md:right-auto'}
-                  `}
-                  style={{ ...glassPanelStyle, clipPath: clipPath(14) }}
                 >
-                  <div className="p-5 sm:p-6 md:p-6 lg:p-8">
-                    {/* Step label row */}
-                    <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  {/* Full-bleed image */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-500"
+                    style={{ opacity: isActive ? 1 : 0 }}
+                    aria-hidden="true"
+                  >
+                    <img
+                      src={step.image}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)',
+                      }}
+                    />
+                  </div>
+
+                  {/* Top row: number + title + icon */}
+                  <div className="relative z-10 flex items-center justify-between
+                                  py-5 sm:py-[22px] gap-3 sm:gap-6">
+
+                    <div className="flex items-center gap-4 sm:gap-6 md:gap-8 min-w-0 flex-1">
                       <span
-                        className="text-[10px] font-bold uppercase tracking-[0.25em] whitespace-nowrap"
-                        style={{ color: 'rgba(246,242,232,0.50)' }}
+                        className="text-xs font-mono flex-shrink-0 w-6 transition-colors duration-300"
+                        style={{ color: isActive ? 'rgba(255,255,255,0.45)' : 'rgba(90,90,90,0.45)' }}
                       >
-                        Étape {i + 1}
-                      </span>
-                      <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.14)' }} />
-                      <span className="text-[10px] font-mono" style={{ color: 'rgba(246,242,232,0.30)' }}>
                         {step.number}
                       </span>
+                      <h3
+                        className="text-base sm:text-xl md:text-2xl lg:text-3xl
+                                   font-bold leading-tight transition-colors duration-300"
+                        style={{ color: isActive ? '#F6F2E8' : '#2A2522' }}
+                      >
+                        {step.title}
+                      </h3>
                     </div>
 
-                    {/* Title — clamps so it never overflows the panel */}
-                    <h3
-                      className="text-base sm:text-lg md:text-xl lg:text-2xl
-                                 font-bold mb-2 md:mb-3 leading-snug"
-                      style={{ color: '#F6F2E8' }}
-                    >
-                      {step.title}
-                    </h3>
-
-                    {/* Description */}
+                    {/* Desktop: description slides in from right */}
                     <p
-                      className="text-xs sm:text-sm leading-relaxed"
-                      style={{ color: 'rgba(246,242,232,0.68)' }}
+                      className="hidden lg:block text-sm leading-relaxed
+                                 flex-shrink-0 max-w-[320px] text-right
+                                 transition-all duration-500"
+                      style={{
+                        color: isActive ? 'rgba(246,242,232,0.78)' : 'rgba(90,90,90,0.0)',
+                        transform: isActive ? 'translateX(0)' : 'translateX(16px)',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {step.description}
+                    </p>
+
+                    {/* Icon */}
+                    <div className="flex-shrink-0 transition-all duration-300">
+                      <div className="lg:hidden">
+                        {isActive
+                          ? <Minus className="w-4 h-4" style={{ color: 'rgba(246,242,232,0.7)' }} />
+                          : <Plus className="w-4 h-4" style={{ color: 'rgba(90,90,90,0.5)' }} />
+                        }
+                      </div>
+                      <ArrowRight
+                        className="hidden lg:block w-5 h-5 transition-all duration-300"
+                        style={{
+                          color: isActive ? '#F6F2E8' : 'transparent',
+                          transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile/tablet: description animates open below title */}
+                  <div
+                    className="lg:hidden relative z-10 overflow-hidden
+                               transition-all duration-500 ease-in-out"
+                    style={{
+                      maxHeight: isActive ? '120px' : '0px',
+                      opacity: isActive ? 1 : 0,
+                      paddingBottom: isActive ? '20px' : '0px',
+                    }}
+                  >
+                    <p
+                      className="text-sm leading-relaxed pr-8"
+                      style={{ color: 'rgba(246,242,232,0.78)' }}
                     >
                       {step.description}
                     </p>
                   </div>
                 </div>
-
-                {/* Ghost number — hidden on mobile (too big, overlaps panel),
-                    visible on tablet+ in the corner opposite the panel */}
-                <div
-                  className={`
-                    hidden md:block
-                    absolute top-4 z-0 select-none pointer-events-none
-                    ${isEven ? 'left-6 md:left-8' : 'right-6 md:right-8'}
-                  `}
-                >
-                  <span
-                    className="text-[100px] md:text-[120px] lg:text-[150px] font-bold leading-none"
-                    style={{ color: 'rgba(255,255,255,0.055)', letterSpacing: '-0.05em' }}
-                  >
-                    {step.number}
-                  </span>
-                </div>
               </div>
             );
           })}
+
+          {/* Final hairline */}
+          <div className="w-full h-px" style={{ background: 'rgba(42,37,34,0.10)' }} />
         </div>
 
-        {/* CTA */}
-        <div className="mt-10 sm:mt-12 flex justify-start">
+        {/* CTA — centered */}
+        <div className="mt-10 sm:mt-12 flex justify-center">
           <Link
             to="/contact"
             className="inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4
@@ -205,7 +198,7 @@ export function BlueprintSection() {
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
               border: '1px solid rgba(80,80,80,0.25)',
-              clipPath: clipPath(12),
+              clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px)',
               color: 'var(--color-base-cream)',
             }}
           >
