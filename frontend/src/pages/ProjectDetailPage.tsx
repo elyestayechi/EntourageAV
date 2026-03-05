@@ -46,7 +46,7 @@ function ImageLightbox({ images, currentIndex, onClose, onNavigate }: {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.96)', backdropFilter: 'blur(20px)' }}
+      style={{ background: 'rgba(20,16,14,0.75)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)' }}
       onClick={onClose}
     >
       {/* Close */}
