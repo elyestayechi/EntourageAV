@@ -44,37 +44,80 @@ function ImageLightbox({ images, currentIndex, onClose, onNavigate }: {
   const src = viewMode === 'before' ? img.before : img.after;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.96)', backdropFilter: 'blur(20px)' }}
-      onClick={onClose}>
-      <button onClick={onClose} className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"><X className="w-6 h-6 text-white" /></button>
-      {images.length > 1 && <>
-        <button onClick={e => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"><ChevronLeft className="w-8 h-8 text-white" /></button>
-        <button onClick={e => { e.stopPropagation(); onNavigate('next'); }} className="absolute right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"><ChevronRight className="w-8 h-8 text-white" /></button>
-      </>}
-      <div className="relative max-w-6xl w-full" onClick={e => e.stopPropagation()}>
-        {/* Toggle */}
-        <div className="flex justify-center mb-4">
-          <div className="inline-flex rounded-full overflow-hidden border border-white/20" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}>
-            {(['before', 'after'] as const).map(mode => (
-              <button key={mode} onClick={() => setViewMode(mode)}
-                className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all ${viewMode === mode ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
-                {mode === 'before' ? 'Avant' : 'Après'}
-              </button>
-            ))}
-          </div>
+      onClick={onClose}
+    >
+      {/* Close */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"
+      >
+        <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+      </button>
+
+      {/* Toggle — Avant / Après */}
+      <div className="flex justify-center mb-3 sm:mb-5 z-10 px-4" onClick={e => e.stopPropagation()}>
+        <div className="inline-flex rounded-full overflow-hidden border border-white/20"
+          style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}>
+          {(['before', 'after'] as const).map(mode => (
+            <button key={mode} onClick={() => setViewMode(mode)}
+              className={`px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-widest transition-all ${viewMode === mode ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
+              {mode === 'before' ? 'Avant' : 'Après'}
+            </button>
+          ))}
         </div>
-        {/* Image */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)' }}>
-          <img key={src} src={src} alt={viewMode === 'before' ? 'Avant' : 'Après'} className="w-full h-full object-contain" />
-          <div className="absolute bottom-5 left-5 px-4 py-2" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)' }}>
-            <span className="text-white text-sm font-semibold uppercase tracking-wider">{viewMode === 'before' ? 'Avant Rénovation' : 'Après Rénovation'}</span>
+      </div>
+
+      {/* Image — full width on mobile, max-w on desktop */}
+      <div
+        className="relative w-full max-w-[96vw] sm:max-w-[90vw] lg:max-w-7xl sm:px-14 px-0"
+        onClick={e => e.stopPropagation()}
+      >
+        <div
+          className="relative overflow-hidden w-full"
+          style={{
+            /* Mobile: near-fullscreen portrait; desktop: large */
+            height: 'min(80vh, 95vw)',
+          }}
+        >
+          <img
+            key={src}
+            src={src}
+            alt={viewMode === 'before' ? 'Avant' : 'Après'}
+            className="w-full h-full object-contain"
+          />
+          {/* Label badge */}
+          <div className="absolute bottom-4 left-4 px-3 py-1.5"
+            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)' }}>
+            <span className="text-white text-xs sm:text-sm font-semibold uppercase tracking-wider">
+              {viewMode === 'before' ? 'Avant Rénovation' : 'Après Rénovation'}
+            </span>
           </div>
-          <div className="absolute bottom-5 right-5 text-right">
-            {img.label && <p className="text-white text-sm font-medium mb-1">{img.label}</p>}
+          <div className="absolute bottom-4 right-4 text-right">
+            {img.label && <p className="text-white text-xs sm:text-sm font-medium mb-1">{img.label}</p>}
             {images.length > 1 && <p className="text-white/50 text-xs">{currentIndex + 1} / {images.length}</p>}
           </div>
         </div>
+
+        {/* Prev / Next — overlaid on sides, only if multiple images */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={e => { e.stopPropagation(); onNavigate('prev'); }}
+              className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"
+            >
+              <ChevronLeft className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); onNavigate('next'); }}
+              className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 z-50"
+            >
+              <ChevronRight className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
