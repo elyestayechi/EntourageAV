@@ -115,7 +115,7 @@ export function StickyServices() {
                   {/* Full-bleed image */}
                   <div
                     className="absolute inset-0 transition-opacity duration-500"
-                    style={{ opacity: isActive ? 1 : 0 }}
+                    style={{ opacity: isActive ? 1 : 0.18 }}
                     aria-hidden="true"
                   >
                     <img
@@ -127,7 +127,7 @@ export function StickyServices() {
                     <div
                       className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)',
+                        background: isActive ? 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.20) 55%, rgba(0,0,0,0.05) 100%)',
                       }}
                     />
                   </div>

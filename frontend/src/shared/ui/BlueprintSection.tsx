@@ -106,7 +106,7 @@ export function BlueprintSection() {
                   {/* Full-bleed image */}
                   <div
                     className="absolute inset-0 transition-opacity duration-500"
-                    style={{ opacity: isActive ? 1 : 0 }}
+                    style={{ opacity: isActive ? 1 : 0.18 }}
                     aria-hidden="true"
                   >
                     <img
@@ -118,7 +118,7 @@ export function BlueprintSection() {
                     <div
                       className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)',
+                        background: isActive ? 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.40) 55%, rgba(0,0,0,0.08) 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.20) 55%, rgba(0,0,0,0.05) 100%)',
                       }}
                     />
                   </div>
@@ -167,7 +167,14 @@ export function BlueprintSection() {
                       }
                     </div>
 
-                    
+                    {/* Desktop only: arrow */}
+                    <ArrowRight
+                      className="hidden lg:block w-5 h-5 flex-shrink-0 transition-all duration-300"
+                      style={{
+                        color: isActive ? '#F6F2E8' : 'transparent',
+                        transform: isActive ? 'translateX(0)' : 'translateX(-8px)',
+                      }}
+                    />
                   </div>
 
                   {/* Mobile + tablet: description expands below, same indent as title */}
