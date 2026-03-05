@@ -83,13 +83,9 @@ export function StickyServices() {
         <div className="flex items-end justify-between mb-8 md:mb-10 pb-5
                         border-b border-[rgba(42,37,34,0.12)]">
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] mb-2"
-               style={{ color: '#5A5A5A' }}>
-              Nos Services
-            </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-none tracking-tight"
                 style={{ color: '#2A2522' }}>
-              Ce que nous faisons
+              Ce Que Nous Faisons
             </h2>
           </div>
         </div>
