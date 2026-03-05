@@ -88,13 +88,7 @@ function ImageLightbox({ images, currentIndex, onClose, onNavigate }: {
             alt={viewMode === 'before' ? 'Avant' : 'Après'}
             className="w-full h-full object-contain"
           />
-          {/* Label badge */}
-          <div className="absolute bottom-4 left-4 px-3 py-1.5"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)' }}>
-            <span className="text-white text-xs sm:text-sm font-semibold uppercase tracking-wider">
-              {viewMode === 'before' ? 'Avant Rénovation' : 'Après Rénovation'}
-            </span>
-          </div>
+          
           <div className="absolute bottom-4 right-4 text-right">
             {img.label && <p className="text-white text-xs sm:text-sm font-medium mb-1">{img.label}</p>}
             {images.length > 1 && <p className="text-white/50 text-xs">{currentIndex + 1} / {images.length}</p>}
